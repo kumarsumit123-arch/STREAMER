@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iNox Streaming</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: #0a0a0a;
+  color: white;
+  font-family: Arial;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="p-4 text-xl font-bold">iNox</div>
+
+<!-- MOVIES -->
+<div class="px-4">
+  <h2 class="mb-3 text-lg">Movies</h2>
+
+  <!-- YAHAN MOVIES AUTO AAYENGI -->
+  <div id="movie-container" class="flex gap-4 overflow-x-auto hide-scrollbar"></div>
+</div>
+
+<!-- PLAYER -->
+<div id="player" class="fixed inset-0 bg-black hidden z-50">
+  <button onclick="closePlayer()" class="absolute top-4 right-4 text-white text-2xl">✖</button>
+
+  <iframe id="video-frame" class="w-full h-full" allowfullscreen></iframe>
+</div>
+
+<script>
+
+// JSON SE MOVIES LOAD
+fetch('movies.json')
+  .then(res => res.json())
+  .then(data => {
+    let container = document.getElementById('movie-container');
+
+    data.forEach(movie => {
+      container.innerHTML += `
+        <div onclick="playMovie('${movie.video}')" class="w-32 flex-shrink-0 cursor-pointer">
+          <img src="${movie.image}" class="rounded-xl w-full h-40 object-cover">
+          <p class="text-sm mt-1">${movie.title}</p>
+        </div>
+      `;
+    });
+  });
+
+// PLAY VIDEO
+function playMovie(link) {
+  document.getElementById('player').classList.remove('hidden');
+  document.getElementById('video-frame').src = link;
+}
+
+// CLOSE VIDEO
+function closePlayer() {
+  document.getElementById('player').classList.add('hidden');
+  document.getElementById('video-frame').src = "";
+}
+
+</script>
+
+</body>
+</html>
