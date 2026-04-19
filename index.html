@@ -1,536 +1,112 @@
-
-# Creating COMPLETE CLEAN index.html - NO Python code, ONLY HTML
-
-html_content = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <title>STREAMER PRO MAX</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        * { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-        body { background-color: #000; color: white; margin: 0; padding: 0; overflow-x: hidden; }
-        
-        /* Animated Background */
-        .animated-bg {
-            background: linear-gradient(-45deg, #0a0a0a, #1a0a1a, #0a1a1a, #1a1a0a, #0a0a1a, #1a0a0a);
-            background-size: 600% 600%;
-            animation: gradientShift 20s ease infinite;
-        }
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 100% 0%; }
-            50% { background-position: 100% 100%; }
-            75% { background-position: 0% 100%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* Floating Orbs */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .orb-1 { width: 400px; height: 400px; background: #dc2626; top: -100px; left: -100px; animation: orbFloat 25s infinite ease-in-out; }
-        .orb-2 { width: 500px; height: 500px; background: #7c3aed; bottom: -150px; right: -150px; animation: orbFloat 30s infinite ease-in-out reverse; }
-        .orb-3 { width: 300px; height: 300px; background: #059669; top: 50%; left: 50%; animation: orbFloat 20s infinite ease-in-out; }
-        
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(50px, -50px) scale(1.2); }
-            66% { transform: translate(-30px, 30px) scale(0.9); }
-        }
-        
-        /* Screen Management */
-        .screen { display: none; min-height: 100vh; opacity: 0; transition: opacity 0.5s ease; }
-        .screen.active { display: block; opacity: 1; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
-        
-        .animate-fade-in { animation: fadeIn 0.6s ease forwards; }
-        .animate-slide-up { animation: slideUp 0.8s ease forwards; }
-        .animate-scale-in { animation: scaleIn 0.4s ease forwards; }
-        
-        /* Glass Effect */
-        .glass {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        
-        /* Scrollbar */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Loading */
-        .spinner {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-left-color: #dc2626;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Card Hover */
-        .movie-card {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
-        }
-        .movie-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px -12px rgba(220, 38, 38, 0.25);
-        }
-        
-        /* Button Glow */
-        .btn-glow {
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
-            transition: all 0.3s ease;
-        }
-        .btn-glow:hover {
-            box-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(90deg, #dc2626, #9333ea, #dc2626);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 3s linear infinite;
-        }
-        
-        /* Input Focus */
-        .input-field {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-        .input-field:focus {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: #dc2626;
-            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
-            outline: none;
-        }
-        
-        /* Nav Item */
-        .nav-item {
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: linear-gradient(90deg, #dc2626, #9333ea);
-            border-radius: 3px;
-        }
-        
-        /* Category Pill */
-        .category-pill {
-            transition: all 0.3s ease;
-        }
-        .category-pill.active {
-            background: linear-gradient(135deg, #dc2626, #9333ea);
-            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
-        }
-        
-        /* Player Overlay */
-        .player-overlay {
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        
-        /* Progress Bar */
-        .progress-bar {
-            background: linear-gradient(90deg, #dc2626, #9333ea);
-        }
-        
-        /* Toast */
-        .toast-enter {
-            animation: toastSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes toastSlide {
-            from { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.9); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STREAMER PRO MAX</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body { background:#000; color:white; font-family:Arial; margin:0; }
+.screen { display:none; }
+.screen.active { display:block; }
+</style>
 </head>
-<body class="animated-bg">
-    <!-- Floating Orbs -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    
-    <!-- Page Loader -->
-    <div id="page-loader" class="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center hidden">
-        <div class="spinner mb-4"></div>
-        <p class="text-gray-500 text-sm tracking-wider">LOADING</p>
-    </div>
 
-    <!-- ==================== WELCOME SCREEN ==================== -->
-    <div id="welcome-screen" class="screen active relative min-h-screen flex flex-col justify-center items-center px-6">
-        <div class="relative z-10 text-center w-full max-w-md">
-            <div class="mb-8 animate-fade-in">
-                <h1 class="text-8xl md:text-9xl font-black tracking-tighter gradient-text mb-2">S</h1>
-                <h1 class="text-6xl md:text-7xl font-black tracking-tighter gradient-text -mt-4">TREAMER</h1>
-            </div>
-            
-            <p class="text-gray-400 text-lg mb-1 animate-slide-up" style="animation-delay: 0.2s">Unlimited Entertainment</p>
-            <p class="text-gray-600 text-sm mb-12 animate-slide-up" style="animation-delay: 0.3s">Movies • Shows • Sports • Live TV</p>
-            
-            <div class="space-y-4 animate-slide-up" style="animation-delay: 0.4s">
-                <button onclick="showScreen('signup-screen')" class="w-full bg-gradient-to-r from-red-600 via-purple-600 to-red-600 bg-[length:200%] text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 btn-glow hover:scale-[1.02] transition-transform">
-                    <i class="fas fa-rocket"></i> Get Started
-                </button>
-                
-                <button onclick="showScreen('login-screen')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-2xl font-semibold transition-all">
-                    <i class="fas fa-user"></i> I have an account
-                </button>
-                
-                <div class="relative py-3">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="px-4 bg-black text-gray-600 text-xs uppercase tracking-widest">or</span>
-                    </div>
-                </div>
-                
-                <button onclick="guestLogin()" class="w-full bg-transparent border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white py-4 rounded-2xl font-semibold transition-all flex items-center justify-center gap-2">
-                    <i class="fas fa-user-secret"></i> Continue as Guest
-                </button>
-            </div>
-            
-            <p class="mt-10 text-gray-700 text-xs animate-fade-in" style="animation-delay: 0.6s">By continuing, you agree to our Terms of Service</p>
-        </div>
-    </div>
+<body>
 
-    <!-- ==================== LOGIN SCREEN ==================== -->
-    <div id="login-screen" class="screen relative min-h-screen flex items-center justify-center px-6 py-12">
-        <div class="w-full max-w-md relative z-10">
-            <button onclick="showScreen('welcome-screen')" class="mb-8 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition border border-white/10">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            
-            <div class="mb-8">
-                <h2 class="text-4xl font-bold mb-2">Welcome Back</h2>
-                <p class="text-gray-400">Sign in to continue watching</p>
-            </div>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="text-sm text-gray-400 mb-2 block ml-1">Email</label>
-                    <input type="email" id="login-email" class="input-field w-full p-4 rounded-2xl text-white placeholder-gray-600" placeholder="your@email.com">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-400 mb-2 block ml-1">Password</label>
-                    <input type="password" id="login-password" class="input-field w-full p-4 rounded-2xl text-white placeholder-gray-600" placeholder="••••••••">
-                </div>
-                <button onclick="login()" class="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg btn-glow hover:scale-[1.02] transition-transform">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
-            </div>
-            
-            <div class="mt-8 text-center space-y-3">
-                <p class="text-gray-500">New here? <span onclick="showScreen('signup-screen')" class="text-red-500 font-semibold cursor-pointer hover:underline">Create account</span></p>
-                <p class="text-gray-600 text-sm"><span onclick="guestLogin()" class="cursor-pointer hover:text-gray-400 transition">Continue as guest</span></p>
-            </div>
-        </div>
-    </div>
+<!-- ================= WELCOME ================= -->
+<div id="welcome-screen" class="screen active">
+<h1>STREAMER</h1>
+<button onclick="showScreen('login-screen')">Login</button>
+<button onclick="showScreen('signup-screen')">Signup</button>
+<button onclick="guestLogin()">Guest</button>
+</div>
 
-    <!-- ==================== SIGNUP SCREEN ==================== -->
-    <div id="signup-screen" class="screen relative min-h-screen flex items-center justify-center px-6 py-12">
-        <div class="w-full max-w-md relative z-10">
-            <button onclick="showScreen('welcome-screen')" class="mb-8 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition border border-white/10">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            
-            <div class="mb-8">
-                <h2 class="text-4xl font-bold mb-2">Create Account</h2>
-                <p class="text-gray-400">Start your streaming journey</p>
-            </div>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="text-sm text-gray-400 mb-2 block ml-1">Full Name</label>
-                    <input type="text" id="signup-name" class="input-field w-full p-4 rounded-2xl text-white placeholder-gray-600" placeholder="John Doe">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-400 mb-2 block ml-1">Email</label>
-                    <input type="email" id="signup-email" class="input-field w-full p-4 rounded-2xl text-white placeholder-gray-600" placeholder="your@email.com">
-                </div>
-                <div>
-                    <label class="text-sm text-gray-400 mb-2 block ml-1">Password</label>
-                    <input type="password" id="signup-password" class="input-field w-full p-4 rounded-2xl text-white placeholder-gray-600" placeholder="••••••••">
-                </div>
-                <button onclick="signUp()" class="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg btn-glow hover:scale-[1.02] transition-transform">
-                    <i class="fas fa-user-plus"></i> Create Account
-                </button>
-            </div>
-            
-            <p class="mt-8 text-center text-gray-500">Already have an account? <span onclick="showScreen('login-screen')" class="text-red-500 font-semibold cursor-pointer hover:underline">Sign In</span></p>
-        </div>
-    </div>
+<!-- ================= LOGIN ================= -->
+<div id="login-screen" class="screen">
+<h2>Login</h2>
+<input id="login-email" placeholder="Email">
+<input id="login-password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
 
-    <!-- ==================== HOME SCREEN ==================== -->
-    <div id="home-screen" class="screen pb-24">
-        <header class="sticky top-0 z-40 glass border-b border-white/5">
-            <div class="flex justify-between items-center px-4 md:px-8 py-4 max-w-7xl mx-auto">
-                <div class="flex items-center gap-3">
-                    <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
-                    <span id="admin-badge" class="hidden bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Admin</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="logout()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
-                        <i class="fas fa-sign-out-alt text-sm"></i>
-                    </button>
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                        <i class="fas fa-user text-sm"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex gap-2 px-4 md:px-8 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
-                <button onclick="filterCategory('All')" class="category-pill active px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap">All</button>
-                <button onclick="filterCategory('Movies')" class="category-pill bg-white/5 text-gray-400 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-white/10 transition">Movies</button>
-                <button onclick="filterCategory('Shows')" class="category-pill bg-white/5 text-gray-400 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-white/10 transition">Shows</button>
-                <button onclick="filterCategory('Sports')" class="category-pill bg-white/5 text-gray-400 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-white/10 transition">Sports</button>
-            </div>
-        </header>
+<!-- ================= SIGNUP ================= -->
+<div id="signup-screen" class="screen">
+<h2>Signup</h2>
+<input id="signup-name" placeholder="Name">
+<input id="signup-email" placeholder="Email">
+<input id="signup-password" placeholder="Password">
+<button onclick="signUp()">Signup</button>
+</div>
 
-        <div id="hero-section" class="mb-10">
-            <div class="w-full h-[70vh] min-h-[500px] bg-gray-900/30 flex items-center justify-center">
-                <div class="spinner"></div>
-            </div>
-        </div>
+<!-- ================= HOME ================= -->
+<div id="home-screen" class="screen">
+<h2>Home</h2>
+<div id="movies"></div>
+</div>
 
-        <div class="px-4 md:px-8 max-w-7xl mx-auto space-y-12">
-            <section>
-                <div class="flex justify-between items-end mb-5">
-                    <h3 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
-                </div>
-                <div class="flex gap-5 overflow-x-auto hide-scrollbar pb-4" id="trending-container">
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                </div>
-            </section>
+<!-- ================= PLAYER ================= -->
+<div id="player-overlay" style="display:none; position:fixed; inset:0; background:black;">
+<button onclick="closePlayer()">Close</button>
+<iframe id="video-iframe" style="width:100%; height:80%;"></iframe>
+</div>
 
-            <section>
-                <h3 class="text-xl font-bold mb-5 flex items-center gap-2"><i class="fas fa-play-circle text-blue-500"></i> Continue Watching</h3>
-                <div class="flex gap-5 overflow-x-auto hide-scrollbar pb-4" id="continue-container">
-                    <p class="text-gray-500 text-sm">No movies in progress</p>
-                </div>
-            </section>
+<!-- ================= JS ================= -->
+<script>
+let currentUser=null;
+let movies=[
+{ id:"1", title:"Demo Movie", videoUrl:"https://www.dailymotion.com/embed/video/x8xyz" }
+];
 
-            <section>
-                <h3 class="text-xl font-bold mb-5">For You</h3>
-                <div class="flex gap-5 overflow-x-auto hide-scrollbar pb-4" id="foryou-container">
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                </div>
-            </section>
+// SCREEN SWITCH
+function showScreen(id){
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
 
-            <section>
-                <h3 class="text-xl font-bold mb-5 flex items-center gap-2"><i class="fas fa-sparkles text-yellow-500"></i> New Releases</h3>
-                <div class="flex gap-5 overflow-x-auto hide-scrollbar pb-4" id="new-container">
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                    <div class="flex-shrink-0 w-36 h-52 bg-white/5 rounded-2xl animate-pulse"></div>
-                </div>
-            </section>
-        </div>
-    </div>
+// AUTH (BASIC MOCK)
+function login(){
+currentUser=true;
+showScreen('home-screen');
+renderMovies();
+}
 
-    <!-- ==================== SEARCH SCREEN ==================== -->
-    <div id="search-screen" class="screen pb-24 min-h-screen">
-        <header class="sticky top-0 z-40 glass border-b border-white/5 px-4 md:px-8 py-4">
-            <h1 class="text-2xl font-bold mb-4">Search</h1>
-            <div class="relative max-w-2xl">
-                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" onkeyup="searchMovies()" class="input-field w-full py-4 pl-12 pr-4 rounded-2xl text-white placeholder-gray-600" placeholder="Search movies, shows, genres...">
-            </div>
-        </header>
-        <div class="px-4 md:px-8 py-6 max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5" id="search-results"></div>
-        </div>
-    </div>
+function signUp(){
+currentUser=true;
+showScreen('home-screen');
+renderMovies();
+}
 
-    <!-- ==================== PROFILE SCREEN ==================== -->
-    <div id="profile-screen" class="screen pb-24 min-h-screen">
-        <header class="sticky top-0 z-40 glass border-b border-white/5 px-4 md:px-8 py-4">
-            <h1 class="text-2xl font-bold">Profile</h1>
-        </header>
-        <div class="px-4 md:px-8 py-8 max-w-2xl mx-auto" id="profile-container">
-            <div class="flex flex-col items-center py-12">
-                <div class="spinner mb-4"></div>
-                <p class="text-gray-400">Loading profile...</p>
-            </div>
-        </div>
-    </div>
+function guestLogin(){
+currentUser=true;
+showScreen('home-screen');
+renderMovies();
+}
 
-    <!-- ==================== ADMIN SCREEN ==================== -->
-    <div id="admin-screen" class="screen pb-24 min-h-screen">
-        <header class="sticky top-0 z-40 glass border-b border-red-600/20 px-4 md:px-8 py-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                    <i class="fas fa-crown text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold">Admin Panel</h1>
-                    <p class="text-xs text-gray-400">Content Management</p>
-                </div>
-            </div>
-        </header>
+// MOVIES
+function renderMovies(){
+let container=document.getElementById('movies');
+container.innerHTML=movies.map(m=>
+`<div>
+<h3>${m.title}</h3>
+<button onclick="playMovie('${m.videoUrl}')">Play</button>
+</div>`).join('');
+}
 
-        <div class="px-4 md:px-8 py-8 max-w-4xl mx-auto space-y-8">
-            <div id="admin-stats"></div>
+// PLAYER
+function playMovie(url){
+document.getElementById('player-overlay').style.display='block';
+document.getElementById('video-iframe').src=url+"?autoplay=1";
+}
 
-            <div class="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10">
-                <h3 class="text-lg font-bold mb-6 flex items-center gap-2 text-red-400">
-                    <i class="fas fa-plus-circle"></i> Add New Content
-                </h3>
-                
-                <form id="admin-form" class="space-y-4">
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <input type="text" id="admin-title" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Movie Title *" required>
-                        <input type="url" id="admin-poster" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Poster URL *" required>
-                    </div>
-                    <input type="url" id="admin-backdrop" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Backdrop URL (optional)">
-                    <input type="url" id="admin-video" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Dailymotion Embed URL *" required>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <select id="admin-category" class="input-field w-full p-4 rounded-xl text-sm bg-transparent text-white">
-                            <option value="movies" class="bg-gray-900">Movie</option>
-                            <option value="shows" class="bg-gray-900">TV Show</option>
-                            <option value="sports" class="bg-gray-900">Sports</option>
-                        </select>
-                        <input type="text" id="admin-genre" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Genre: Action, Drama">
-                        <input type="number" id="admin-rating" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Rating 0-10" step="0.1" max="10">
-                        <input type="number" id="admin-year" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Year">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" id="admin-duration" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Duration: 2h 30m">
-                        <input type="text" id="admin-video-source" class="input-field w-full p-4 rounded-xl text-sm" placeholder="Source: dailymotion" value="dailymotion">
-                    </div>
-                    
-                    <textarea id="admin-desc" rows="3" class="input-field w-full p-4 rounded-xl text-sm resize-none" placeholder="Description..."></textarea>
-                    
-                    <div class="flex gap-6">
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" id="admin-featured" class="w-5 h-5 rounded bg-white/10 border-gray-600 text-red-600 focus:ring-red-600">
-                            <span class="text-sm text-gray-300">Featured</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="checkbox" id="admin-trending" class="w-5 h-5 rounded bg-white/10 border-gray-600 text-red-600 focus:ring-red-600">
-                            <span class="text-sm text-gray-300">Trending</span>
-                        </label>
-                    </div>
-                    
-                    <button type="button" onclick="addMovie()" class="w-full bg-gradient-to-r from-red-600 to-purple-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 btn-glow hover:scale-[1.02] transition-transform">
-                        <i class="fas fa-cloud-upload-alt"></i> Publish Movie
-                    </button>
-                </form>
-            </div>
+function closePlayer(){
+document.getElementById('player-overlay').style.display='none';
+document.getElementById('video-iframe').src='';
+}
+</script>
 
-            <div>
-                <h3 class="text-lg font-bold mb-4">Library</h3>
-                <div id="admin-movies-list" class="space-y-3">
-                    <div class="text-center py-8 text-gray-500">
-                        <div class="spinner mx-auto mb-3"></div>
-                        <p>Loading...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== PLAYER OVERLAY ==================== -->
-    <div id="player-overlay" class="player-overlay fixed inset-0 z-[60] hidden flex-col">
-        <div class="flex items-center justify-between px-4 md:px-8 py-4">
-            <button onclick="closePlayer()" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur">
-                <i class="fas fa-arrow-left text-lg"></i>
-            </button>
-            <div class="text-center">
-                <h3 id="player-title" class="text-lg font-bold">Movie Title</h3>
-                <p id="player-info" class="text-xs text-gray-400">Year • Genre • Duration</p>
-            </div>
-            <div class="w-12"></div>
-        </div>
-        
-        <div class="flex-1 flex items-center justify-center px-4">
-            <div class="w-full max-w-6xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-                <iframe id="video-iframe" class="w-full h-full" frameborder="0" allowfullscreen allow="autoplay"></iframe>
-            </div>
-        </div>
-        
-        <div class="px-4 md:px-8 py-4 bg-black/50 backdrop-blur">
-            <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleSubtitles()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition text-sm flex items-center gap-2">
-                        <i class="fas fa-closed-captioning"></i> CC
-                    </button>
-                    <button id="ai-subtitle-btn" onclick="generateSubtitles()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition text-sm flex items-center gap-2">
-                        <i class="fas fa-magic"></i> AI Subtitles
-                    </button>
-                </div>
-                <div id="ai-subtitle-status" class="text-sm"></div>
-            </div>
-            <div id="subtitle-list" class="mt-4 max-w-6xl mx-auto hidden">
-                <p class="text-gray-500 text-sm">No subtitles available</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 px-6 py-3 flex justify-around items-center z-50" style="display: none;">
-        <button onclick="showScreen('home-screen')" class="nav-item active flex flex-col items-center gap-1 text-red-500" data-screen="home-screen">
-            <i class="fas fa-home text-xl"></i>
-            <span class="text-[10px] font-medium">Home</span>
-        </button>
-        
-        <button onclick="showScreen('search-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen">
-            <i class="fas fa-search text-xl"></i>
-            <span class="text-[10px] font-medium">Search</span>
-        </button>
-        
-        <button id="admin-nav-btn" onclick="showScreen('admin-screen')" class="nav-item hidden flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="admin-screen">
-            <i class="fas fa-cog text-xl"></i>
-            <span class="text-[10px] font-medium">Admin</span>
-        </button>
-        
-        <button onclick="showScreen('profile-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen">
-            <i class="fas fa-user text-xl"></i>
-            <span class="text-[10px] font-medium">Profile</span>
-        </button>
-    </nav>
-'''
-
-# Save first part
-with open('/mnt/agents/output/index_clean_part1.html', 'w', encoding='utf-8') as f:
-    f.write(html_content)
-
-print("✅ Part 1 saved (HTML structure)")
-print(f"📄 Size: {len(html_content):,} chars")
+</body>
+</html>
