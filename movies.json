@@ -1,128 +1,128 @@
-# Creating PROPER SPLIT files - index.html and movies.json separate
+import json
 
-# First, let's create the movies.json file
-movies_json_content = '''{
-  "movies": [
-    {
-      "id": "1",
-      "title": "KGF Chapter 2",
-      "poster": "https://image.tmdb.org/t/p/w500/ntUgY8Hs9dS4Y0s4Z91J0sJrR7W.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/77GGq4VgEfU0I9d1W3b9z9z9z9.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "movies",
-      "genre": ["Action", "Drama"],
-      "rating": 8.5,
-      "duration": "2h 48m",
-      "year": 2022,
-      "description": "Rocky takes control of the Kolar Gold Fields and his newfound power makes the government as well as his enemies jittery.",
-      "featured": true,
-      "trending": true,
-      "newRelease": false,
-      "views": 15420,
-      "likes": 8932,
-      "subtitles": []
-    },
-    {
-      "id": "2",
-      "title": "RRR",
-      "poster": "https://image.tmdb.org/t/p/w500/nEuflUFv5gGf8nN7M8d7s4z9z9.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/8Y9z9z9z9z9z9z9z9z9z9z9.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "movies",
-      "genre": ["Action", "Drama"],
-      "rating": 8.0,
-      "duration": "3h 7m",
-      "year": 2022,
-      "description": "A fictional story about two legendary revolutionaries and their journey away from home.",
-      "featured": false,
-      "trending": true,
-      "newRelease": false,
-      "views": 12300,
-      "likes": 7200,
-      "subtitles": []
-    },
-    {
-      "id": "3",
-      "title": "Stranger Things",
-      "poster": "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "shows",
-      "genre": ["Sci-Fi", "Horror"],
-      "rating": 8.7,
-      "duration": "50m",
-      "year": 2022,
-      "description": "When a young boy disappears, his mother, a police chief and his friends must confront terrifying supernatural forces.",
-      "featured": false,
-      "trending": true,
-      "newRelease": true,
-      "views": 8900,
-      "likes": 5600,
-      "subtitles": []
-    },
-    {
-      "id": "4",
-      "title": "The Batman",
-      "poster": "https://image.tmdb.org/t/p/w500/74xTEgt7R36FpoooUQ3z9g5q6o2.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/5P8SmMzSNYikXpxil6BYzJ16611.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "movies",
-      "genre": ["Action", "Crime"],
-      "rating": 7.9,
-      "duration": "2h 56m",
-      "year": 2022,
-      "description": "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption.",
-      "featured": false,
-      "trending": false,
-      "newRelease": true,
-      "views": 6700,
-      "likes": 4300,
-      "subtitles": []
-    },
-    {
-      "id": "5",
-      "title": "Money Heist",
-      "poster": "https://image.tmdb.org/t/p/w500/MoEKaPFHABtA1xKoOteirGaHl1.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/gFZriCkpJYsApPZEF3jhxL4yLzG.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "shows",
-      "genre": ["Crime", "Thriller"],
-      "rating": 8.2,
-      "duration": "45m",
-      "year": 2021,
-      "description": "Eight thieves take hostages and lock themselves in the Royal Mint of Spain as a criminal mastermind manipulates the police to carry out his plan.",
-      "featured": false,
-      "trending": true,
-      "newRelease": false,
-      "views": 11200,
-      "likes": 6800,
-      "subtitles": []
-    },
-    {
-      "id": "6",
-      "title": "FIFA World Cup Final",
-      "poster": "https://image.tmdb.org/t/p/w500/9z36e4v8x9z9z9z9z9z9z9z9.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/original/9z36e4v8x9z9z9z9z9z9z9z9.jpg",
-      "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-      "category": "sports",
-      "genre": ["Sports", "Live"],
-      "rating": 9.0,
-      "duration": "2h 30m",
-      "year": 2022,
-      "description": "Argentina vs France - The greatest World Cup final ever played.",
-      "featured": false,
-      "trending": false,
-      "newRelease": false,
-      "views": 25000,
-      "likes": 15000,
-      "subtitles": []
-    }
-  ]
-}'''
+# Creating CLEAN movies.json (no Python wrapper)
+movies_data = {
+    "movies": [
+        {
+            "id": "1",
+            "title": "KGF Chapter 2",
+            "poster": "https://image.tmdb.org/t/p/w500/ntUgY8Hs9dS4Y0s4Z91J0sJrR7W.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/77GGq4VgEfU0I9d1W3b9z9z9z9.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "movies",
+            "genre": ["Action", "Drama"],
+            "rating": 8.5,
+            "duration": "2h 48m",
+            "year": 2022,
+            "description": "Rocky takes control of the Kolar Gold Fields and his newfound power makes the government as well as his enemies jittery.",
+            "featured": True,
+            "trending": True,
+            "newRelease": False,
+            "views": 15420,
+            "likes": 8932,
+            "subtitles": []
+        },
+        {
+            "id": "2",
+            "title": "RRR",
+            "poster": "https://image.tmdb.org/t/p/w500/nEuflUFv5gGf8nN7M8d7s4z9z9.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/8Y9z9z9z9z9z9z9z9z9z9z9.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "movies",
+            "genre": ["Action", "Drama"],
+            "rating": 8.0,
+            "duration": "3h 7m",
+            "year": 2022,
+            "description": "A fictional story about two legendary revolutionaries and their journey away from home.",
+            "featured": False,
+            "trending": True,
+            "newRelease": False,
+            "views": 12300,
+            "likes": 7200,
+            "subtitles": []
+        },
+        {
+            "id": "3",
+            "title": "Stranger Things",
+            "poster": "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "shows",
+            "genre": ["Sci-Fi", "Horror"],
+            "rating": 8.7,
+            "duration": "50m",
+            "year": 2022,
+            "description": "When a young boy disappears, his mother, a police chief and his friends must confront terrifying supernatural forces.",
+            "featured": False,
+            "trending": True,
+            "newRelease": True,
+            "views": 8900,
+            "likes": 5600,
+            "subtitles": []
+        },
+        {
+            "id": "4",
+            "title": "The Batman",
+            "poster": "https://image.tmdb.org/t/p/w500/74xTEgt7R36FpoooUQ3z9g5q6o2.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/5P8SmMzSNYikXpxil6BYzJ16611.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "movies",
+            "genre": ["Action", "Crime"],
+            "rating": 7.9,
+            "duration": "2h 56m",
+            "year": 2022,
+            "description": "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption.",
+            "featured": False,
+            "trending": False,
+            "newRelease": True,
+            "views": 6700,
+            "likes": 4300,
+            "subtitles": []
+        },
+        {
+            "id": "5",
+            "title": "Money Heist",
+            "poster": "https://image.tmdb.org/t/p/w500/MoEKaPFHABtA1xKoOteirGaHl1.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/gFZriCkpJYsApPZEF3jhxL4yLzG.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "shows",
+            "genre": ["Crime", "Thriller"],
+            "rating": 8.2,
+            "duration": "45m",
+            "year": 2021,
+            "description": "Eight thieves take hostages and lock themselves in the Royal Mint of Spain as a criminal mastermind manipulates the police to carry out his plan.",
+            "featured": False,
+            "trending": True,
+            "newRelease": False,
+            "views": 11200,
+            "likes": 6800,
+            "subtitles": []
+        },
+        {
+            "id": "6",
+            "title": "FIFA World Cup Final",
+            "poster": "https://image.tmdb.org/t/p/w500/9z36e4v8x9z9z9z9z9z9z9z9.jpg",
+            "backdrop": "https://image.tmdb.org/t/p/original/9z36e4v8x9z9z9z9z9z9z9z9.jpg",
+            "videoUrl": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "category": "sports",
+            "genre": ["Sports", "Live"],
+            "rating": 9.0,
+            "duration": "2h 30m",
+            "year": 2022,
+            "description": "Argentina vs France - The greatest World Cup final ever played.",
+            "featured": False,
+            "trending": False,
+            "newRelease": False,
+            "views": 25000,
+            "likes": 15000,
+            "subtitles": []
+        }
+    ]
+}
 
+# Save clean movies.json
 with open('/mnt/agents/output/movies.json', 'w', encoding='utf-8') as f:
-    f.write(movies_json_content)
+    json.dump(movies_data, f, indent=2, ensure_ascii=False)
 
-print("✅ movies.json created separately!")
-print("📁 Location: /mnt/agents/output/movies.json")
-print("\n" + "="*50)
+print("✅ movies.json created successfully!")
+print(f"📊 Total movies: {len(movies_data['movies'])}")
