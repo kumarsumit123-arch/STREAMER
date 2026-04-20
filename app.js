@@ -558,7 +558,9 @@ class StreamerApp {
         this.setupVideoTracking(video, movie.id);
         
         // Hide quality button for native (browser handles it)
-        document.getElementById('quality-btn').style.display = 'none';
+        <button id="quality-btn" class="control-btn">
+    <i class="fas fa-cog"></i>
+</button>
     }
     
     setupDMTracking() {
