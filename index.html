@@ -1,45 +1,24 @@
-                <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>STREAMER - Anime Streaming</title>
+    <title>STREAMER - Real OTT</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         
-        * { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
-        }
+        * { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body { background-color: #000000; color: white; margin: 0; padding: 0; overflow-x: hidden; }
         
-        body { 
-            background-color: #000000; 
-            color: white;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        
-        .screen { 
-            display: none;
-            min-height: 100vh;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .screen.active { 
-            display: block;
-        }
-        
-        @keyframes fadeIn { 
-            from { opacity: 0; } 
-            to { opacity: 1; } 
-        }
+        .screen { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -51,16 +30,10 @@
             background-clip: text;
         }
         
-        .movie-card {
-            transition: transform 0.3s, box-shadow 0.3s;
-            cursor: pointer;
-        }
+        .movie-card { transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
+        .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(239,68,68,0.3); }
         
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(239,68,68,0.3);
-        }
-        
+        /* REAL VIDEO PLAYER */
         .video-player-wrapper {
             position: relative;
             width: 100%;
@@ -68,10 +41,10 @@
             background: #000;
         }
         
-        #dailymotion-player {
+        #real-video-player {
             width: 100%;
             height: 100%;
-            position: relative;
+            object-fit: contain;
         }
         
         .player-controls-overlay {
@@ -86,7 +59,8 @@
             z-index: 100;
         }
         
-        .video-player-wrapper:hover .player-controls-overlay {
+        .video-player-wrapper:hover .player-controls-overlay,
+        .video-player-wrapper.paused .player-controls-overlay {
             opacity: 1;
         }
         
@@ -105,10 +79,7 @@
             font-size: 16px;
         }
         
-        .control-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: scale(1.1);
-        }
+        .control-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
         
         .progress-container {
             width: 100%;
@@ -125,10 +96,25 @@
             background: #ef4444;
             border-radius: 3px;
             width: 0%;
-            transition: width 0.1s;
+            position: relative;
         }
         
-        .quality-menu, .subtitle-menu {
+        .progress-handle {
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: #ef4444;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .progress-container:hover .progress-handle { opacity: 1; }
+        
+        .quality-menu {
             position: absolute;
             bottom: 70px;
             right: 20px;
@@ -139,13 +125,13 @@
             display: none;
             min-width: 160px;
             border: 1px solid rgba(255,255,255,0.1);
+            max-height: 300px;
+            overflow-y: auto;
         }
         
-        .quality-menu.show, .subtitle-menu.show {
-            display: block;
-        }
+        .quality-menu.show { display: block; }
         
-        .quality-option, .subtitle-option {
+        .quality-option {
             padding: 12px 16px;
             cursor: pointer;
             border-radius: 8px;
@@ -153,100 +139,12 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
         }
         
-        .quality-option:hover, .quality-option.active,
-        .subtitle-option:hover, .subtitle-option.active {
+        .quality-option:hover, .quality-option.active {
             background: rgba(239,68,68,0.2);
             color: #ef4444;
-        }
-        
-        .episode-list-panel {
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 340px;
-            background: rgba(0,0,0,0.98);
-            backdrop-filter: blur(10px);
-            transform: translateX(100%);
-            transition: transform 0.3s;
-            z-index: 200;
-            overflow-y: auto;
-            border-left: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .episode-list-panel.show {
-            transform: translateX(0);
-        }
-        
-        .episode-item {
-            padding: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-        
-        .episode-item:hover, .episode-item.active {
-            background: rgba(239,68,68,0.15);
-        }
-        
-        .share-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px);
-            z-index: 300;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .share-modal.show {
-            display: flex;
-        }
-        
-        .share-content {
-            background: #1a1a1a;
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-        }
-        
-        .share-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.2s;
-        }
-        
-        .admin-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            z-index: 50;
-            display: none;
-        }
-        
-        .admin-badge.visible {
-            display: block;
         }
         
         .admin-panel {
@@ -258,9 +156,7 @@
             display: none;
         }
         
-        .admin-panel.visible {
-            display: block;
-        }
+        .admin-panel.visible { display: block; }
         
         .upload-area {
             border: 2px dashed #333;
@@ -284,9 +180,7 @@
             display: none;
         }
         
-        .upload-preview.visible {
-            display: block;
-        }
+        .upload-preview.visible { display: block; }
         
         .form-input {
             width: 100%;
@@ -315,11 +209,6 @@
             letter-spacing: 0.5px;
         }
         
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
         .toast {
             position: fixed;
             top: 20px;
@@ -343,9 +232,49 @@
         .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
         
+        .center-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(239,68,68,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+        
+        .video-player-wrapper:hover .center-play-btn,
+        .video-player-wrapper.paused .center-play-btn {
+            opacity: 1;
+        }
+        
+        .buffering-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #ef4444;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            z-index: 40;
+        }
+        
+        @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        
         .subtitle-display {
             position: absolute;
-            bottom: 100px;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
@@ -358,24 +287,23 @@
             max-width: 80%;
             line-height: 1.5;
             background: rgba(0,0,0,0.7);
-            padding: 12px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
+            display: none;
         }
         
+        .subtitle-display.show { display: block; }
+        
         @media (max-width: 640px) {
-            .subtitle-display {
-                font-size: 14px;
-                bottom: 80px;
-            }
-            .episode-list-panel {
-                width: 280px;
-            }
+            .subtitle-display { font-size: 14px; bottom: 100px; }
+            .center-play-btn { width: 60px; height: 60px; }
         }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
     
+    <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="absolute top-20 left-10 w-64 h-64 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -384,15 +312,11 @@
         
         <div class="relative z-10 text-center max-w-md w-full">
             <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
-            <p class="text-gray-400 text-lg mb-8">Unlimited Anime Streaming</p>
+            <p class="text-gray-400 text-lg mb-8">Real OTT Streaming</p>
             
             <div class="space-y-4">
                 <button onclick="guestLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition transform hover:scale-105">
                     <i class="fas fa-play-circle"></i> Start Watching
-                </button>
-                
-                <button onclick="showAdminLogin()" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-500 hover:text-gray-300 py-2 rounded-xl font-semibold transition text-xs opacity-50 hover:opacity-100">
-                    <i class="fas fa-lock"></i> Admin Access
                 </button>
                 
                 <p class="text-gray-600 text-xs">No account needed • Free forever</p>
@@ -400,31 +324,7 @@
         </div>
     </div>
 
-    <div id="admin-login-screen" class="screen flex flex-col justify-center items-center min-h-screen px-6">
-        <div class="max-w-md w-full">
-            <button onclick="showScreen('welcome-screen')" class="mb-8 w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            
-            <h2 class="text-3xl font-bold mb-2">Admin Access</h2>
-            <p class="text-gray-400 mb-8">Enter admin password to manage Content</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="form-label">Password</label>
-                    <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password">
-                </div>
-                <button onclick="adminLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold transition">
-                    <i class="fas fa-unlock"></i> Access Admin Panel
-                </button>
-            </div>
-            
-            <p class="mt-6 text-center text-gray-600 text-sm">
-                Default password: <span class="text-gray-400">Sumit.streamer@81#live.ott</span>
-            </p>
-        </div>
-    </div>
-
+    <!-- MAIN SCREEN -->
     <div id="main-screen" class="screen pb-24">
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800">
             <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
@@ -439,28 +339,8 @@
                 </div>
             </div>
             
-            <div id="admin-badge" class="admin-badge" onclick="toggleAdminPanel()">
-                <i class="fas fa-cog"></i> Admin
-            </div>
-            
-            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
-                <button onclick="filterCategory('All')" class="category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">All</button>
-                <button onclick="filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Anime</button>
-                <button onclick="filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Movies</button>
-                <button onclick="filterCategory('Shows')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Shows</button>
-                <button onclick="filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Sports</button>
-            </div>
-        </div>
-
-        <div id="hero-section" class="mb-8 px-4">
-            <div class="w-full h-[50vh] bg-gray-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content"></div>
-            </div>
-        </div>
-
-        <div class="px-4 max-w-7xl mx-auto space-y-8">
-            <div id="admin-panel" class="admin-panel">
+            <!-- ADMIN PANEL (Hidden by default, only shows with ?admin=sumit81) -->
+            <div id="admin-panel" class="admin-panel mx-4">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <i class="fas fa-cog text-red-500"></i> Admin Panel
@@ -479,85 +359,78 @@
                         <input type="file" id="image-upload" accept="image/*" style="display: none;">
                     </div>
                     <img id="upload-preview" class="upload-preview">
-                    
-                    <div class="grid md:grid-cols-2 gap-4 mb-6 mt-4">
-                        <div>
-                            <label class="form-label">Title *</label>
-                            <input type="text" id="admin-title" class="form-input" placeholder="e.g., Attack on Titan">
-                        </div>
-                        <div>
-                            <label class="form-label">Category *</label>
-                            <select id="admin-category" class="form-input">
-                                <option value="Anime">Anime</option>
-                                <option value="Movies">Movies</option>
-                                <option value="Shows">TV Shows</option>
-                                <option value="Sports">Sports</option>
-                            </select>
-                        </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="form-label">Title *</label>
+                        <input type="text" id="admin-title" class="form-input" placeholder="e.g., Attack on Titan">
                     </div>
-                    
-                    <div class="grid md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="form-label">Year</label>
-                            <input type="number" id="admin-year" class="form-input" placeholder="2024">
-                        </div>
-                        <div>
-                            <label class="form-label">Duration</label>
-                            <input type="text" id="admin-duration" class="form-input" placeholder="24m / 45m">
-                        </div>
-                        <div>
-                            <label class="form-label">Rating (0-10)</label>
-                            <input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="form-label">Description</label>
-                        <textarea id="admin-description" class="form-input form-textarea" rows="3" placeholder="Enter description..."></textarea>
-                    </div>
-                    
-                    <div class="flex gap-3 mb-6">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="admin-featured" class="w-5 h-5 rounded accent-red-600">
-                            <span class="text-sm">Featured</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="admin-trending" class="w-5 h-5 rounded accent-red-600">
-                            <span class="text-sm">Trending</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="admin-new" class="w-5 h-5 rounded accent-red-600">
-                            <span class="text-sm">New Release</span>
-                        </label>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="form-label">Video URL (Dailymotion) *</label>
-                        <input type="url" id="admin-video" class="form-input" placeholder="https://www.dailymotion.com/embed/video/x8xxxxx">
-                        <p class="text-xs text-gray-600 mt-2">Paste Dailymotion embed URL</p>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <div class="flex justify-between items-center mb-3">
-                            <label class="form-label mb-0">Episodes</label>
-                            <button onclick="addAdminEpisode()" class="text-sm text-red-500 hover:text-red-400">
-                                <i class="fas fa-plus"></i> Add Episode
-                            </button>
-                        </div>
-                        <div id="admin-episodes" class="space-y-3"></div>
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <button onclick="saveAdminContent()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">
-                            <i class="fas fa-save"></i> Save Content
-                        </button>
-                        <button onclick="exportAdminJSON()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-bold transition">
-                            <i class="fas fa-download"></i> Export JSON
-                        </button>
+                    <div>
+                        <label class="form-label">Category *</label>
+                        <select id="admin-category" class="form-input">
+                            <option value="Anime">Anime</option>
+                            <option value="Chinese Anime">Chinese Anime</option>
+                            <option value="Movies">Movies</option>
+                            <option value="Shows">TV Shows</option>
+                        </select>
                     </div>
                 </div>
+                
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="form-label">Year</label>
+                        <input type="number" id="admin-year" class="form-input" placeholder="2024">
+                    </div>
+                    <div>
+                        <label class="form-label">Duration</label>
+                        <input type="text" id="admin-duration" class="form-input" placeholder="24m">
+                    </div>
+                    <div>
+                        <label class="form-label">Rating (0-10)</label>
+                        <input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="form-label">Description</label>
+                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Enter description..."></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="form-label">HLS Video URL (M3U8) *</label>
+                    <input type="url" id="admin-video" class="form-input" placeholder="https://example.com/video.m3u8">
+                    <p class="text-xs text-gray-600 mt-2">Real HLS streaming URL required</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="form-label">Subtitle URL (VTT) - Optional</label>
+                    <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
+                </div>
+                
+                <div class="flex gap-3 mb-4">
+                    <button onclick="saveAdminContent()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">
+                        <i class="fas fa-save"></i> Save to Firebase
+                    </button>
+                </div>
             </div>
+            
+            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
+                <button onclick="filterCategory('All')" class="category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">All</button>
+                <button onclick="filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Anime</button>
+                <button onclick="filterCategory('Chinese Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Chinese Anime</button>
+                <button onclick="filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Movies</button>
+            </div>
+        </div>
 
+        <div id="hero-section" class="mb-8 px-4">
+            <div class="w-full h-[50vh] bg-gray-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content"></div>
+            </div>
+        </div>
+
+        <div class="px-4 max-w-7xl mx-auto space-y-8">
             <section id="continue-watching-section" style="display: none;">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-play-circle text-blue-500"></i> Continue Watching
@@ -578,16 +451,10 @@
                 <h3 class="text-lg font-bold mb-4">For You</h3>
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container"></div>
             </section>
-
-            <section>
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-sparkles text-yellow-500"></i> New Releases
-                </h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container"></div>
-            </section>
         </div>
     </div>
 
+    <!-- SEARCH SCREEN -->
     <div id="search-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800 px-4 py-4">
             <div class="flex items-center gap-4">
@@ -600,7 +467,7 @@
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                 <input type="text" id="search-input" onkeyup="searchMovies()" 
                        class="w-full bg-gray-900 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition"
-                       placeholder="Search anime, movies, genres...">
+                       placeholder="Search anime, movies...">
             </div>
         </div>
         <div class="px-4 py-6 max-w-7xl mx-auto">
@@ -610,6 +477,7 @@
         </div>
     </div>
 
+    <!-- PROFILE SCREEN -->
     <div id="profile-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800 px-4 py-4">
             <div class="flex items-center gap-4">
@@ -627,36 +495,41 @@
                 
                 <div class="grid grid-cols-2 gap-4 w-full mb-8">
                     <div class="bg-gray-900 rounded-xl p-4 text-center">
-                        <p class="text-2xl font-bold text-red-500" id="watchlist-count">0</p>
-                        <p class="text-xs text-gray-400">Watchlist</p>
-                    </div>
-                    <div class="bg-gray-900 rounded-xl p-4 text-center">
                         <p class="text-2xl font-bold text-blue-500" id="continue-count">0</p>
                         <p class="text-xs text-gray-400">In Progress</p>
                     </div>
+                    <div class="bg-gray-900 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-green-500" id="total-count">0</p>
+                        <p class="text-xs text-gray-400">Total Content</p>
+                    </div>
                 </div>
-                
-                <button id="profile-admin-btn" onclick="showAdminLogin()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mb-4" style="display: none;">
-                    <i class="fas fa-cog"></i> Admin Panel
-                </button>
                 
                 <button onclick="clearAllData()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all mb-4">
                     <i class="fas fa-trash"></i> Clear All Data
                 </button>
-                
-                <p class="text-gray-600 text-xs text-center">Data is stored locally on your device</p>
             </div>
         </div>
     </div>
 
+    <!-- REAL PLAYER SCREEN -->
     <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
         <div class="video-player-wrapper" id="video-container">
-            <div id="dailymotion-player"></div>
+            <video id="real-video-player" class="w-full h-full bg-black"></video>
+            <track id="subtitle-track" kind="subtitles" srclang="en" label="English" default>
+            
+            <div class="buffering-spinner" id="buffering-spinner"></div>
+            
+            <div class="center-play-btn" id="center-play-btn" onclick="togglePlay()">
+                <i class="fas fa-play text-2xl ml-1"></i>
+            </div>
+            
             <div id="subtitle-display" class="subtitle-display"></div>
             
             <div class="player-controls-overlay">
                 <div class="progress-container" id="progress-bar" onclick="seekVideo(event)">
-                    <div class="progress-fill" id="progress-fill"></div>
+                    <div class="progress-fill" id="progress-fill">
+                        <div class="progress-handle"></div>
+                    </div>
                 </div>
                 
                 <div class="flex items-center justify-between">
@@ -664,24 +537,18 @@
                         <button class="control-btn" onclick="togglePlay()" id="play-pause-btn">
                             <i class="fas fa-pause"></i>
                         </button>
-                        <span class="text-sm text-gray-300" id="time-display">0:00 / 0:00</span>
+                        <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="toggleEpisodeList()" id="episode-btn">
-                            <i class="fas fa-list"></i>
-                        </button>
-                        <button class="control-btn" onclick="toggleSubtitleMenu()">
-                            <i class="fas fa-closed-captioning"></i>
-                        </button>
-                        <button class="control-btn" onclick="toggleQualityMenu()">
+                        <button class="control-btn" onclick="toggleQualityMenu()" id="quality-btn">
                             <i class="fas fa-cog"></i>
+                        </button>
+                        <button class="control-btn" onclick="toggleSubtitle()">
+                            <i class="fas fa-closed-captioning"></i>
                         </button>
                         <button class="control-btn" onclick="toggleFullscreen()">
                             <i class="fas fa-expand"></i>
-                        </button>
-                        <button class="control-btn" onclick="showShareModal()">
-                            <i class="fas fa-share-alt"></i>
                         </button>
                         <button class="control-btn" onclick="closePlayer()">
                             <i class="fas fa-times"></i>
@@ -692,65 +559,12 @@
             
             <div class="quality-menu" id="quality-menu">
                 <div class="text-sm font-bold mb-2 text-gray-400">Quality</div>
-                <div class="quality-option active" onclick="changeQuality('auto')">Auto</div>
-                <div class="quality-option" onclick="changeQuality('1080')">1080p</div>
-                <div class="quality-option" onclick="changeQuality('720')">720p</div>
-                <div class="quality-option" onclick="changeQuality('480')">480p</div>
-                <div class="quality-option" onclick="changeQuality('360')">360p</div>
-            </div>
-            
-            <div class="subtitle-menu" id="subtitle-menu">
-                <div class="text-sm font-bold mb-2 text-gray-400">Subtitles</div>
-                <div class="subtitle-option active" onclick="changeSubtitle('off')">Off</div>
-                <div class="subtitle-option" onclick="changeSubtitle('en')">English</div>
-                <div class="subtitle-option" onclick="changeSubtitle('hi')">Hindi</div>
-                <div class="subtitle-option" onclick="changeSubtitle('zh')">Chinese</div>
-                <div class="subtitle-option" onclick="changeSubtitle('ja')">Japanese</div>
-            </div>
-            
-            <div class="episode-list-panel" id="episode-list">
-                <div class="p-4 border-b border-gray-800 flex justify-between items-center">
-                    <h3 class="font-bold">Episodes</h3>
-                    <button onclick="toggleEpisodeList()" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div id="episode-list-content"></div>
+                <div id="quality-options"></div>
             </div>
         </div>
     </div>
 
-    <div id="share-modal" class="share-modal" onclick="hideShareModal(event)">
-        <div class="share-content" onclick="event.stopPropagation()">
-            <h3 class="text-xl font-bold mb-4">Share</h3>
-            <p class="text-gray-400 mb-4">Share this content with friends</p>
-            
-            <div class="flex justify-center gap-4 mb-6">
-                <button onclick="shareContent('copy')" class="share-btn bg-gray-800 hover:bg-red-600 text-white transition">
-                    <i class="fas fa-link"></i>
-                </button>
-                <button onclick="shareContent('whatsapp')" class="share-btn bg-gray-800 hover:bg-green-600 text-white transition">
-                    <i class="fab fa-whatsapp"></i>
-                </button>
-                <button onclick="shareContent('telegram')" class="share-btn bg-gray-800 hover:bg-blue-600 text-white transition">
-                    <i class="fab fa-telegram"></i>
-                </button>
-                <button onclick="shareContent('twitter')" class="share-btn bg-gray-800 hover:bg-blue-400 text-white transition">
-                    <i class="fab fa-twitter"></i>
-                </button>
-            </div>
-            
-            <div class="bg-gray-800 rounded-xl p-4 mb-4">
-                <p class="text-sm text-gray-400 mb-2">Or share this link:</p>
-                <input type="text" id="share-link" class="form-input text-center" readonly>
-            </div>
-            
-            <button onclick="hideShareModal()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold">
-                Close
-            </button>
-        </div>
-    </div>
-
+    <!-- BOTTOM NAV -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-gray-800 px-6 py-3 flex justify-around items-center z-40" style="display: none;">
         <button onclick="showScreen('main-screen')" class="nav-item active flex flex-col items-center gap-1 text-red-500 transition" data-screen="main-screen">
             <i class="fas fa-home text-xl"></i>
@@ -766,189 +580,347 @@
         </button>
     </div>
 
-    <script>
-        let movies = [];
-        let watchlist = [];
-        let continueWatching = [];
-        let activeCategory = 'All';
-        let currentMovie = null;
-        let currentEpisode = null;
-        let isPlaying = false;
-        let isAdmin = false;
-        let updateInterval = null;
-        let currentQuality = 'auto';
+    <!-- FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         
-        const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450"%3E%3Crect fill="%231a1a1a" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23666"%3ENO IMAGE%3C/text%3E%3C/svg%3E';
+        // TERA FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbmzWNyL0maOCAJ_b3dVPT6v2gKpwIXPU",
+            authDomain: "neonvoiceai-68980.firebaseapp.com",
+            projectId: "neonvoiceai-68980",
+            storageBucket: "neonvoiceai-68980.firebasestorage.app",
+            messagingSenderId: "242394583926",
+            appId: "1:242394583926:web:36bfab111a5b235740a057",
+            measurementId: "G-17YYFJ3XJ7"
+        };
         
-        document.addEventListener('DOMContentLoaded', () => {
-            loadMovies();
-            loadUserData();
-            setupUploadHandlers();
-        });
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         
-        function loadUserData() {
-            const savedWatchlist = localStorage.getItem('streamer_watchlist');
-            const savedContinue = localStorage.getItem('streamer_continue');
-            const savedMovies = localStorage.getItem('streamer_movies');
-            
-            if (savedWatchlist) watchlist = JSON.parse(savedWatchlist);
-            if (savedContinue) continueWatching = JSON.parse(savedContinue);
-            if (savedMovies) {
-                const parsed = JSON.parse(savedMovies);
-                movies = parsed.content || parsed.movies || [];
-            }
-            
-            updateProfileStats();
-            checkAdminSession();
+        // GLOBAL VARIABLES
+        window.db = db;
+        window.movies = [];
+        window.continueWatching = JSON.parse(localStorage.getItem('streamer_continue') || '[]');
+        window.hls = null;
+        window.currentMovie = null;
+        window.isAdmin = false;
+        window.activeCategory = 'All';
+        
+        // CHECK ADMIN MODE (SECRET URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'sumit81') {
+            window.isAdmin = true;
+            document.getElementById('admin-panel').classList.add('visible');
+            showToast('Admin Mode Activated', 'success');
         }
         
-        function saveUserData() {
-            localStorage.setItem('streamer_watchlist', JSON.stringify(watchlist));
-            localStorage.setItem('streamer_continue', JSON.stringify(continueWatching));
-            localStorage.setItem('streamer_movies', JSON.stringify({ content: movies }));
-            updateProfileStats();
-        }
-        
-        function updateProfileStats() {
-            const wc = document.getElementById('watchlist-count');
-            const cc = document.getElementById('continue-count');
-            if (wc) wc.textContent = watchlist.length;
-            if (cc) cc.textContent = continueWatching.length;
-        }
-        
-        function checkAdminSession() {
-            const adminSession = sessionStorage.getItem('streamer_admin');
-            if (adminSession === 'true') {
-                isAdmin = true;
-                document.getElementById('admin-badge').classList.add('visible');
-                document.getElementById('profile-admin-btn').style.display = 'block';
-            }
-        }
-        
-        async function loadMovies() {
+        // LOAD MOVIES FROM FIREBASE
+        async function loadMoviesFromFirebase() {
             try {
-                const saved = localStorage.getItem('streamer_movies');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    movies = parsed.content || parsed.movies || [];
-                    renderMovies();
-                    return;
-                }
-                showEmptyState();
+                const q = query(collection(db, "movies"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+                window.movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderMovies();
+                updateStats();
             } catch (error) {
-                console.error('Error loading movies:', error);
-                showEmptyState();
+                console.error("Error loading movies:", error);
+                showToast('Error loading content', 'error');
             }
         }
         
-        function showEmptyState() {
-            const hero = document.getElementById('hero-section');
-            if (hero) {
-                hero.querySelector('#hero-content').innerHTML = `
-                    <div class="w-full h-full flex flex-col items-center justify-center">
-                        <i class="fas fa-film text-6xl text-gray-700 mb-4"></i>
-                        <p class="text-gray-500 mb-2">No content available</p>
-                        <p class="text-gray-600 text-sm">Admin login to add Content</p>
-                    </div>`;
-            }
-        }
-        
-        function renderMovies() {
-            if (!movies || movies.length === 0) {
-                showEmptyState();
+        // SAVE MOVIE TO FIREBASE
+        window.saveAdminContent = async function() {
+            const title = document.getElementById('admin-title').value;
+            const category = document.getElementById('admin-category').value;
+            const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
+            const duration = document.getElementById('admin-duration').value;
+            const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
+            const description = document.getElementById('admin-description').value;
+            const poster = document.getElementById('upload-preview').src;
+            const videoUrl = document.getElementById('admin-video').value;
+            const subtitleUrl = document.getElementById('admin-subtitle').value;
+            
+            if (!title || !category || poster === '' || !videoUrl) {
+                showToast('Please fill all required fields', 'error');
                 return;
             }
             
-            const hero = document.getElementById('hero-section');
-            const forYou = document.getElementById('foryou-container');
-            const trending = document.getElementById('trending-container');
-            const newReleases = document.getElementById('new-container');
-            const continueContainer = document.getElementById('continue-container');
-            const continueSection = document.getElementById('continue-watching-section');
+            const movieData = {
+                title,
+                category,
+                year,
+                duration,
+                rating,
+                description,
+                poster,
+                videoUrl,
+                subtitleUrl: subtitleUrl || null,
+                views: 0,
+                timestamp: Date.now()
+            };
             
-            let filtered = activeCategory === 'All' 
-                ? movies 
-                : movies.filter(m => m.category?.toLowerCase() === activeCategory.toLowerCase());
-            
-            if (continueSection) {
-                continueSection.style.display = continueWatching.length > 0 ? 'block' : 'none';
+            try {
+                await addDoc(collection(db, "movies"), movieData);
+                showToast('Content saved to Firebase!', 'success');
+                
+                // Reset form
+                document.getElementById('admin-title').value = '';
+                document.getElementById('admin-video').value = '';
+                document.getElementById('admin-subtitle').value = '';
+                document.getElementById('upload-preview').classList.remove('visible');
+                
+                loadMoviesFromFirebase();
+            } catch (error) {
+                console.error("Error saving:", error);
+                showToast('Error saving content', 'error');
+            }
+        };
+        
+        // REAL HLS PLAYER
+        window.playMovie = function(movieId) {
+            const movie = window.movies.find(m => m.id === movieId);
+            if (!movie) {
+                showToast('Movie not found', 'error');
+                return;
             }
             
-            const featured = movies.find(m => m.featured) || movies[0];
-            if (featured && hero) {
-                hero.querySelector('#hero-content').innerHTML = `
-                    <div class="relative w-full h-full overflow-hidden rounded-2xl cursor-pointer group" onclick="playMovie('${featured.id}')">
-                        <img src="${featured.backdrop || featured.poster}" class="w-full h-full object-cover" onerror="this.src='${featured.poster || fallbackImage}'">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6">
-                            <span class="inline-block px-3 py-1 bg-red-600 rounded-full text-xs font-bold mb-3">
-                                ${featured.trending ? '🔥 TRENDING' : 'FEATURED'}
-                            </span>
-                            <h2 class="text-2xl md:text-4xl font-bold mb-2">${featured.title}</h2>
-                            <p class="text-gray-300 text-sm mb-3 line-clamp-2">${featured.description || ''}</p>
-                            <div class="flex items-center gap-3 mb-4 text-sm">
-                                <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${featured.rating || 'N/A'}</span>
-                                <span class="text-gray-400">${featured.year || ''}</span>
-                                <span class="text-gray-400">${featured.duration || ''}</span>
-                            </div>
-                            <div class="flex gap-3">
-                                <button onclick="event.stopPropagation(); playMovie('${featured.id}')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold flex items-center justify-center gap-2 transition">
-                                    <i class="fas fa-play"></i> Play Now
-                                </button>
-                                <button onclick="event.stopPropagation(); toggleWatchlist('${featured.id}')" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:scale-110 transition">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
+            window.currentMovie = movie;
+            showScreen('player-screen');
+            
+            const video = document.getElementById('real-video-player');
+            const spinner = document.getElementById('buffering-spinner');
+            
+            // Destroy previous HLS instance
+            if (window.hls) {
+                window.hls.destroy();
+                window.hls = null;
             }
             
-            if (forYou) forYou.innerHTML = filtered.slice(0, 10).map(m => createCard(m)).join('');
-            if (trending) trending.innerHTML = movies.filter(m => m.trending).slice(0, 8).map(m => createCard(m)).join('');
-            if (newReleases) newReleases.innerHTML = movies.filter(m => m.newRelease).slice(0, 8).map(m => createCard(m)).join('');
-            
-            if (continueContainer && continueWatching.length > 0) {
-                continueContainer.innerHTML = continueWatching.slice(0, 6).map(item => {
-                    const movie = movies.find(m => m.id === item.movieId);
-                    if (!movie) return '';
-                    return `
-                        <div onclick="playMovie('${movie.id}', ${item.episode || 0})" class="flex-shrink-0 w-40 cursor-pointer group">
-                            <div class="relative rounded-xl overflow-hidden mb-2 aspect-[2/3]">
-                                <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='${fallbackImage}'">
-                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
-                                    <div class="h-full bg-red-600" style="width: ${item.progress || 0}%"></div>
-                                </div>
-                            </div>
-                            <p class="text-sm font-medium truncate">${movie.title}</p>
-                            <p class="text-xs text-gray-500">${Math.round(item.progress || 0)}% watched</p>
-                        </div>`;
-                }).join('');
+            // Setup subtitles
+            const track = document.getElementById('subtitle-track');
+            const subtitleDisplay = document.getElementById('subtitle-display');
+            if (movie.subtitleUrl) {
+                track.src = movie.subtitleUrl;
+                track.mode = 'hidden';
+                subtitleDisplay.classList.add('show');
+            } else {
+                subtitleDisplay.classList.remove('show');
             }
+            
+            // Initialize HLS
+            if (Hls.isSupported()) {
+                window.hls = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 600,
+                    enableWorker: true
+                });
+                
+                window.hls.loadSource(movie.videoUrl);
+                window.hls.attachMedia(video);
+                
+                window.hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                    video.play();
+                    setupQualityLevels(data.levels);
+                    spinner.style.display = 'none';
+                });
+                
+                window.hls.on(Hls.Events.BUFFERING, () => {
+                    spinner.style.display = 'block';
+                });
+                
+                window.hls.on(Hls.Events.BUFFERED, () => {
+                    spinner.style.display = 'none';
+                });
+                
+                window.hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        showToast('Streaming error', 'error');
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = movie.videoUrl;
+                video.play();
+            } else {
+                showToast('HLS not supported in this browser', 'error');
+                return;
+            }
+            
+            setupVideoTracking(video, movieId);
+        };
+        
+        function setupQualityLevels(levels) {
+            const container = document.getElementById('quality-options');
+            container.innerHTML = '';
+            
+            // Auto option
+            const autoDiv = document.createElement('div');
+            autoDiv.className = 'quality-option active';
+            autoDiv.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
+            autoDiv.onclick = () => changeQuality(-1, autoDiv);
+            container.appendChild(autoDiv);
+            
+            // Quality levels
+            levels.forEach((level, index) => {
+                const height = level.height || 0;
+                const div = document.createElement('div');
+                div.className = 'quality-option';
+                div.innerHTML = `<span>${height}p</span>`;
+                div.onclick = () => changeQuality(index, div);
+                container.appendChild(div);
+            });
         }
         
-        function createCard(movie) {
-            return `
-                <div class="flex-shrink-0 w-36 md:w-44 cursor-pointer group movie-card" onclick="showDetails('${movie.id}')">
-                    <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3]">
-                        <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='${fallbackImage}'">
-                        ${movie.newRelease ? '<div class="absolute top-2 left-2 bg-green-500 text-xs font-bold px-2 py-1 rounded">NEW</div>' : ''}
-                        ${movie.trending ? '<div class="absolute top-2 right-2 bg-red-600 text-xs font-bold px-2 py-1 rounded"><i class="fas fa-fire"></i></div>' : ''}
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
-                            <button onclick="event.stopPropagation(); playMovie('${movie.id}')" class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition opacity-0 group-hover:opacity-100">
-                                <i class="fas fa-play text-white ml-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-sm font-semibold truncate">${movie.title}</p>
-                    <div class="flex items-center gap-2 text-xs text-gray-500">
-                        <span>${movie.year || ''}</span>
-                        <span>•</span>
-                        <span class="text-yellow-400"><i class="fas fa-star mr-0.5"></i>${movie.rating || 'N/A'}</span>
-                    </div>
-                </div>`;
+        window.changeQuality = function(levelIndex, element) {
+            if (window.hls) {
+                window.hls.currentLevel = levelIndex;
+            }
+            
+            document.querySelectorAll('.quality-option').forEach(opt => {
+                opt.classList.remove('active');
+                opt.querySelector('i')?.remove();
+            });
+            
+            element.classList.add('active');
+            if (levelIndex === -1) {
+                element.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
+            } else {
+                element.innerHTML = `<span>${element.querySelector('span').textContent}</span><i class="fas fa-check text-xs"></i>`;
+            }
+            
+            document.getElementById('quality-menu').classList.remove('show');
+            showToast(levelIndex === -1 ? 'Quality: Auto' : `Quality: ${element.querySelector('span').textContent}`, 'info');
+        };
+        
+        function setupVideoTracking(video, movieId) {
+            const progressFill = document.getElementById('progress-fill');
+            const timeDisplay = document.getElementById('time-display');
+            const playBtn = document.getElementById('play-pause-btn');
+            const centerBtn = document.getElementById('center-play-btn');
+            const container = document.getElementById('video-container');
+            
+            // Time update
+            video.addEventListener('timeupdate', () => {
+                if (video.duration) {
+                    const percent = (video.currentTime / video.duration) * 100;
+                    progressFill.style.width = percent + '%';
+                    
+                    const current = formatTime(video.currentTime);
+                    const total = formatTime(video.duration);
+                    timeDisplay.textContent = `${current} / ${total}`;
+                    
+                    // Save progress
+                    saveContinueWatching(movieId, video.currentTime, video.duration, percent);
+                }
+            });
+            
+            // Play/Pause states
+            video.addEventListener('play', () => {
+                playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                centerBtn.innerHTML = '<i class="fas fa-pause text-2xl"></i>';
+                container.classList.remove('paused');
+            });
+            
+            video.addEventListener('pause', () => {
+                playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+                centerBtn.innerHTML = '<i class="fas fa-play text-2xl ml-1"></i>';
+                container.classList.add('paused');
+            });
+            
+            // Click video to toggle play
+            video.addEventListener('click', togglePlay);
         }
         
-        function showScreen(screenId) {
+        window.togglePlay = function() {
+            const video = document.getElementById('real-video-player');
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        };
+        
+        window.seekVideo = function(event) {
+            const video = document.getElementById('real-video-player');
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            
+            if (video.duration) {
+                video.currentTime = percent * video.duration;
+            }
+        };
+        
+        window.toggleQualityMenu = function() {
+            document.getElementById('quality-menu').classList.toggle('show');
+        };
+        
+        window.toggleSubtitle = function() {
+            const track = document.getElementById('subtitle-track');
+            const display = document.getElementById('subtitle-display');
+            
+            if (track.mode === 'showing') {
+                track.mode = 'hidden';
+                display.classList.remove('show');
+                showToast('Subtitles off', 'info');
+            } else {
+                track.mode = 'showing';
+                display.classList.add('show');
+                showToast('Subtitles on', 'success');
+            }
+        };
+        
+        window.toggleFullscreen = function() {
+            const container = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    showToast('Fullscreen error', 'error');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        };
+        
+        window.closePlayer = function() {
+            const video = document.getElementById('real-video-player');
+            video.pause();
+            
+            if (window.hls) {
+                window.hls.destroy();
+                window.hls = null;
+            }
+            
+            showScreen('main-screen');
+        };
+        
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+        
+        function saveContinueWatching(movieId, currentTime, duration, percent) {
+            const existing = window.continueWatching.find(item => item.movieId === movieId);
+            const item = {
+                movieId,
+                currentTime,
+                duration,
+                percent: Math.round(percent),
+                timestamp: Date.now()
+            };
+            
+            if (existing) {
+                Object.assign(existing, item);
+            } else {
+                window.continueWatching.push(item);
+            }
+            
+            localStorage.setItem('streamer_continue', JSON.stringify(window.continueWatching));
+        }
+        
+        // UI FUNCTIONS
+        window.showScreen = function(screenId) {
             document.querySelectorAll('.screen').forEach(s => {
                 s.classList.remove('active');
                 s.style.display = 'none';
@@ -960,7 +932,7 @@
                 target.style.display = 'block';
             }
             
-            const hideNav = ['welcome-screen', 'admin-login-screen', 'player-screen'];
+            const hideNav = ['welcome-screen', 'player-screen'];
             const nav = document.getElementById('bottom-nav');
             if (nav) {
                 nav.style.display = hideNav.includes(screenId) ? 'none' : 'flex';
@@ -973,15 +945,16 @@
             });
             
             window.scrollTo(0, 0);
-        }
+        };
         
-        function guestLogin() {
+        window.guestLogin = function() {
             showScreen('main-screen');
-            showToast('Welcome! Start watching now.', 'success');
-        }
+            loadMoviesFromFirebase();
+            showToast('Welcome to Real OTT!', 'success');
+        };
         
-        function filterCategory(cat) {
-            activeCategory = cat;
+        window.filterCategory = function(cat) {
+            window.activeCategory = cat;
             
             document.querySelectorAll('.category-pill').forEach(p => {
                 const isActive = p.textContent.trim() === cat;
@@ -995,203 +968,90 @@
             });
             
             renderMovies();
-        }
+        };
         
-        function showAdminLogin() {
-            showScreen('admin-login-screen');
-        }
-        
-        function adminLogin() {
-            const password = document.getElementById('admin-password').value;
-            if (password === 'Sumit.streamer@81#live.ott') {
-                isAdmin = true;
-                sessionStorage.setItem('streamer_admin', 'true');
-                showScreen('main-screen');
-                
-                document.getElementById('admin-badge').classList.add('visible');
-                document.getElementById('profile-admin-btn').style.display = 'block';
-                document.getElementById('admin-panel').classList.add('visible');
-                
-                showToast('Admin access granted!', 'success');
+        function renderMovies() {
+            const movies = window.activeCategory === 'All' 
+                ? window.movies 
+                : window.movies.filter(m => m.category === window.activeCategory);
+            
+            const hero = document.getElementById('hero-content');
+            const forYou = document.getElementById('foryou-container');
+            const trending = document.getElementById('trending-container');
+            const continueContainer = document.getElementById('continue-container');
+            const continueSection = document.getElementById('continue-watching-section');
+            
+            // Continue watching
+            if (window.continueWatching.length > 0) {
+                continueSection.style.display = 'block';
+                continueContainer.innerHTML = window.continueWatching.slice(0, 6).map(item => {
+                    const movie = window.movies.find(m => m.id === item.movieId);
+                    if (!movie) return '';
+                    return `
+                        <div onclick="playMovie('${movie.id}')" class="flex-shrink-0 w-40 cursor-pointer group">
+                            <div class="relative rounded-xl overflow-hidden mb-2 aspect-[2/3]">
+                                <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
+                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                                    <div class="h-full bg-red-600" style="width: ${item.percent || 0}%"></div>
+                                </div>
+                            </div>
+                            <p class="text-sm font-medium truncate">${movie.title}</p>
+                            <p class="text-xs text-gray-500">${item.percent || 0}% watched</p>
+                        </div>`;
+                }).join('');
             } else {
-                showToast('Invalid password', 'error');
-            }
-        }
-        
-        function toggleAdminPanel() {
-            const panel = document.getElementById('admin-panel');
-            if (panel.classList.contains('visible')) {
-                hideAdminPanel();
-            } else {
-                panel.classList.add('visible');
-            }
-        }
-        
-        function hideAdminPanel() {
-            document.getElementById('admin-panel').classList.remove('visible');
-        }
-        
-        function setupUploadHandlers() {
-            const uploadArea = document.getElementById('upload-area');
-            const fileInput = document.getElementById('image-upload');
-            
-            if (!uploadArea || !fileInput) return;
-            
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-            
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleImageFile(files[0]);
-                }
-            });
-            
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files[0]) {
-                    handleImageFile(e.target.files[0]);
-                }
-            });
-        }
-        
-        function handleImageFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showToast('Please upload an image file', 'error');
-                return;
+                continueSection.style.display = 'none';
             }
             
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById('upload-preview');
-                preview.src = e.target.result;
-                preview.classList.add('visible');
-                showToast('Image uploaded successfully!', 'success');
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function addAdminEpisode() {
-            const container = document.getElementById('admin-episodes');
-            const index = container.children.length + 1;
-            
-            const div = document.createElement('div');
-            div.className = 'flex gap-3 items-start';
-            div.innerHTML = `
-                <div class="flex-1 grid grid-cols-3 gap-3">
-                    <input type="number" class="form-input episode-ep" placeholder="Ep#" value="${index}">
-                    <input type="text" class="form-input episode-title" placeholder="Title">
-                    <input type="url" class="form-input episode-url" placeholder="Video URL">
-                </div>
-                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400 mt-3">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            container.appendChild(div);
-        }
-        
-        function saveAdminContent() {
-            const title = document.getElementById('admin-title').value;
-            const category = document.getElementById('admin-category').value;
-            const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
-            const duration = document.getElementById('admin-duration').value;
-            const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
-            const description = document.getElementById('admin-description').value;
-            const poster = document.getElementById('upload-preview').src;
-            const videoUrl = document.getElementById('admin-video').value;
-            const featured = document.getElementById('admin-featured').checked;
-            const trending = document.getElementById('admin-trending').checked;
-            const newRelease = document.getElementById('admin-new').checked;
-            
-            if (!title || !category || poster === '' || !videoUrl) {
-                showToast('Please fill all required fields', 'error');
-                return;
+            // Hero (first movie)
+            if (movies.length > 0 && hero) {
+                const featured = movies[0];
+                hero.innerHTML = `
+                    <div class="relative w-full h-full overflow-hidden rounded-2xl cursor-pointer group" onclick="playMovie('${featured.id}')">
+                        <img src="${featured.poster}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/800x600/1a1a1a/666?text=NO+IMAGE'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6">
+                            <span class="inline-block px-3 py-1 bg-red-600 rounded-full text-xs font-bold mb-3">FEATURED</span>
+                            <h2 class="text-2xl md:text-4xl font-bold mb-2">${featured.title}</h2>
+                            <p class="text-gray-300 text-sm mb-3 line-clamp-2">${featured.description || ''}</p>
+                            <div class="flex items-center gap-3 mb-4 text-sm">
+                                <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${featured.rating || 'N/A'}</span>
+                                <span class="text-gray-400">${featured.year || ''}</span>
+                                <span class="text-gray-400">${featured.duration || ''}</span>
+                            </div>
+                            <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 transition">
+                                <i class="fas fa-play"></i> Play Now
+                            </button>
+                        </div>
+                    </div>`;
             }
             
-            const episodes = [];
-            document.querySelectorAll('#admin-episodes > div').forEach(div => {
-                const ep = div.querySelector('.episode-ep').value;
-                const title = div.querySelector('.episode-title').value;
-                const url = div.querySelector('.episode-url').value;
-                if (ep && title && url) {
-                    episodes.push({ ep: parseInt(ep), title, videoUrl: url });
-                }
-            });
-            
-            const contentData = {
-                id: Date.now().toString(36),
-                title: title,
-                category: category,
-                poster: poster,
-                videoUrl: videoUrl,
-                year: year,
-                duration: duration,
-                rating: rating,
-                description: description,
-                featured: featured,
-                trending: trending,
-                newRelease: newRelease,
-                episodes: episodes,
-                views: 0,
-                likes: 0
-            };
-            
-            movies.push(contentData);
-            saveUserData();
-            renderMovies();
-            
-            document.getElementById('admin-title').value = '';
-            document.getElementById('admin-video').value = '';
-            document.getElementById('upload-preview').classList.remove('visible');
-            document.getElementById('admin-episodes').innerHTML = '';
-            
-            showToast('Content saved successfully!', 'success');
+            // Lists
+            if (forYou) forYou.innerHTML = movies.slice(0, 10).map(m => createCard(m)).join('');
+            if (trending) trending.innerHTML = movies.slice(0, 8).map(m => createCard(m)).join('');
         }
         
-        function exportAdminJSON() {
-            const data = {
-                metadata: {
-                    version: "1.0",
-                    lastUpdated: new Date().toISOString(),
-                    totalContent: movies.length
-                },
-                content: movies
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'movies.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('JSON exported!', 'success');
+        function createCard(movie) {
+            return `
+                <div class="flex-shrink-0 w-36 md:w-44 cursor-pointer group movie-card" onclick="playMovie('${movie.id}')">
+                    <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3]">
+                        <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
+                            <button class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition opacity-0 group-hover:opacity-100">
+                                <i class="fas fa-play text-white ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm font-semibold truncate">${movie.title}</p>
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <span>${movie.year || ''}</span>
+                        <span>•</span>
+                        <span class="text-yellow-400"><i class="fas fa-star mr-0.5"></i>${movie.rating || 'N/A'}</span>
+                    </div>
+                </div>`;
         }
         
-        function toggleWatchlist(movieId) {
-            const index = watchlist.indexOf(movieId);
-            if (index > -1) {
-                watchlist.splice(index, 1);
-                showToast('Removed from Watchlist', 'info');
-            } else {
-                watchlist.push(movieId);
-                showToast('Added to Watchlist', 'success');
-            }
-            saveUserData();
-        }
-        
-        function searchMovies() {
+        window.searchMovies = function() {
             const query = document.getElementById('search-input')?.value.toLowerCase() || '';
             const container = document.getElementById('search-container');
             
@@ -1200,7 +1060,7 @@
                 return;
             }
             
-            const filtered = movies.filter(m => 
+            const filtered = window.movies.filter(m => 
                 m.title?.toLowerCase().includes(query) ||
                 m.category?.toLowerCase().includes(query)
             );
@@ -1210,419 +1070,59 @@
             } else {
                 container.innerHTML = filtered.map(m => createCard(m)).join('');
             }
-        }
+        };
         
-        function showDetails(movieId) {
-            const movie = movies.find(m => m.id === movieId);
-            if (!movie) return;
-            
-            const hasEpisodes = movie.episodes && movie.episodes.length > 0;
-            
-            closeDetails();
-            
-            const modal = document.createElement('div');
-            modal.id = 'details-modal';
-            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm';
-            modal.innerHTML = `
-                <div class="bg-gray-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                    <div class="relative">
-                        <img src="${movie.backdrop || movie.poster}" class="w-full h-48 object-cover rounded-t-3xl" onerror="this.src='${movie.poster}'">
-                        <button onclick="closeDetails()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-20"></div>
-                    </div>
-                    <div class="p-6">
-                        <h2 class="text-2xl font-bold mb-2">${movie.title}</h2>
-                        <div class="flex items-center gap-3 mb-4 text-sm text-gray-400">
-                            <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${movie.rating || 'N/A'}</span>
-                            <span>${movie.year || ''}</span>
-                            <span>${movie.duration || ''}</span>
-                            <span class="px-2 py-0.5 bg-gray-800 rounded text-xs">${movie.category || 'Movie'}</span>
-                        </div>
-                        <p class="text-gray-300 mb-6 text-sm">${movie.description || 'No description.'}</p>
-                        
-                        ${hasEpisodes ? `
-                        <div class="mb-4">
-                            <h3 class="font-bold mb-2">Episodes (${movie.episodes.length})</h3>
-                            <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-                                ${movie.episodes.map((ep, idx) => `
-                                    <button onclick="playMovie('${movie.id}', ${idx}); closeDetails();" class="flex-shrink-0 bg-gray-800 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition">
-                                        Ep ${ep.ep || idx + 1}
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>` : ''}
-                        
-                        <div class="flex gap-3">
-                            <button onclick="playMovie('${movie.id}'); closeDetails();" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                                <i class="fas fa-play"></i> ${hasEpisodes ? 'Watch Ep 1' : 'Play Now'}
-                            </button>
-                            <button onclick="showShareModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                                <i class="fas fa-share-alt"></i> Share
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-            document.body.appendChild(modal);
-            modal.onclick = (e) => { if (e.target === modal) closeDetails(); };
-        }
+        window.hideAdminPanel = function() {
+            document.getElementById('admin-panel').classList.remove('visible');
+        };
         
-        function closeDetails() {
-            const modal = document.getElementById('details-modal');
-            if (modal) modal.remove();
-        }
-        
-        function playMovie(movieId, episodeIndex = 0) {
-            const movie = movies.find(m => m.id === movieId);
-            if (!movie) {
-                showToast('Movie not found', 'error');
-                return;
+        window.clearAllData = function() {
+            if (confirm('Clear all local data?')) {
+                localStorage.removeItem('streamer_continue');
+                window.continueWatching = [];
+                updateStats();
+                renderMovies();
+                showToast('Data cleared', 'success');
             }
-            
-            currentMovie = movie;
-            let videoUrl = movie.videoUrl;
-            
-            if (movie.episodes && movie.episodes.length > episodeIndex) {
-                currentEpisode = movie.episodes[episodeIndex];
-                videoUrl = currentEpisode.videoUrl || videoUrl;
+        };
+        
+        function updateStats() {
+            document.getElementById('continue-count').textContent = window.continueWatching.length;
+            document.getElementById('total-count').textContent = window.movies.length;
+        }
+        
+        // UPLOAD HANDLERS
+        document.getElementById('upload-area')?.addEventListener('click', () => {
+            document.getElementById('image-upload').click();
+        });
+        
+        document.getElementById('image-upload')?.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('upload-preview');
+                    preview.src = e.target.result;
+                    preview.classList.add('visible');
+                };
+                reader.readAsDataURL(e.target.files[0]);
             }
-            
-            if (!videoUrl) {
-                showToast('Video URL not available', 'error');
-                return;
-            }
-            
-            const dmId = extractDailymotionId(videoUrl);
-            if (!dmId) {
-                showToast('Invalid video URL', 'error');
-                return;
-            }
-            
-            showScreen('player-screen');
-            initDailymotionPlayer(dmId);
-            setupEpisodeList(movie, episodeIndex);
-            addToContinueWatching(movieId, episodeIndex, 0);
-        }
+        });
         
-        function extractDailymotionId(url) {
-            let match = url.match(/video\/([a-zA-Z0-9]+)/);
-            if (match) return match[1];
-            
-            match = url.match(/dm=(\w+)/);
-            if (match) return match[1];
-            
-            match = url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
-            if (match) return match[1];
-            
-            return url;
-        }
-        
-        function initDailymotionPlayer(videoId) {
-            const container = document.getElementById('dailymotion-player');
-            container.innerHTML = '';
-            
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0&quality=${currentQuality}`;
-            iframe.width = '100%';
-            iframe.height = '100%';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-            iframe.allowFullscreen = true;
-            iframe.id = 'dm-player';
-            
-            container.appendChild(iframe);
-            isPlaying = true;
-            
-            document.getElementById('play-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
-            
-            if (updateInterval) clearInterval(updateInterval);
-            updateInterval = setInterval(() => {
-                const progressBar = document.getElementById('progress-fill');
-                let currentWidth = parseFloat(progressBar.style.width) || 0;
-                if (currentWidth < 100 && isPlaying) {
-                    progressBar.style.width = (currentWidth + 0.1) + '%';
-                    updateTimeDisplay(currentWidth);
-                }
-            }, 1000);
-        }
-        
-        function updateTimeDisplay(percent) {
-            const current = Math.floor((percent / 100) * 24);
-            const total = 24;
-            document.getElementById('time-display').textContent = `${current}:00 / ${total}:00`;
-        }
-        
-        function setupEpisodeList(movie, currentIdx) {
-            const btn = document.getElementById('episode-btn');
-            const list = document.getElementById('episode-list-content');
-            
-            if (!movie.episodes || movie.episodes.length === 0) {
-                btn.style.display = 'none';
-                return;
-            }
-            
-            btn.style.display = 'flex';
-            list.innerHTML = movie.episodes.map((ep, idx) => `
-                <div class="episode-item ${idx === currentIdx ? 'active' : ''}" onclick="playEpisode(${idx})">
-                    <div class="w-12 h-12 rounded bg-gray-800 flex items-center justify-center text-sm font-bold">${ep.ep || idx + 1}</div>
-                    <div class="flex-1">
-                        <p class="font-medium text-sm">${ep.title || `Episode ${ep.ep || idx + 1}`}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        function playEpisode(index) {
-            if (currentMovie && currentMovie.episodes[index]) {
-                playMovie(currentMovie.id, index);
-                toggleEpisodeList();
-            }
-        }
-        
-        function togglePlay() {
-            const btn = document.getElementById('play-pause-btn');
-            
-            if (isPlaying) {
-                isPlaying = false;
-                btn.innerHTML = '<i class="fas fa-play"></i>';
-                showToast('Paused', 'info');
-            } else {
-                isPlaying = true;
-                btn.innerHTML = '<i class="fas fa-pause"></i>';
-                showToast('Playing', 'success');
-            }
-        }
-        
-        function seekVideo(event) {
-            const container = document.getElementById('progress-bar');
-            const rect = container.getBoundingClientRect();
-            const percent = ((event.clientX - rect.left) / rect.width) * 100;
-            document.getElementById('progress-fill').style.width = percent + '%';
-            updateTimeDisplay(percent);
-        }
-        
-        function toggleEpisodeList() {
-            document.getElementById('episode-list').classList.toggle('show');
-        }
-        
-        function toggleQualityMenu() {
-            document.getElementById('quality-menu').classList.toggle('show');
-            document.getElementById('subtitle-menu').classList.remove('show');
-        }
-        
-        function toggleSubtitleMenu() {
-            document.getElementById('subtitle-menu').classList.toggle('show');
-            document.getElementById('quality-menu').classList.remove('show');
-        }
-        
-        function changeQuality(quality) {
-            currentQuality = quality;
-            document.querySelectorAll('.quality-option').forEach(opt => {
-                opt.classList.remove('active');
-                if (opt.textContent.includes(quality) || (quality === 'auto' && opt.textContent === 'Auto')) {
-                    opt.classList.add('active');
-                }
-            });
-            document.getElementById('quality-menu').classList.remove('show');
-            showToast(`Quality: ${quality === 'auto' ? 'Auto' : quality + 'p'}`, 'info');
-            
-            if (currentMovie) {
-                const videoUrl = currentEpisode?.videoUrl || currentMovie.videoUrl;
-                const dmId = extractDailymotionId(videoUrl);
-                if (dmId) {
-                    const iframe = document.getElementById('dm-player');
-                    if (iframe) {
-                        iframe.src = `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0&quality=${quality}`;
-                    }
-                }
-            }
-        }
-        
-        function changeSubtitle(lang) {
-            document.querySelectorAll('.subtitle-option').forEach(opt => opt.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('subtitle-menu').classList.remove('show');
-            
-            const display = document.getElementById('subtitle-display');
-            if (lang === 'off') {
-                display.style.display = 'none';
-                showToast('Subtitles off', 'info');
-            } else {
-                display.style.display = 'block';
-                display.textContent = 'Subtitles: ' + lang.toUpperCase();
-                showToast('Subtitles: ' + lang.toUpperCase(), 'success');
-            }
-        }
-        
-        function toggleFullscreen() {
-            const container = document.getElementById('video-container');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {
-                    showToast('Fullscreen error: ' + err.message, 'error');
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-        
-        function closePlayer() {
-            if (updateInterval) clearInterval(updateInterval);
-            isPlaying = false;
-            document.getElementById('dailymotion-player').innerHTML = '';
-            showScreen('main-screen');
-        }
-        
-        function showShareModal() {
-            const modal = document.getElementById('share-modal');
-            const linkInput = document.getElementById('share-link');
-            
-            const shareUrl = currentMovie 
-                ? `${window.location.origin}?movie=${currentMovie.id}`
-                : window.location.origin;
-            
-            linkInput.value = shareUrl;
-            modal.classList.add('show');
-        }
-        
-        function hideShareModal(event) {
-            if (!event || event.target.id === 'share-modal') {
-                document.getElementById('share-modal').classList.remove('show');
-            }
-        }
-        
-        function shareContent(platform) {
-            const url = document.getElementById('share-link').value;
-            const text = currentMovie ? `Watch ${currentMovie.title} on STREAMER!` : 'Check out STREAMER - Unlimited Anime Streaming!';
-            
-            let shareUrl = '';
-            
-            switch(platform) {
-                case 'copy':
-                    navigator.clipboard.writeText(url).then(() => {
-                        showToast('Link copied!', 'success');
-                    }).catch(() => {
-                        const input = document.getElementById('share-link');
-                        input.select();
-                        document.execCommand('copy');
-                        showToast('Link copied!', 'success');
-                    });
-                    return;
-                    
-                case 'whatsapp':
-                    shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-                    break;
-                    
-                case 'telegram':
-                    shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-                    break;
-                    
-                case 'twitter':
-                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
-                    break;
-            }
-            
-            if (shareUrl) {
-                window.open(shareUrl, '_blank');
-            }
-        }
-        
-        function addToContinueWatching(movieId, episode, progress) {
-            const existing = continueWatching.find(item => item.movieId === movieId);
-            if (existing) {
-                existing.episode = episode;
-                existing.progress = progress;
-                existing.timestamp = Date.now();
-            } else {
-                continueWatching.push({
-                    movieId,
-                    episode,
-                    progress,
-                    timestamp: Date.now()
-                });
-            }
-            continueWatching.sort((a, b) => b.timestamp - a.timestamp);
-            saveUserData();
-            renderMovies();
-        }
-        
-        function showToast(message, type = 'info') {
+        // TOAST
+        window.showToast = function(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
-            
             container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(-100%)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
+            setTimeout(() => toast.remove(), 3000);
+        };
         
-        function clearAllData() {
-            if (confirm('Are you sure you want to clear all data? This cannot be undone!')) {
-                localStorage.removeItem('streamer_watchlist');
-                localStorage.removeItem('streamer_continue');
-                localStorage.removeItem('streamer_movies');
-                sessionStorage.removeItem('streamer_admin');
-                
-                watchlist = [];
-                continueWatching = [];
-                movies = [];
-                isAdmin = false;
-                
-                document.getElementById('admin-badge').classList.remove('visible');
-                document.getElementById('admin-panel').classList.remove('visible');
-                document.getElementById('profile-admin-btn').style.display = 'none';
-                
-                updateProfileStats();
-                renderMovies();
-                showToast('All data cleared!', 'success');
+        // INIT
+        window.addEventListener('load', () => {
+            if (window.isAdmin) {
+                loadMoviesFromFirebase();
             }
-        }
-        
-        function handleUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            const movieId = params.get('movie');
-            
-            if (movieId) {
-                const movie = movies.find(m => m.id === movieId);
-                if (movie) {
-                    setTimeout(() => {
-                        showDetails(movieId);
-                    }, 1000);
-                }
-            }
-        }
-        
-        window.addEventListener('load', handleUrlParams);
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeDetails();
-                hideShareModal();
-                if (document.getElementById('player-screen').classList.contains('active')) {
-                    closePlayer();
-                }
-            }
-            
-            if (e.key === 'a' || e.key === 'A') {
-                window.adminKeyPresses = (window.adminKeyPresses || 0) + 1;
-                setTimeout(() => {
-                    window.adminKeyPresses = 0;
-                }, 1000);
-                
-                if (window.adminKeyPresses >= 3 && !isAdmin) {
-                    showAdminLogin();
-                    window.adminKeyPresses = 0;
-                }
-            }
-        });
-        
-        document.getElementById('video-container')?.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
         });
     </script>
 </body>
