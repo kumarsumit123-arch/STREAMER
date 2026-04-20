@@ -659,47 +659,55 @@
         window.isAdmin = false;
         window.activeCategory = 'All';
         
-        // CHECK ADMIN MODE - FIXED
-        function checkAdminMode() {
+        // CHECK ADMIN MODE
+        window.checkAdminMode = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const adminParam = urlParams.get('admin');
             
-            console.log('URL param admin:', adminParam); // Debug
+            console.log('URL param admin:', adminParam);
             
             if (adminParam === 'sumit81') {
                 window.isAdmin = true;
                 const adminPanel = document.getElementById('admin-panel');
                 if (adminPanel) {
                     adminPanel.classList.add('visible');
-                    console.log('Admin panel activated'); // Debug
+                    console.log('Admin panel activated');
                 }
                 showToast('🔥 Admin Mode Activated', 'success');
                 
-                // Show admin info in profile
                 const adminInfo = document.getElementById('admin-info');
                 if (adminInfo) adminInfo.classList.remove('hidden');
             }
-        }
+        };
         
-        // LOAD MOVIES FROM FIREBASE
-        async function loadMoviesFromFirebase() {
+        // LOAD MOVIES FROM FIREBASE - CRITICAL FIX
+        window.loadMoviesFromFirebase = async function() {
             try {
-                console.log('Loading content...');
+                console.log('Loading content from Firebase...');
+                showToast('Loading content...', 'info');
+                
                 const snapshot = await getDocs(collection(db, "movies"));
                 window.movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
-                console.log('Loaded movies:', window.movies.length); // Debug
+                console.log('Loaded movies:', window.movies.length);
+                console.log('Movies data:', window.movies);
                 
-                renderMovies();
+                if (window.movies.length === 0) {
+                    console.log('No movies found in Firebase');
+                    renderEmptyState();
+                } else {
+                    renderMovies();
+                }
                 
                 updateStats();
             } catch (error) {
                 console.error("Error loading movies:", error);
-                showToast('Error: ' + error.message, 'error');
+                showToast('Error loading: ' + error.message, 'error');
+                renderEmptyState();
             }
-        }
+        };
         
-        function renderEmptyState() {
+        window.renderEmptyState = function() {
             const hero = document.getElementById('hero-content');
             const forYou = document.getElementById('foryou-container');
             const trending = document.getElementById('trending-container');
@@ -717,7 +725,7 @@
             if (hero) hero.innerHTML = emptyHTML;
             if (forYou) forYou.innerHTML = emptyHTML;
             if (trending) trending.innerHTML = emptyHTML;
-        }
+        };
         
         // SAVE MOVIE TO FIREBASE
         window.saveAdminContent = async function() {
@@ -731,7 +739,6 @@
             const subtitleUrl = document.getElementById('admin-subtitle').value.trim();
             const posterUrl = document.getElementById('poster-url').value.trim();
             
-            // Get poster from upload or URL
             let poster = posterUrl;
             const uploadPreview = document.getElementById('upload-preview');
             if (uploadPreview.classList.contains('visible') && uploadPreview.src) {
@@ -743,7 +750,6 @@
                 return;
             }
             
-            // Validate HLS URL
             if (!videoUrl.includes('.m3u8') && !videoUrl.includes('m3u8')) {
                 showToast('Warning: URL should be HLS (.m3u8) format', 'error');
                 return;
@@ -774,9 +780,13 @@
                 document.getElementById('admin-subtitle').value = '';
                 document.getElementById('poster-url').value = '';
                 document.getElementById('upload-preview').classList.remove('visible');
+                document.getElementById('admin-description').value = '';
+                document.getElementById('admin-year').value = '';
+                document.getElementById('admin-duration').value = '';
+                document.getElementById('admin-rating').value = '';
                 
                 // Reload
-                loadMoviesFromFirebase();
+                await loadMoviesFromFirebase();
             } catch (error) {
                 console.error("Error saving:", error);
                 showToast('Error: ' + error.message, 'error');
@@ -818,7 +828,7 @@
                     await addDoc(collection(db, "movies"), movie);
                 }
                 showToast('✅ Demo content added!', 'success');
-                loadMoviesFromFirebase();
+                await loadMoviesFromFirebase();
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
             }
@@ -838,17 +848,14 @@
             const video = document.getElementById('real-video-player');
             const spinner = document.getElementById('buffering-spinner');
             
-            // Destroy previous HLS
             if (window.hls) {
                 window.hls.destroy();
                 window.hls = null;
             }
             
-            // Reset UI
             document.getElementById('progress-fill').style.width = '0%';
             document.getElementById('time-display').textContent = '0:00 / 0:00';
             
-            // Setup HLS
             if (Hls.isSupported()) {
                 window.hls = new Hls({
                     maxBufferLength: 30,
@@ -883,7 +890,6 @@
                 return;
             }
             
-            // Setup subtitles
             const track = document.getElementById('subtitle-track');
             const subtitleDisplay = document.getElementById('subtitle-display');
             if (movie.subtitleUrl) {
@@ -901,14 +907,12 @@
             const container = document.getElementById('quality-options');
             container.innerHTML = '';
             
-            // Auto
             const autoDiv = document.createElement('div');
             autoDiv.className = 'quality-option active';
             autoDiv.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
             autoDiv.onclick = () => changeQuality(-1, autoDiv);
             container.appendChild(autoDiv);
             
-            // Levels
             levels.forEach((level, index) => {
                 const height = level.height || 0;
                 const div = document.createElement('div');
@@ -951,7 +955,6 @@
                     progressFill.style.width = percent + '%';
                     timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
                     
-                    // Auto save progress every 5 seconds
                     if (Math.floor(video.currentTime) % 5 === 0) {
                         saveContinueWatching(movieId, video.currentTime, video.duration, percent);
                     }
@@ -1094,7 +1097,7 @@
         };
         
         window.guestLogin = function() {
-            checkAdminMode(); // Check admin on login
+            checkAdminMode();
             showScreen('main-screen');
             loadMoviesFromFirebase();
         };
@@ -1103,7 +1106,9 @@
             window.activeCategory = cat;
             
             document.querySelectorAll('.category-pill').forEach(p => {
-                const isActive = p.textContent.trim() === cat;
+                const isActive = p.textContent.trim() === cat || 
+                    (cat === 'Chinese Anime' && p.textContent.trim() === 'Chinese Anime') ||
+                    (cat === 'Korean Drama' && p.textContent.trim() === 'K-Drama');
                 p.className = isActive 
                     ? 'category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition'
                     : 'category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition';
@@ -1112,7 +1117,7 @@
             renderMovies();
         };
         
-        function renderMovies() {
+        window.renderMovies = function() {
             const movies = window.activeCategory === 'All' 
                 ? window.movies 
                 : window.movies.filter(m => m.category === window.activeCategory);
@@ -1167,9 +1172,19 @@
                             </button>
                         </div>
                     </div>`;
+            } else if (hero) {
+                hero.innerHTML = `
+                    <div class="empty-state w-full">
+                        <i class="fas fa-film"></i>
+                        <p class="text-gray-500 mb-2">No content available</p>
+                        ${window.isAdmin ? 
+                            '<p class="text-xs text-gray-600">Use Admin Panel to add content</p>' : 
+                            ''
+                        }
+                    </div>`;
             }
             
-            // Lists
+            // For You
             if (forYou) {
                 if (movies.length === 0) {
                     forYou.innerHTML = `<div class="empty-state w-full"><i class="fas fa-film"></i><p class="text-gray-500">No content in this category</p></div>`;
@@ -1178,14 +1193,17 @@
                 }
             }
             
+            // Trending
             if (trending) {
                 if (movies.length === 0) {
                     trending.innerHTML = `<div class="empty-state w-full"><i class="fas fa-film"></i><p class="text-gray-500">No trending content</p></div>`;
                 } else {
-                    trending.innerHTML = movies.slice(0, 8).map(m => createCard(m)).join('');
+                    // Sort by views for trending
+                    const trendingMovies = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0));
+                    trending.innerHTML = trendingMovies.slice(0, 8).map(m => createCard(m)).join('');
                 }
             }
-        }
+        };
         
         function createCard(movie) {
             return `
@@ -1246,10 +1264,10 @@
             }
         };
         
-        function updateStats() {
+        window.updateStats = function() {
             document.getElementById('continue-count').textContent = window.continueWatching.length;
             document.getElementById('total-count').textContent = window.movies.length;
-        }
+        };
         
         // UPLOAD HANDLERS
         document.getElementById('upload-area')?.addEventListener('click', () => {
@@ -1278,13 +1296,15 @@
             setTimeout(() => toast.remove(), 3000);
         };
         
-        // INIT
+        // INIT - SINGLE LOAD EVENT LISTENER
         window.addEventListener('load', () => {
-    console.log('Page loaded');
-
-    checkAdminMode();
-    loadMoviesFromFirebase(); // 🔥 ADD THIS LINE
-});
+            console.log('Page loaded - Initializing...');
+            checkAdminMode();
+            // Auto-load if already logged in (page refresh on main screen)
+            if (document.getElementById('main-screen').classList.contains('active')) {
+                loadMoviesFromFirebase();
+            }
+        });
         
         // Close menus on click outside
         document.addEventListener('click', (e) => {
