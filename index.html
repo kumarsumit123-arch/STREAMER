@@ -684,18 +684,13 @@
         // LOAD MOVIES FROM FIREBASE
         async function loadMoviesFromFirebase() {
             try {
-                showToast('Loading content...', 'info');
+                console.log('Loading content...');
                 const snapshot = await getDocs(collection(db, "movies"));
                 window.movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 console.log('Loaded movies:', window.movies.length); // Debug
                 
-                if (window.movies.length === 0) {
-                    // No content - show empty state with hint
-                    renderEmptyState();
-                } else {
-                    renderMovies();
-                }
+                renderMovies();
                 
                 updateStats();
             } catch (error) {
