@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0f0f0f">
+    <meta name="theme-color" content="#0a0a0a">
     <title>STREAMER - Premium OTT</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,52 +27,93 @@
             overflow-x: hidden; 
         }
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0a0a0a; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
         
-        /* Screens */
         .screen { 
             display: none; 
             min-height: 100vh; 
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
         }
         .screen.active { display: block; }
         
         @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
+            from { opacity: 0; transform: translateY(20px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
         
-        /* Gradient Text */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        @keyframes mesh-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
         .gradient-text {
             background: linear-gradient(135deg, #ef4444 0%, #a855f7 50%, #ec4899 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradient-shift 3s ease infinite;
         }
         
-        /* Glassmorphism */
+        @keyframes gradient-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
         .glass {
-            background: rgba(20, 20, 20, 0.8);
+            background: rgba(20, 20, 20, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        /* Movie Cards */
+        .mesh-bg {
+            background: linear-gradient(-45deg, #0a0a0a, #1a0a0a, #0a0a1a, #1a0a1a);
+            background-size: 400% 400%;
+            animation: mesh-gradient 15s ease infinite;
+        }
+        
         .movie-card { 
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
         
         .movie-card:hover { 
-            transform: translateY(-8px) scale(1.02); 
+            transform: translateY(-8px) scale(1.03) rotateX(5deg); 
             z-index: 10;
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1);
         }
         
         .movie-card .play-overlay {
@@ -88,19 +129,14 @@
         
         .movie-card:hover .play-overlay { opacity: 1; }
         
-        .movie-card img {
-            transition: transform 0.5s;
-        }
+        .movie-card img { transition: transform 0.5s; }
+        .movie-card:hover img { transform: scale(1.1); }
         
-        .movie-card:hover img {
-            transform: scale(1.1);
-        }
-        
-        /* Category Pills */
         .category-pill {
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            border: 1px solid transparent;
         }
         
         .category-pill::before {
@@ -114,10 +150,19 @@
         }
         
         .category-pill.active::before { opacity: 1; }
-        .category-pill.active { color: white; font-weight: 600; }
+        .category-pill.active { 
+            color: white; 
+            font-weight: 600;
+            border-color: rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
         .category-pill span { position: relative; z-index: 1; }
         
-        /* Video Player */
+        .category-pill:hover:not(.active) {
+            border-color: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+        
         .video-player-wrapper {
             position: relative;
             width: 100%;
@@ -125,7 +170,7 @@
             background: #000;
         }
         
-        #video-element {
+        #video-element, #dailymotion-player {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -150,18 +195,19 @@
         
         .progress-container {
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            border-radius: 3px;
             cursor: pointer;
             position: relative;
             margin-bottom: 16px;
+            overflow: visible;
         }
         
         .progress-fill {
             height: 100%;
-            background: #ef4444;
-            border-radius: 2px;
+            background: linear-gradient(90deg, #ef4444, #a855f7);
+            border-radius: 3px;
             width: 0%;
             position: relative;
             transition: width 0.1s linear;
@@ -169,16 +215,17 @@
         
         .progress-handle {
             position: absolute;
-            right: -6px;
+            right: -8px;
             top: 50%;
             transform: translateY(-50%);
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             background: #ef4444;
             border-radius: 50%;
             opacity: 0;
             transition: opacity 0.2s, transform 0.2s;
-            box-shadow: 0 0 10px rgba(239,68,68,0.5);
+            box-shadow: 0 0 15px rgba(239,68,68,0.8);
+            border: 2px solid white;
         }
         
         .progress-container:hover .progress-handle { 
@@ -190,8 +237,8 @@
             background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -200,12 +247,26 @@
             transition: all 0.2s;
             font-size: 14px;
             backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(239,68,68,0.4) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
         .control-btn:hover { 
             background: rgba(239,68,68,0.8); 
             transform: scale(1.1); 
+            box-shadow: 0 0 20px rgba(239,68,68,0.4);
         }
+        
+        .control-btn:hover::after { opacity: 1; }
         
         .center-play-btn {
             position: absolute;
@@ -224,11 +285,13 @@
             transition: all 0.3s;
             z-index: 50;
             backdrop-filter: blur(10px);
+            box-shadow: 0 0 40px rgba(239,68,68,0.5);
         }
         
         .video-player-wrapper:hover .center-play-btn,
         .video-player-wrapper.paused .center-play-btn {
             opacity: 1;
+            animation: pulse-glow 2s infinite;
         }
         
         .buffering-spinner {
@@ -250,7 +313,6 @@
             to { transform: translate(-50%, -50%) rotate(360deg); } 
         }
         
-        /* Admin Panel */
         .admin-panel {
             background: linear-gradient(135deg, #1a0a0a 0%, #0f0f0f 100%);
             border: 2px solid #ef4444;
@@ -260,6 +322,7 @@
             display: none;
             position: relative;
             animation: slideDown 0.4s ease;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
         }
         
         .admin-panel.visible { display: block; }
@@ -278,6 +341,7 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             box-shadow: 0 4px 15px rgba(239,68,68,0.4);
+            animation: pulse-glow 2s infinite;
         }
         
         .upload-area {
@@ -293,6 +357,7 @@
         .upload-area:hover, .upload-area.dragover {
             border-color: #ef4444;
             background: rgba(239,68,68,0.05);
+            box-shadow: 0 0 20px rgba(239,68,68,0.1);
         }
         
         .form-input {
@@ -309,7 +374,7 @@
         .form-input:focus {
             outline: none;
             border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1), 0 0 20px rgba(239, 68, 68, 0.1);
             background: rgba(255,255,255,0.08);
         }
         
@@ -323,7 +388,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* Toast */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -347,11 +411,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         .toast.success { 
@@ -367,7 +427,6 @@
             border-color: rgba(59, 130, 246, 0.3);
         }
         
-        /* Loading Skeleton */
         .skeleton {
             background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
             background-size: 200% 100%;
@@ -375,12 +434,6 @@
             border-radius: 12px;
         }
         
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        /* Bottom Nav */
         .bottom-nav-item {
             position: relative;
             transition: all 0.3s;
@@ -399,16 +452,67 @@
             transform: translateX(-50%);
             width: 20px;
             height: 3px;
-            background: #ef4444;
+            background: linear-gradient(90deg, #ef4444, #a855f7);
             border-radius: 3px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
         
-        /* Hero Section */
         .hero-gradient {
             background: linear-gradient(to top, #0a0a0a 0%, transparent 60%);
         }
         
-        /* Subtitle Display */
+        .hero-slider {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out, transform 6s ease;
+            transform: scale(1.1);
+        }
+        
+        .hero-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .hero-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .hero-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+        }
+        
+        .hero-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .hero-dot.active {
+            background: #ef4444;
+            width: 24px;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
         .subtitle-display {
             position: absolute;
             bottom: 140px;
@@ -431,34 +535,147 @@
         
         .subtitle-display.show { display: block; }
         
-        /* Responsive */
+        .quality-menu {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            min-width: 150px;
+            display: none;
+            z-index: 200;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .quality-menu.show { display: block; animation: slideUp 0.3s ease; }
+        
+        .quality-option {
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        
+        .quality-option:hover { background: rgba(255,255,255,0.1); }
+        .quality-option.active { color: #ef4444; font-weight: 600; }
+        
+        .coming-soon-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #ef4444, #a855f7);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 5;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+        
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(239, 68, 68, 0.3);
+            border-radius: 50%;
+            animation: float-particle 10s infinite;
+        }
+        
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .welcome-logo {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .glow-btn {
+            position: relative;
+        }
+        
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, #ef4444, #a855f7, #ec4899);
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            filter: blur(10px);
+        }
+        
+        .glow-btn:hover::before { opacity: 0.7; }
+        
         @media (max-width: 640px) {
             .subtitle-display { font-size: 14px; bottom: 120px; }
             .center-play-btn { width: 60px; height: 60px; }
             .admin-panel { margin: 0 8px 16px 8px; padding: 16px; }
         }
         
-        /* Hide scrollbar for horizontal scroll */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .dm-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
-<body>
-    <!-- Toast Container -->
+<body class="mesh-bg">
+    <div class="particles" id="particles"></div>
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- ==================== WELCOME SCREEN ==================== -->
+    <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
-        <!-- Background Effects -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
             <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-600/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
         </div>
         
         <div class="relative z-10 text-center max-w-md w-full">
             <div class="mb-8">
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20">
+                <div class="welcome-logo w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20">
                     <i class="fas fa-play text-3xl text-white ml-1"></i>
                 </div>
                 <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
@@ -466,30 +683,29 @@
             </div>
             
             <div class="space-y-4">
-                <button onclick="app.guestLogin()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20">
+                <button onclick="app.guestLogin()" class="btn-ripple glow-btn w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20">
                     <i class="fas fa-play-circle"></i> Start Watching
                 </button>
                 
-                <button onclick="app.showAdminLogin()" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50">
+                <button onclick="app.showAdminLogin()" class="btn-ripple w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50">
                     <i class="fas fa-lock"></i> Admin Access
                 </button>
                 
-                <p class="text-gray-600 text-xs pt-4">Powered by Firebase • HLS Streaming • Real-time</p>
+                <p class="text-gray-600 text-xs pt-4">Next-Gen Streaming • AI Subtitles • 4K Ready</p>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MAIN SCREEN ==================== -->
+    <!-- MAIN SCREEN -->
     <div id="main-screen" class="screen pb-24">
-        <!-- Header -->
         <div class="sticky top-0 z-40 glass">
             <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
                 <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
                 <div class="flex items-center gap-3">
-                    <button onclick="app.showScreen('search-screen')" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <button onclick="app.showScreen('search-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button onclick="app.showScreen('profile-screen')" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition">
+                    <button onclick="app.showScreen('profile-screen')" class="btn-ripple w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition">
                         <i class="fas fa-user text-sm"></i>
                     </button>
                 </div>
@@ -507,7 +723,6 @@
                     </button>
                 </div>
                 
-                <!-- Image Upload -->
                 <div class="mb-6">
                     <label class="form-label">Poster Image</label>
                     <div class="upload-area" id="upload-area" onclick="document.getElementById('image-upload').click()">
@@ -520,7 +735,6 @@
                     <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL here" oninput="app.handleUrlInput(this.value)">
                 </div>
                 
-                <!-- Form Grid -->
                 <div class="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="form-label">Title *</label>
@@ -529,11 +743,12 @@
                     <div>
                         <label class="form-label">Category *</label>
                         <select id="admin-category" class="form-input">
-                            <option value="Anime">Japanese Anime</option>
-                            <option value="Chinese Anime">Chinese Anime (Donghua)</option>
-                            <option value="Korean Drama">Korean Drama</option>
+                            <option value="Anime">Anime</option>
+                            <option value="Donghua">Donghua (Chinese)</option>
+                            <option value="K-Drama">K-Drama</option>
                             <option value="Movies">Movies</option>
                             <option value="Web Series">Web Series</option>
+                            <option value="Sports">Sports</option>
                         </select>
                     </div>
                 </div>
@@ -559,27 +774,46 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="form-label">HLS Video URL (.m3u8) *</label>
-                    <input type="url" id="admin-video" class="form-input" placeholder="https://cdn.example.com/video.m3u8">
-                    <p class="text-xs text-gray-500 mt-2">Must be HLS format for adaptive streaming</p>
+                    <label class="form-label">Video Source Type</label>
+                    <select id="video-type" class="form-input mb-2" onchange="app.toggleVideoInput()">
+                        <option value="dailymotion">Dailymotion Embed</option>
+                        <option value="mp4">Direct MP4 / CDN</option>
+                        <option value="hls">HLS Stream (.m3u8)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4" id="dailymotion-input">
+                    <label class="form-label">Dailymotion Video ID *</label>
+                    <input type="text" id="admin-video-dm" class="form-input" placeholder="x7tgad0 (Video ID only)">
+                    <p class="text-xs text-gray-500 mt-2">Paste only the video ID from Dailymotion URL</p>
+                </div>
+                
+                <div class="mb-4 hidden" id="mp4-input">
+                    <label class="form-label">MP4 / CDN URL *</label>
+                    <input type="url" id="admin-video-mp4" class="form-input" placeholder="https://cdn.example.com/video.mp4">
+                </div>
+                
+                <div class="mb-4 hidden" id="hls-input">
+                    <label class="form-label">HLS URL (.m3u8) *</label>
+                    <input type="url" id="admin-video-hls" class="form-input" placeholder="https://cdn.example.com/video.m3u8">
                 </div>
                 
                 <div class="mb-6">
                     <label class="form-label">Subtitle URL (.vtt) - Optional</label>
                     <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
+                    <p class="text-xs text-gray-500 mt-2">Or leave empty for AI-generated subtitles</p>
                 </div>
                 
                 <div class="flex gap-3">
-                    <button onclick="app.saveContent()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20">
+                    <button onclick="app.saveContent()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 btn-ripple">
                         <i class="fas fa-save mr-2"></i> Save to Firebase
                     </button>
-                    <button onclick="app.addDemoContent()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition" title="Add sample content">
+                    <button onclick="app.addDemoContent()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition btn-ripple" title="Add sample content">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Categories -->
             <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
                 <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
                     <span>All</span>
@@ -587,23 +821,27 @@
                 <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
                     <span>Anime</span>
                 </button>
-                <button onclick="app.filterCategory('Chinese Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Chinese Anime</span>
+                <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
+                    <span>Donghua</span>
                 </button>
-                <button onclick="app.filterCategory('Korean Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
+                <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
                     <span>K-Drama</span>
                 </button>
                 <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
                     <span>Movies</span>
                 </button>
+                <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
+                    <span>Web Series</span>
+                </button>
+                <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
+                    <span>Sports</span>
+                </button>
             </div>
         </div>
 
-        <!-- Hero Section -->
         <div id="hero-section" class="mb-8 px-4">
-            <div class="w-full h-[55vh] bg-gray-900 rounded-2xl relative overflow-hidden">
-                <div id="hero-content" class="w-full h-full">
-                    <!-- Loading State -->
+            <div class="w-full h-[55vh] bg-gray-900 rounded-2xl relative overflow-hidden shadow-2xl shadow-red-900/20">
+                <div id="hero-content" class="hero-slider">
                     <div class="w-full h-full flex items-center justify-center">
                         <div class="text-center">
                             <div class="skeleton w-64 h-96 mx-auto mb-4 rounded-xl"></div>
@@ -614,9 +852,7 @@
             </div>
         </div>
 
-        <!-- Content Sections -->
         <div class="px-4 max-w-7xl mx-auto space-y-10">
-            <!-- Continue Watching -->
             <section id="continue-watching-section" class="hidden">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -629,7 +865,6 @@
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
             </section>
 
-            <!-- Trending -->
             <section>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -646,7 +881,6 @@
                 </div>
             </section>
 
-            <!-- For You -->
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-sparkles text-purple-500"></i> For You
@@ -661,7 +895,6 @@
                 </div>
             </section>
             
-            <!-- New Releases -->
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-clock text-green-500"></i> New Releases
@@ -678,11 +911,11 @@
         </div>
     </div>
 
-    <!-- ==================== SEARCH SCREEN ==================== -->
+    <!-- SEARCH SCREEN -->
     <div id="search-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 glass px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
+                <button onclick="app.showScreen('main-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Search</h1>
@@ -690,7 +923,7 @@
             <div class="relative mt-4 max-w-2xl mx-auto">
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
                 <input type="text" id="search-input" onkeyup="app.searchMovies()" 
-                       class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition"
+                       class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition focus:shadow-lg focus:shadow-red-600/10"
                        placeholder="Search anime, movies, dramas...">
             </div>
         </div>
@@ -704,11 +937,11 @@
         </div>
     </div>
 
-    <!-- ==================== PROFILE SCREEN ==================== -->
+    <!-- PROFILE SCREEN -->
     <div id="profile-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 glass px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
+                <button onclick="app.showScreen('main-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Profile</h1>
@@ -716,62 +949,68 @@
         </div>
         <div class="px-4 py-6 max-w-2xl mx-auto">
             <div class="flex flex-col items-center py-12">
-                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl shadow-red-500/20">
+                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl shadow-red-500/20 animate-pulse">
                     <i class="fas fa-user"></i>
                 </div>
                 <h2 class="text-2xl font-bold mb-1">Guest User</h2>
                 <p class="text-gray-400 mb-8">Free Plan</p>
                 
                 <div class="grid grid-cols-3 gap-4 w-full mb-8">
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5">
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-red-500/30 transition">
                         <p class="text-2xl font-bold text-blue-500" id="continue-count">0</p>
                         <p class="text-xs text-gray-400 mt-1">Continue</p>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5">
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-purple-500/30 transition">
                         <p class="text-2xl font-bold text-green-500" id="total-count">0</p>
                         <p class="text-xs text-gray-400 mt-1">Total</p>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5">
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-pink-500/30 transition">
                         <p class="text-2xl font-bold text-purple-500" id="watch-time">0h</p>
                         <p class="text-xs text-gray-400 mt-1">Watched</p>
                     </div>
                 </div>
                 
                 <div class="w-full space-y-3">
-                    <button onclick="app.showAdminLogin()" class="w-full bg-white/5 hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5">
+                    <button onclick="app.showAdminLogin()" class="btn-ripple w-full bg-white/5 hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30">
                         <i class="fas fa-crown text-yellow-500"></i> Admin Panel
                     </button>
                     
-                    <button onclick="app.clearAllData()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition">
+                    <button onclick="app.clearAllData()" class="btn-ripple w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition border border-red-500/20">
                         <i class="fas fa-trash"></i> Clear Watch History
                     </button>
                 </div>
                 
                 <div class="mt-8 text-center">
-                    <p class="text-xs text-gray-600">STREAMER v2.0 • Firebase Powered</p>
+                    <p class="text-xs text-gray-600">STREAMER v3.0 • AI Powered • 4K Ready</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ==================== VIDEO PLAYER ==================== -->
+    <!-- VIDEO PLAYER -->
     <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
         <div class="video-player-wrapper" id="video-container">
-            <video id="video-element" class="w-full h-full bg-black" playsinline></video>
+            <!-- Native Video Player -->
+            <video id="video-element" class="w-full h-full bg-black" playsinline style="display: none;"></video>
+            
+            <!-- Dailymotion Player -->
+            <div id="dailymotion-container" style="display: none; width: 100%; height: 100%;">
+                <iframe id="dailymotion-player" class="dm-player" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            
             <track id="subtitle-track" kind="subtitles" srclang="en" label="English">
             
             <div class="buffering-spinner" id="buffering-spinner"></div>
             
-            <div class="center-play-btn" id="center-play-btn" onclick="app.togglePlay()">
+            <div class="center-play-btn" id="center-play-btn" onclick="app.togglePlay()" style="display: none;">
                 <i class="fas fa-play text-2xl ml-1"></i>
             </div>
             
             <div id="subtitle-display" class="subtitle-display"></div>
             
-            <!-- Top Bar -->
             <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
                 <div class="flex items-center gap-3">
-                    <button onclick="app.closePlayer()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
+                    <button onclick="app.closePlayer()" class="btn-ripple w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
                         <i class="fas fa-arrow-left"></i>
                     </button>
                     <div>
@@ -779,10 +1018,12 @@
                         <p class="text-xs text-gray-400" id="player-meta"></p>
                     </div>
                 </div>
+                <button onclick="app.shareContent()" class="btn-ripple w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
+                    <i class="fas fa-share-alt"></i>
+                </button>
             </div>
             
-            <!-- Controls -->
-            <div class="player-controls">
+            <div class="player-controls" id="native-controls" style="display: none;">
                 <div class="progress-container" id="progress-bar" onclick="app.seekVideo(event)">
                     <div class="progress-fill" id="progress-fill">
                         <div class="progress-handle"></div>
@@ -791,41 +1032,50 @@
                 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="app.togglePlay()" id="play-pause-btn">
+                        <button class="control-btn btn-ripple" onclick="app.togglePlay()" id="play-pause-btn">
                             <i class="fas fa-pause"></i>
                         </button>
-                        <button class="control-btn" onclick="app.skipBackward()">
-                            <i class="fas fa-backward"></i>
+                        <button class="control-btn btn-ripple" onclick="app.skipBackward()">
+                            <i class="fas fa-undo-10"></i>
+                            <span class="absolute text-[8px] font-bold">10</span>
                         </button>
-                        <button class="control-btn" onclick="app.skipForward()">
-                            <i class="fas fa-forward"></i>
+                        <button class="control-btn btn-ripple" onclick="app.skipForward()">
+                            <i class="fas fa-redo-10"></i>
+                            <span class="absolute text-[8px] font-bold">10</span>
                         </button>
                         <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="app.toggleQualityMenu()" id="quality-btn">
+                        <button class="control-btn btn-ripple" onclick="app.toggleQualityMenu()" id="quality-btn">
                             <i class="fas fa-cog"></i>
                         </button>
-                        <button class="control-btn" onclick="app.toggleSubtitle()">
+                        <button class="control-btn btn-ripple" onclick="app.toggleSubtitle()" id="subtitle-btn">
                             <i class="fas fa-closed-captioning"></i>
                         </button>
-                        <button class="control-btn" onclick="app.toggleFullscreen()">
+                        <button class="control-btn btn-ripple" onclick="app.toggleFullscreen()">
                             <i class="fas fa-expand"></i>
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Quality Menu -->
             <div class="quality-menu" id="quality-menu">
                 <div class="text-sm font-bold mb-3 text-gray-400 px-2">Quality</div>
                 <div id="quality-options"></div>
             </div>
+            
+            <!-- AI Subtitle Toggle for Dailymotion -->
+            <div id="dm-subtitle-toggle" class="absolute bottom-24 right-4 z-50 hidden">
+                <button onclick="app.toggleAISubtitle()" class="control-btn btn-ripple bg-red-600/80">
+                    <i class="fas fa-closed-captioning"></i>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
+    <!-- BOTTOM NAVIGATION -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-3 flex justify-around items-center z-40 hidden">
         <button onclick="app.showScreen('main-screen')" class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen">
             <i class="fas fa-home text-xl"></i>
@@ -840,834 +1090,3 @@
             <span class="text-xs font-medium">Profile</span>
         </button>
     </div>
-
-    <!-- ==================== FIREBASE & APP LOGIC ==================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-analytics.js";
-        
-        // Your Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
-            authDomain: "streamer-a5ea9.firebaseapp.com",
-            projectId: "streamer-a5ea9",
-            storageBucket: "streamer-a5ea9.firebasestorage.app",
-            messagingSenderId: "821781298641",
-            appId: "1:821781298641:web:1fcec50709460dcdd8f4f0",
-            measurementId: "G-21LF69JH1Q"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const analytics = getAnalytics(app);
-        
-        // ==================== APP CLASS ====================
-        class StreamerApp {
-            constructor() {
-                this.db = db;
-                this.movies = [];
-                this.continueWatching = JSON.parse(localStorage.getItem('streamer_continue') || '[]');
-                this.watchTime = parseInt(localStorage.getItem('streamer_watchtime') || '0');
-                this.hls = null;
-                this.currentMovie = null;
-                this.isAdmin = false;
-                this.activeCategory = 'All';
-                this.isLoading = false;
-                
-                this.init();
-            }
-            
-            async init() {
-                this.setupEventListeners();
-                this.checkAdminMode();
-                
-                // If already on main screen (refresh), load data
-                if (document.getElementById('main-screen').classList.contains('active')) {
-                    await this.loadMovies();
-                }
-            }
-            
-            // ==================== AUTH & ADMIN ====================
-            checkAdminMode() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const adminParam = urlParams.get('admin');
-                
-                if (adminParam === 'sumit81') {
-                    this.isAdmin = true;
-                    const adminPanel = document.getElementById('admin-panel');
-                    if (adminPanel) adminPanel.classList.add('visible');
-                    this.showToast('🔥 Admin Mode Activated', 'success');
-                }
-            }
-            
-            showAdminLogin() {
-                const password = prompt('Enter admin password:');
-                if (password === 'sumit81') {
-                    this.isAdmin = true;
-                    const adminPanel = document.getElementById('admin-panel');
-                    if (adminPanel) adminPanel.classList.add('visible');
-                    this.showToast('Admin Mode Activated', 'success');
-                    
-                    // Update URL without reload
-                    const url = new URL(window.location);
-                    url.searchParams.set('admin', 'sumit81');
-                    window.history.pushState({}, '', url);
-                } else {
-                    this.showToast('Invalid password', 'error');
-                }
-            }
-            
-            hideAdminPanel() {
-                document.getElementById('admin-panel').classList.remove('visible');
-            }
-            
-            // ==================== DATA LOADING ====================
-            async loadMovies() {
-                if (this.isLoading) return;
-                this.isLoading = true;
-                
-                try {
-                    console.log('Loading movies from Firebase...');
-                    
-                    const q = query(collection(this.db, "movies"), orderBy("timestamp", "desc"));
-                    const snapshot = await getDocs(q);
-                    
-                    this.movies = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    
-                    console.log(`Loaded ${this.movies.length} movies`);
-                    
-                    if (this.movies.length === 0) {
-                        this.renderEmptyState();
-                    } else {
-                        this.renderMovies();
-                    }
-                    
-                    this.updateStats();
-                    
-                } catch (error) {
-                    console.error("Error loading movies:", error);
-                    this.showToast('Failed to load content: ' + error.message, 'error');
-                    this.renderEmptyState();
-                } finally {
-                    this.isLoading = false;
-                }
-            }
-            
-            // ==================== RENDERING ====================
-            renderEmptyState() {
-                const emptyHTML = `
-                    <div class="text-center py-12">
-                        <i class="fas fa-film text-5xl text-gray-700 mb-4"></i>
-                        <p class="text-gray-500 mb-2">No content available</p>
-                        ${this.isAdmin ? 
-                            '<p class="text-xs text-gray-600">Add content using the Admin Panel above</p>' : 
-                            '<p class="text-xs text-gray-600">Check back later for new content</p>'
-                        }
-                    </div>`;
-                
-                document.getElementById('hero-content').innerHTML = emptyHTML;
-                document.getElementById('trending-container').innerHTML = emptyHTML;
-                document.getElementById('foryou-container').innerHTML = emptyHTML;
-                document.getElementById('new-container').innerHTML = emptyHTML;
-            }
-            
-            renderMovies() {
-                const movies = this.activeCategory === 'All' 
-                    ? this.movies 
-                    : this.movies.filter(m => m.category === this.activeCategory);
-                
-                // Hero (Featured - first movie or highest rated)
-                const featured = movies.reduce((prev, current) => (prev.rating > current.rating) ? prev : current, movies[0]);
-                this.renderHero(featured);
-                
-                // Continue Watching
-                this.renderContinueWatching();
-                
-                // Trending (by views)
-                const trending = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0));
-                this.renderSection('trending-container', trending.slice(0, 10));
-                
-                // For You (shuffled)
-                const forYou = [...movies].sort(() => Math.random() - 0.5);
-                this.renderSection('foryou-container', forYou.slice(0, 10));
-                
-                // New Releases (by timestamp)
-                const newReleases = [...movies].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                this.renderSection('new-container', newReleases.slice(0, 10));
-            }
-            
-            renderHero(movie) {
-                if (!movie) return;
-                
-                const hero = document.getElementById('hero-content');
-                hero.innerHTML = `
-                    <div class="relative w-full h-full cursor-pointer group" onclick="app.playMovie('${movie.id}')">
-                        <img src="${movie.poster}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/800x600/1a1a1a/666?text=NO+IMAGE'">
-                        <div class="absolute inset-0 hero-gradient"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-                            <div class="flex items-center gap-3 mb-3">
-                                <span class="px-3 py-1 bg-red-600 rounded-full text-xs font-bold">FEATURED</span>
-                                <span class="px-2 py-1 bg-white/10 rounded text-xs backdrop-blur-md">${movie.category}</span>
-                            </div>
-                            <h2 class="text-3xl md:text-5xl font-black mb-3 line-clamp-2 leading-tight">${movie.title}</h2>
-                            <p class="text-gray-300 text-sm md:text-base mb-4 line-clamp-2 max-w-xl">${movie.description || ''}</p>
-                            <div class="flex items-center gap-4 mb-6 text-sm">
-                                <span class="text-yellow-400 font-bold"><i class="fas fa-star mr-1"></i>${movie.rating || 'N/A'}</span>
-                                <span class="text-gray-400">${movie.year || ''}</span>
-                                <span class="text-gray-400">${movie.duration || ''}</span>
-                            </div>
-                            <button class="bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-full font-bold flex items-center gap-2 transition transform hover:scale-105">
-                                <i class="fas fa-play"></i> Play Now
-                            </button>
-                        </div>
-                    </div>`;
-            }
-            
-            renderSection(containerId, movies) {
-                const container = document.getElementById(containerId);
-                if (!movies.length) {
-                    container.innerHTML = `<div class="text-center py-8 text-gray-500 w-full">No content</div>`;
-                    return;
-                }
-                
-                container.innerHTML = movies.map(m => this.createCard(m)).join('');
-            }
-            
-            createCard(movie) {
-                return `
-                    <div class="flex-shrink-0 w-36 md:w-44 movie-card" onclick="app.playMovie('${movie.id}')">
-                        <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3] bg-gray-800">
-                            <img src="${movie.poster}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
-                            <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-bold">
-                                <i class="fas fa-star text-yellow-400 mr-1"></i>${movie.rating || '-'}
-                            </div>
-                            <div class="play-overlay">
-                                <div class="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition shadow-lg shadow-red-600/40">
-                                    <i class="fas fa-play text-white ml-1"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-sm font-semibold truncate mb-1">${movie.title}</p>
-                        <div class="flex items-center gap-2 text-xs text-gray-500">
-                            <span>${movie.year || ''}</span>
-                            <span class="w-1 h-1 rounded-full bg-gray-600"></span>
-                            <span>${movie.duration || ''}</span>
-                        </div>
-                    </div>`;
-            }
-            
-            renderContinueWatching() {
-                const section = document.getElementById('continue-watching-section');
-                const container = document.getElementById('continue-container');
-                
-                if (!this.continueWatching.length) {
-                    section.classList.add('hidden');
-                    return;
-                }
-                
-                section.classList.remove('hidden');
-                container.innerHTML = this.continueWatching.slice(0, 6).map(item => {
-                    const movie = this.movies.find(m => m.id === item.movieId);
-                    if (!movie) return '';
-                    return `
-                        <div onclick="app.playMovie('${movie.id}')" class="flex-shrink-0 w-40 cursor-pointer group">
-                            <div class="relative rounded-xl overflow-hidden mb-2 aspect-[2/3]">
-                                <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
-                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
-                                    <div class="h-full bg-red-600" style="width: ${item.percent || 0}%"></div>
-                                </div>
-                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
-                                    <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                                        <i class="fas fa-play text-white text-xs ml-0.5"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="text-sm font-medium truncate">${movie.title}</p>
-                            <p class="text-xs text-gray-500">${item.percent || 0}% watched</p>
-                        </div>`;
-                }).join('');
-            }
-            
-            // ==================== CATEGORY FILTER ====================
-            filterCategory(cat) {
-                this.activeCategory = cat;
-                
-                document.querySelectorAll('.category-pill').forEach(p => {
-                    const isActive = p.querySelector('span').textContent.trim() === cat ||
-                        (cat === 'Korean Drama' && p.querySelector('span').textContent.trim() === 'K-Drama');
-                    p.classList.toggle('active', isActive);
-                });
-                
-                this.renderMovies();
-            }
-            
-            // ==================== SEARCH ====================
-            searchMovies() {
-                const query = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
-                const container = document.getElementById('search-container');
-                
-                if (!query) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-12 text-gray-500">
-                            <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
-                            <p>Type to search content...</p>
-                        </div>`;
-                    return;
-                }
-                
-                const filtered = this.movies.filter(m => 
-                    m.title?.toLowerCase().includes(query) ||
-                    m.category?.toLowerCase().includes(query) ||
-                    m.description?.toLowerCase().includes(query)
-                );
-                
-                if (filtered.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-12">
-                            <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
-                            <p class="text-gray-400">No results for "${query}"</p>
-                        </div>`;
-                } else {
-                    container.innerHTML = `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">${filtered.map(m => this.createCard(m)).join('')}</div>`;
-                }
-            }
-            
-            // ==================== VIDEO PLAYER ====================
-            async playMovie(movieId) {
-                const movie = this.movies.find(m => m.id === movieId);
-                if (!movie) {
-                    this.showToast('Content not found', 'error');
-                    return;
-                }
-                
-                this.currentMovie = movie;
-                this.showScreen('player-screen');
-                
-                // Update views
-                try {
-                    await updateDoc(doc(this.db, "movies", movieId), {
-                        views: (movie.views || 0) + 1
-                    });
-                } catch (e) { console.log('View update failed', e); }
-                
-                const video = document.getElementById('video-element');
-                const spinner = document.getElementById('buffering-spinner');
-                
-                // Update player info
-                document.getElementById('player-title').textContent = movie.title;
-                document.getElementById('player-meta').textContent = `${movie.category} • ${movie.year || ''} • ${movie.duration || ''}`;
-                
-                // Destroy previous HLS
-                if (this.hls) {
-                    this.hls.destroy();
-                    this.hls = null;
-                }
-                
-                // Reset UI
-                document.getElementById('progress-fill').style.width = '0%';
-                document.getElementById('time-display').textContent = '0:00 / 0:00';
-                
-                // Setup HLS
-                if (Hls.isSupported()) {
-                    this.hls = new Hls({
-                        maxBufferLength: 30,
-                        maxMaxBufferLength: 600,
-                        enableWorker: true,
-                        debug: false
-                    });
-                    
-                    this.hls.loadSource(movie.videoUrl);
-                    this.hls.attachMedia(video);
-                    
-                    this.hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                        video.play();
-                        this.setupQualityLevels(data.levels);
-                        spinner.style.display = 'none';
-                        this.showToast(`Playing: ${movie.title}`, 'success');
-                    });
-                    
-                    this.hls.on(Hls.Events.BUFFERING, () => spinner.style.display = 'block');
-                    this.hls.on(Hls.Events.BUFFERED, () => spinner.style.display = 'none');
-                    
-                    this.hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (data.fatal) {
-                            this.showToast('Stream error - recovering...', 'error');
-                            this.hls.recoverMediaError();
-                        }
-                    });
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = movie.videoUrl;
-                    video.addEventListener('loadedmetadata', () => video.play());
-                } else {
-                    this.showToast('HLS not supported', 'error');
-                    return;
-                }
-                
-                // Subtitles
-                const track = document.getElementById('subtitle-track');
-                const subtitleDisplay = document.getElementById('subtitle-display');
-                if (movie.subtitleUrl) {
-                    track.src = movie.subtitleUrl;
-                    track.mode = 'hidden';
-                    subtitleDisplay.classList.add('show');
-                } else {
-                    subtitleDisplay.classList.remove('show');
-                }
-                
-                this.setupVideoTracking(video, movieId);
-                
-                // Resume from continue watching
-                const progress = this.continueWatching.find(item => item.movieId === movieId);
-                if (progress && progress.currentTime > 10) {
-                    video.currentTime = progress.currentTime;
-                    this.showToast(`Resumed from ${this.formatTime(progress.currentTime)}`, 'info');
-                }
-            }
-            
-            setupQualityLevels(levels) {
-                const container = document.getElementById('quality-options');
-                container.innerHTML = '';
-                
-                const autoDiv = document.createElement('div');
-                autoDiv.className = 'quality-option active';
-                autoDiv.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
-                autoDiv.onclick = () => this.changeQuality(-1, autoDiv);
-                container.appendChild(autoDiv);
-                
-                levels.forEach((level, index) => {
-                    const height = level.height || 0;
-                    const div = document.createElement('div');
-                    div.className = 'quality-option';
-                    div.innerHTML = `<span>${height}p</span>`;
-                    div.onclick = () => this.changeQuality(index, div);
-                    container.appendChild(div);
-                });
-            }
-            
-            changeQuality(levelIndex, element) {
-                if (this.hls) this.hls.currentLevel = levelIndex;
-                
-                document.querySelectorAll('.quality-option').forEach(opt => {
-                    opt.classList.remove('active');
-                    const check = opt.querySelector('i');
-                    if (check) check.remove();
-                });
-                
-                element.classList.add('active');
-                const span = element.querySelector('span').textContent;
-                element.innerHTML = `<span>${span}</span><i class="fas fa-check text-xs"></i>`;
-                
-                document.getElementById('quality-menu').classList.remove('show');
-                this.showToast(`Quality: ${span}`, 'info');
-            }
-            
-            setupVideoTracking(video, movieId) {
-                const progressFill = document.getElementById('progress-fill');
-                const timeDisplay = document.getElementById('time-display');
-                const playBtn = document.getElementById('play-pause-btn');
-                const centerBtn = document.getElementById('center-play-btn');
-                const container = document.getElementById('video-container');
-                
-                video.addEventListener('timeupdate', () => {
-                    if (video.duration) {
-                        const percent = (video.currentTime / video.duration) * 100;
-                        progressFill.style.width = percent + '%';
-                        timeDisplay.textContent = `${this.formatTime(video.currentTime)} / ${this.formatTime(video.duration)}`;
-                        
-                        // Save progress every 5 seconds
-                        if (Math.floor(video.currentTime) % 5 === 0) {
-                            this.saveContinueWatching(movieId, video.currentTime, video.duration, percent);
-                        }
-                        
-                        // Update watch time
-                        this.watchTime++;
-                        if (this.watchTime % 60 === 0) {
-                            localStorage.setItem('streamer_watchtime', this.watchTime);
-                        }
-                    }
-                });
-                
-                video.addEventListener('play', () => {
-                    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    centerBtn.innerHTML = '<i class="fas fa-pause text-2xl"></i>';
-                    container.classList.remove('paused');
-                });
-                
-                video.addEventListener('pause', () => {
-                    playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
-                    centerBtn.innerHTML = '<i class="fas fa-play text-2xl ml-1"></i>';
-                    container.classList.add('paused');
-                });
-                
-                video.addEventListener('ended', () => {
-                    this.showToast('Video ended', 'info');
-                    // Remove from continue watching
-                    this.continueWatching = this.continueWatching.filter(item => item.movieId !== movieId);
-                    localStorage.setItem('streamer_continue', JSON.stringify(this.continueWatching));
-                });
-                
-                video.addEventListener('click', () => this.togglePlay());
-            }
-            
-            togglePlay() {
-                const video = document.getElementById('video-element');
-                video.paused ? video.play() : video.pause();
-            }
-            
-            seekVideo(event) {
-                const video = document.getElementById('video-element');
-                const rect = event.currentTarget.getBoundingClientRect();
-                const percent = (event.clientX - rect.left) / rect.width;
-                if (video.duration) video.currentTime = percent * video.duration;
-            }
-            
-            skipForward() {
-                const video = document.getElementById('video-element');
-                video.currentTime = Math.min(video.currentTime + 10, video.duration);
-            }
-            
-            skipBackward() {
-                const video = document.getElementById('video-element');
-                video.currentTime = Math.max(video.currentTime - 10, 0);
-            }
-            
-            toggleQualityMenu() {
-                document.getElementById('quality-menu').classList.toggle('show');
-            }
-            
-            toggleSubtitle() {
-                const track = document.getElementById('subtitle-track');
-                const display = document.getElementById('subtitle-display');
-                
-                if (track.mode === 'showing') {
-                    track.mode = 'hidden';
-                    display.classList.remove('show');
-                    this.showToast('Subtitles off', 'info');
-                } else {
-                    track.mode = 'showing';
-                    display.classList.add('show');
-                    this.showToast('Subtitles on', 'success');
-                }
-            }
-            
-            toggleFullscreen() {
-                const container = document.getElementById('video-container');
-                if (!document.fullscreenElement) {
-                    container.requestFullscreen().catch(() => this.showToast('Fullscreen error', 'error'));
-                } else {
-                    document.exitFullscreen();
-                }
-            }
-            
-            closePlayer() {
-                const video = document.getElementById('video-element');
-                video.pause();
-                if (this.hls) {
-                    this.hls.destroy();
-                    this.hls = null;
-                }
-                this.showScreen('main-screen');
-            }
-            
-            formatTime(seconds) {
-                if (isNaN(seconds)) return '0:00';
-                const h = Math.floor(seconds / 3600);
-                const m = Math.floor((seconds % 3600) / 60);
-                const s = Math.floor(seconds % 60);
-                if (h > 0) return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
-                return `${m}:${s < 10 ? '0' : ''}${s}`;
-            }
-            
-            // ==================== CONTINUE WATCHING ====================
-            saveContinueWatching(movieId, currentTime, duration, percent) {
-                const existing = this.continueWatching.find(item => item.movieId === movieId);
-                const item = {
-                    movieId,
-                    currentTime,
-                    duration,
-                    percent: Math.round(percent),
-                    timestamp: Date.now()
-                };
-                
-                if (existing) Object.assign(existing, item);
-                else this.continueWatching.push(item);
-                
-                this.continueWatching.sort((a, b) => b.timestamp - a.timestamp);
-                localStorage.setItem('streamer_continue', JSON.stringify(this.continueWatching));
-            }
-            
-            clearContinueWatching() {
-                if (confirm('Clear continue watching history?')) {
-                    this.continueWatching = [];
-                    localStorage.removeItem('streamer_continue');
-                    this.renderContinueWatching();
-                    this.updateStats();
-                    this.showToast('History cleared', 'success');
-                }
-            }
-            
-            // ==================== ADMIN: SAVE CONTENT ====================
-            async saveContent() {
-                const title = document.getElementById('admin-title').value.trim();
-                const category = document.getElementById('admin-category').value;
-                const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
-                const duration = document.getElementById('admin-duration').value.trim();
-                const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
-                const description = document.getElementById('admin-description').value.trim();
-                const videoUrl = document.getElementById('admin-video').value.trim();
-                const subtitleUrl = document.getElementById('admin-subtitle').value.trim();
-                const posterUrl = document.getElementById('poster-url').value.trim();
-                
-                // Get poster from upload or URL
-                let poster = posterUrl;
-                const uploadPreview = document.getElementById('upload-preview');
-                if (!uploadPreview.classList.contains('hidden') && uploadPreview.src && !uploadPreview.src.includes('placeholder')) {
-                    poster = uploadPreview.src;
-                }
-                
-                // Validation
-                if (!title || !category || !poster || !videoUrl) {
-                    this.showToast('Fill all required fields (*)', 'error');
-                    return;
-                }
-                
-                if (!videoUrl.includes('.m3u8') && !videoUrl.includes('m3u8')) {
-                    this.showToast('URL must be HLS (.m3u8) format', 'error');
-                    return;
-                }
-                
-                const movieData = {
-                    title,
-                    category,
-                    year,
-                    duration,
-                    rating,
-                    description,
-                    poster,
-                    videoUrl,
-                    subtitleUrl: subtitleUrl || null,
-                    views: 0,
-                    timestamp: Date.now()
-                };
-                
-                try {
-                    this.showToast('Saving to Firebase...', 'info');
-                    await addDoc(collection(this.db, "movies"), movieData);
-                    this.showToast('✅ Content saved!', 'success');
-                    
-                    // Reset form
-                    this.resetAdminForm();
-                    
-                    // Reload
-                    await this.loadMovies();
-                } catch (error) {
-                    console.error("Error saving:", error);
-                    this.showToast('Error: ' + error.message, 'error');
-                }
-            }
-            
-            resetAdminForm() {
-                document.getElementById('admin-title').value = '';
-                document.getElementById('admin-video').value = '';
-                document.getElementById('admin-subtitle').value = '';
-                document.getElementById('poster-url').value = '';
-                document.getElementById('admin-description').value = '';
-                document.getElementById('admin-duration').value = '';
-                document.getElementById('admin-rating').value = '';
-                document.getElementById('upload-preview').classList.add('hidden');
-                document.getElementById('upload-preview').src = '';
-            }
-            
-            // ==================== ADMIN: DEMO CONTENT ====================
-            async addDemoContent() {
-                const demoMovies = [
-                    {
-                        title: "Demon Slayer",
-                        category: "Anime",
-                        year: 2019,
-                        duration: "24 min",
-                        rating: 8.7,
-                        description: "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko.",
-                        poster: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
-                        videoUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                        views: 0,
-                        timestamp: Date.now()
-                    },
-                    {
-                        title: "Soul Land",
-                        category: "Chinese Anime",
-                        year: 2018,
-                        duration: "20 min",
-                        rating: 8.2,
-                        description: "Tang San embarks on a journey to become a Spirit Master in the Soul Land.",
-                        poster: "https://m.media-amazon.com/images/M/MV5BNzBjZTBiZDgtYjA1OS00MjViLThkYWItMDU3YzcxNmQxNmRhXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_.jpg",
-                        videoUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                        views: 0,
-                        timestamp: Date.now() - 1000
-                    },
-                    {
-                        title: "Squid Game",
-                        category: "Korean Drama",
-                        year: 2021,
-                        duration: "60 min",
-                        rating: 8.0,
-                        description: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.",
-                        poster: "https://m.media-amazon.com/images/M/MV5BYWE3MDVkN2EtNjQ5MS00ZDQ4LTllNzQtM2I1N2JkZDZlNTkwXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_.jpg",
-                        videoUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                        views: 0,
-                        timestamp: Date.now() - 2000
-                    }
-                ];
-                
-                try {
-                    this.showToast('Adding demo content...', 'info');
-                    for (const movie of demoMovies) {
-                        await addDoc(collection(this.db, "movies"), movie);
-                    }
-                    this.showToast('✅ Demo content added!', 'success');
-                    await this.loadMovies();
-                } catch (error) {
-                    this.showToast('Error: ' + error.message, 'error');
-                }
-            }
-            
-            // ==================== IMAGE UPLOAD ====================
-            handleImageUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                
-                if (!file.type.startsWith('image/')) {
-                    this.showToast('Please select an image file', 'error');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('upload-preview');
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                    this.showToast('Image loaded', 'success');
-                };
-                reader.readAsDataURL(file);
-            }
-            
-            handleUrlInput(url) {
-                if (url && url.startsWith('http')) {
-                    const preview = document.getElementById('upload-preview');
-                    preview.src = url;
-                    preview.classList.remove('hidden');
-                    preview.onload = () => this.showToast('Image URL valid', 'success');
-                    preview.onerror = () => {
-                        preview.classList.add('hidden');
-                        this.showToast('Invalid image URL', 'error');
-                    };
-                }
-            }
-            
-            // ==================== UI UTILITIES ====================
-            showScreen(screenId) {
-                document.querySelectorAll('.screen').forEach(s => {
-                    s.classList.remove('active');
-                    s.style.display = 'none';
-                });
-                
-                const target = document.getElementById(screenId);
-                if (target) {
-                    target.classList.add('active');
-                    target.style.display = 'block';
-                }
-                
-                // Bottom nav visibility
-                const hideNav = ['welcome-screen', 'player-screen'];
-                const nav = document.getElementById('bottom-nav');
-                if (nav) {
-                    nav.classList.toggle('hidden', hideNav.includes(screenId));
-                    nav.classList.toggle('flex', !hideNav.includes(screenId));
-                }
-                
-                // Update nav items
-                document.querySelectorAll('.bottom-nav-item').forEach(item => {
-                    const isActive = item.dataset.screen === screenId;
-                    item.classList.toggle('active', isActive);
-                    item.classList.toggle('text-red-500', isActive);
-                    item.classList.toggle('text-gray-400', !isActive);
-                });
-                
-                window.scrollTo(0, 0);
-            }
-            
-            guestLogin() {
-                this.showScreen('main-screen');
-                this.loadMovies();
-            }
-            
-            updateStats() {
-                document.getElementById('continue-count').textContent = this.continueWatching.length;
-                document.getElementById('total-count').textContent = this.movies.length;
-                document.getElementById('watch-time').textContent = Math.floor(this.watchTime / 60) + 'h';
-            }
-            
-            clearAllData() {
-                if (confirm('Clear all local data?')) {
-                    localStorage.removeItem('streamer_continue');
-                    localStorage.removeItem('streamer_watchtime');
-                    this.continueWatching = [];
-                    this.watchTime = 0;
-                    this.updateStats();
-                    this.renderContinueWatching();
-                    this.showToast('All data cleared', 'success');
-                }
-            }
-            
-            showToast(message, type = 'info') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    info: 'fa-info-circle'
-                };
-                
-                toast.innerHTML = `<i class="fas ${icons[type]}"></i>${message}`;
-                container.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.style.animation = 'slideInRight 0.4s ease reverse';
-                    setTimeout(() => toast.remove(), 400);
-                }, 3000);
-            }
-            
-            setupEventListeners() {
-                // Close quality menu on outside click
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.quality-menu') && !e.target.closest('#quality-btn')) {
-                        document.getElementById('quality-menu')?.classList.remove('show');
-                    }
-                });
-                
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if (!document.getElementById('player-screen').classList.contains('active')) return;
-                    
-                    switch(e.key) {
-                        case ' ': e.preventDefault(); this.togglePlay(); break;
-                        case 'ArrowRight': this.skipForward(); break;
-                        case 'ArrowLeft': this.skipBackward(); break;
-                        case 'f': this.toggleFullscreen(); break;
-                        case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
-                    }
-                });
-            }
-        }
-        
-        // ==================== INITIALIZE APP ====================
-        window.app = new StreamerApp();
-    </script>
-</body>
-</html>
