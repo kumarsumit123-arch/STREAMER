@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -61,7 +61,6 @@
             box-shadow: 0 10px 30px rgba(239,68,68,0.3);
         }
         
-        /* Video Player Styles */
         .video-player-wrapper {
             position: relative;
             width: 100%;
@@ -163,7 +162,6 @@
             color: #ef4444;
         }
         
-        /* Episode List */
         .episode-list-panel {
             position: absolute;
             right: 0;
@@ -197,15 +195,6 @@
             background: rgba(239,68,68,0.15);
         }
         
-        .episode-thumb {
-            width: 80px;
-            height: 45px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: #333;
-        }
-        
-        /* Share Modal */
         .share-modal {
             position: fixed;
             inset: 0;
@@ -241,7 +230,6 @@
             transition: all 0.2s;
         }
         
-        /* Admin Panel Styles */
         .admin-badge {
             position: absolute;
             top: 20px;
@@ -267,30 +255,39 @@
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
+            display: none;
         }
         
-        /* Upload Area */
+        .admin-panel.visible {
+            display: block;
+        }
+        
         .upload-area {
             border: 2px dashed #333;
             border-radius: 16px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3;
+            transition: all 0.3s;
         }
         
         .upload-area:hover, .upload-area.dragover {
             border-color: #ef4444;
             background: rgba(239,68,68,0.1);
-        image upload Preview */
+        }
+        
         .upload-preview {
             max-width: 200px;
             max-height: 300px;
             border-radius: 12px;
             margin-top: 16px;
+            display: none;
         }
         
-        /* Form Elements */
+        .upload-preview.visible {
+            display: block;
+        }
+        
         .form-input {
             width: 100%;
             padding: 12px 16px;
@@ -299,7 +296,7 @@
             border-radius: 12px;
             color: white;
             font-size: 14px;
-            transition: all 0.3;
+            transition: all 0.3s;
         }
         
         .form-input:focus {
@@ -323,7 +320,6 @@
             resize: vertical;
         }
         
-        /* Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -347,7 +343,6 @@
         .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
         
-        /* Subtitle Display */
         .subtitle-display {
             position: absolute;
             bottom: 100px;
@@ -376,27 +371,11 @@
                 width: 280px;
             }
         }
-        
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
-            }
-            ::-webkit-scrollbar-track {
-                background: #1a1a1a;
-            }
-            ::-webkit-scrollbar-thumb {
-                background: #333;
-                border-radius: 4px;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
     <div id="toast-container"></div>
     
-    <!-- ==================== WELCOME SCREEN ==================== -->
     <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
             <div class="absolute top-20 left-10 w-64 h-64 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -404,30 +383,23 @@
         </div>
         
         <div class="relative z-10 text-center max-w-md w-full">
-            <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">
-                STREAMER
-            </h1>
+            <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
             <p class="text-gray-400 text-lg mb-8">Unlimited Anime Streaming</p>
             
             <div class="space-y-4">
-                <button onclick="guestLogin()" 
-                        class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition transform hover:scale-105">
+                <button onclick="guestLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition transform hover:scale-105">
                     <i class="fas fa-play-circle"></i> Start Watching
                 </button>
                 
-                <button onclick="showAdminLogin()" 
-                        class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 py-3 rounded-2xl font-semibold transition text-sm">
+                <button onclick="showAdminLogin()" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-500 hover:text-gray-300 py-2 rounded-xl font-semibold transition text-xs opacity-50 hover:opacity-100">
                     <i class="fas fa-lock"></i> Admin Access
                 </button>
                 
-                <p class="text-gray-600 text-xs">
-                    No account needed • Free forever
-                </p>
+                <p class="text-gray-600 text-xs">No account needed • Free forever</p>
             </div>
         </div>
     </div>
 
-    <!-- ==================== ADMIN LOGIN SCREEN ==================== -->
     <div id="admin-login-screen" class="screen flex flex-col justify-center items-center min-h-screen px-6">
         <div class="max-w-md w-full">
             <button onclick="showScreen('welcome-screen')" class="mb-8 w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
@@ -444,7 +416,7 @@
                 </div>
                 <button onclick="adminLogin()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold transition">
                     <i class="fas fa-unlock"></i> Access Admin Panel
-                </ </button>
+                </button>
             </div>
             
             <p class="mt-6 text-center text-gray-600 text-sm">
@@ -453,9 +425,7 @@
         </div>
     </div>
 
-    <!-- ==================== MAIN APP SCREEN ==================== -->
     <div id="main-screen" class="screen pb-24">
-        <!-- Header -->
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800">
             <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
                 <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
@@ -469,12 +439,10 @@
                 </div>
             </div>
             
-            <!-- Admin Badge -->
-            <div id="admin-badge" class="admin-badge" onclick="showAdminPanel()">
+            <div id="admin-badge" class="admin-badge" onclick="toggleAdminPanel()">
                 <i class="fas fa-cog"></i> Admin
             </div>
             
-            <!-- Categories -->
             <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
                 <button onclick="filterCategory('All')" class="category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">All</button>
                 <button onclick="filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Anime</button>
@@ -484,20 +452,15 @@
             </div>
         </div>
 
-        <!-- Hero Section -->
         <div id="hero-section" class="mb-8 px-4">
             <div class="w-full h-[50vh] bg-gray-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content">
-                    <!-- Hero content injected here -->
-                </div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content"></div>
             </div>
         </div>
 
-        <!-- Content Sections -->
         <div class="px-4 max-w-7xl mx-auto space-y-8">
-            <!-- Admin Panel (Hidden by default) -->
-            <div id="admin-panel" class="admin-panel" style="display: none;">
+            <div id="admin-panel" class="admin-panel">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <i class="fas fa-cog text-red-500"></i> Admin Panel
@@ -507,18 +470,17 @@
                     </button>
                 </div>
                 
-                <!-- Image Upload -->
                 <div class="mb-6">
                     <label class="form-label">Poster Image</label>
-                    <div class="upload-area" id="upload-area" onclick="triggerUpload()">
+                    <div class="upload-area" id="upload-area">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4"></i>
                         <p class="text-gray-400 mb-2">Click to upload or drag & drop</p>
                         <p class="text-xs text-gray-600">Supports: JPG, PNG, WebP</p>
-                        <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <input type="file" id="image-upload" accept="image/*" style="display: none;">
                     </div>
-                    <img id="upload-preview" class="upload-preview" style="display: none;">
+                    <img id="upload-preview" class="upload-preview">
                     
-                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div class="grid md:grid-cols-2 gap-4 mb-6 mt-4">
                         <div>
                             <label class="form-label">Title *</label>
                             <input type="text" id="admin-title" class="form-input" placeholder="e.g., Attack on Titan">
@@ -526,10 +488,10 @@
                         <div>
                             <label class="form-label">Category *</label>
                             <select id="admin-category" class="form-input">
-                                <option value="anime">Anime</option>
-                                <option value="movies">Movies</option>
-                                <option value="shows">TV Shows</option>
-                                <option value="sports">Sports</option>
+                                <option value="Anime">Anime</option>
+                                <option value="Movies">Movies</option>
+                                <option value="Shows">TV Shows</option>
+                                <option value="Sports">Sports</option>
                             </select>
                         </div>
                     </div>
@@ -569,14 +531,12 @@
                         </label>
                     </div>
                     
-                    <!-- Video URL Input -->
                     <div class="mb-6">
                         <label class="form-label">Video URL (Dailymotion) *</label>
                         <input type="url" id="admin-video" class="form-input" placeholder="https://www.dailymotion.com/embed/video/x8xxxxx">
                         <p class="text-xs text-gray-600 mt-2">Paste Dailymotion embed URL</p>
                     </div>
                     
-                    <!-- Episodes -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-3">
                             <label class="form-label mb-0">Episodes</label>
@@ -588,17 +548,16 @@
                     </div>
                     
                     <div class="flex gap-3">
-                        <button onclick="SaveAdminContent()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">
+                        <button onclick="saveAdminContent()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">
                             <i class="fas fa-save"></i> Save Content
                         </button>
-                        <button onclick="ExportAdminJSON()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-bold transition">
+                        <button onclick="exportAdminJSON()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-bold transition">
                             <i class="fas fa-download"></i> Export JSON
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Continue Watching -->
             <section id="continue-watching-section" style="display: none;">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-play-circle text-blue-500"></i> Continue Watching
@@ -606,39 +565,29 @@
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
             </section>
 
-            <!-- Trending -->
             <section>
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <i class="fas fa-fire text-orange-500"></i> Trending Now
                     </h3>
                 </div>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
-                    <!-- Trending content -->
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container"></div>
             </section>
 
-            <!-- For You -->
             <section>
                 <h3 class="text-lg font-bold mb-4">For You</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
-                    <!-- For you content -->
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container"></div>
             </section>
 
-            <!-- New Releases -->
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        <i class="fas fa-sparkles text-yellow-500"></i> New Releases
+                    <i class="fas fa-sparkles text-yellow-500"></i> New Releases
                 </h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container">
-                    <!-- New releases content -->
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container"></div>
             </section>
         </div>
     </div>
 
-    <!-- ==================== SEARCH SCREEN ==================== -->
     <div id="search-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800 px-4 py-4">
             <div class="flex items-center gap-4">
@@ -649,7 +598,7 @@
             </div>
             <div class="relative mt-4 max-w-2xl">
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" onkeyup="SearchMovies()" 
+                <input type="text" id="search-input" onkeyup="searchMovies()" 
                        class="w-full bg-gray-900 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition"
                        placeholder="Search anime, movies, genres...">
             </div>
@@ -661,7 +610,6 @@
         </div>
     </div>
 
-    <!-- ==================== PROFILE SCREEN ==================== -->
     <div id="profile-screen" class="screen pb-24 min-h-screen">
         <div class="sticky top-0 z-40 bg-black/95 backdrop-blur-xl border-b border-gray-800 px-4 py-4">
             <div class="flex items-center gap-4">
@@ -673,9 +621,7 @@
         </div>
         <div class="px-4 py-6 max-w-2xl mx-auto">
             <div class="flex flex-col items-center py-12">
-                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-3xl font-bold mb-4">
-                    G
-                </div>
+                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-3xl font-bold mb-4">G</div>
                 <h2 class="text-2xl font-bold mb-2">Guest User</h2>
                 <p class="text-gray-400 mb-6">Free Plan</p>
                 
@@ -690,60 +636,54 @@
                     </div>
                 </div>
                 
-                <button onclick="ShowAdminPanel()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mb-4">
+                <button id="profile-admin-btn" onclick="showAdminLogin()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all mb-4" style="display: none;">
                     <i class="fas fa-cog"></i> Admin Panel
                 </button>
                 
-                <button onclick="ClearAllData()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all mb-4">
+                <button onclick="clearAllData()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all mb-4">
                     <i class="fas fa-trash"></i> Clear All Data
                 </button>
                 
-                <p class="text-gray-600 text-xs text-center">
-                    Data is stored locally on your device
-                </p>
+                <p class="text-gray-600 text-xs text-center">Data is stored locally on your device</p>
             </div>
         </div>
     </div>
 
-    <!-- ==================== VIDEO PLAYER SCREEN ==================== -->
     <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
         <div class="video-player-wrapper" id="video-container">
-            <div id="dailymotion-player">
-                <!-- Dailymotion iframe injected here -->
-            </div>
-            
+            <div id="dailymotion-player"></div>
             <div id="subtitle-display" class="subtitle-display"></div>
             
             <div class="player-controls-overlay">
-                <div class="progress-container" id="progress-bar" onclick="SeekVideo(event)">
+                <div class="progress-container" id="progress-bar" onclick="seekVideo(event)">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="TogglePlay()" id="play-pause-btn">
+                        <button class="control-btn" onclick="togglePlay()" id="play-pause-btn">
                             <i class="fas fa-pause"></i>
-                        <button>
+                        </button>
                         <span class="text-sm text-gray-300" id="time-display">0:00 / 0:00</span>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="ToggleEpisodeList()" id="episode-btn">
+                        <button class="control-btn" onclick="toggleEpisodeList()" id="episode-btn">
                             <i class="fas fa-list"></i>
                         </button>
-                        <button class="control-btn" onclick="ToggleSubtitleMenu()">
+                        <button class="control-btn" onclick="toggleSubtitleMenu()">
                             <i class="fas fa-closed-captioning"></i>
-                        <button>
-                        <button class="control-btn" onclick="ToggleQualityMenu()">
+                        </button>
+                        <button class="control-btn" onclick="toggleQualityMenu()">
                             <i class="fas fa-cog"></i>
                         </button>
-                        <button class="control-btn" onclick="ToggleFullscreen()">
+                        <button class="control-btn" onclick="toggleFullscreen()">
                             <i class="fas fa-expand"></i>
                         </button>
-                        <button class="control-btn" onclick="ShowShareModal()">
+                        <button class="control-btn" onclick="showShareModal()">
                             <i class="fas fa-share-alt"></i>
                         </button>
-                        <button class="control-btn" onclick="ClosePlayer()">
+                        <button class="control-btn" onclick="closePlayer()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -752,26 +692,26 @@
             
             <div class="quality-menu" id="quality-menu">
                 <div class="text-sm font-bold mb-2 text-gray-400">Quality</div>
-                <div class="quality-option active" onclick="ChangeQuality('auto')">Auto</div>
-                <div class="quality-option" onclick="ChangeQuality('1080')">1080p</div>
-                <div class="quality-option" onclick="ChangeQuality('720')">720p</div>
-                <div class="quality-option" onclick="ChangeQuality('480')">480p</div>
-                <div class="quality-option" onclick="ChangeQuality('360')">360p</div>
+                <div class="quality-option active" onclick="changeQuality('auto')">Auto</div>
+                <div class="quality-option" onclick="changeQuality('1080')">1080p</div>
+                <div class="quality-option" onclick="changeQuality('720')">720p</div>
+                <div class="quality-option" onclick="changeQuality('480')">480p</div>
+                <div class="quality-option" onclick="changeQuality('360')">360p</div>
             </div>
             
             <div class="subtitle-menu" id="subtitle-menu">
                 <div class="text-sm font-bold mb-2 text-gray-400">Subtitles</div>
-                <div class="subtitle-option active" onclick="ChangeSubtitle('off')">Off</div>
-                <div class="subtitle-option" onclick="ChangeSubtitle('en')">English</div>
-                <div class="subtitle-option" onclick="ChangeSubtitle('hi')">Hindi</div>
-                <div class="subtitle-option" onclick="ChangeSubtitle('zh')">Chinese</div>
-                <div class="subtitle-option" onclick="ChangeSubtitle('ja')">Japanese</div>
+                <div class="subtitle-option active" onclick="changeSubtitle('off')">Off</div>
+                <div class="subtitle-option" onclick="changeSubtitle('en')">English</div>
+                <div class="subtitle-option" onclick="changeSubtitle('hi')">Hindi</div>
+                <div class="subtitle-option" onclick="changeSubtitle('zh')">Chinese</div>
+                <div class="subtitle-option" onclick="changeSubtitle('ja')">Japanese</div>
             </div>
             
             <div class="episode-list-panel" id="episode-list">
                 <div class="p-4 border-b border-gray-800 flex justify-between items-center">
                     <h3 class="font-bold">Episodes</h3>
-                    <button onclick="ToggleEpisodeList()" class="text-gray-400 hover:text-white">
+                    <button onclick="toggleEpisodeList()" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -780,23 +720,22 @@
         </div>
     </div>
 
-    <!-- ==================== SHARE MODAL ==================== -->
-    <div id="share-modal" class="share-modal" onclick="HideShareModal(event)">
-        <div class="share-content">
+    <div id="share-modal" class="share-modal" onclick="hideShareModal(event)">
+        <div class="share-content" onclick="event.stopPropagation()">
             <h3 class="text-xl font-bold mb-4">Share</h3>
             <p class="text-gray-400 mb-4">Share this content with friends</p>
             
             <div class="flex justify-center gap-4 mb-6">
-                <button onclick="ShareContent('copy')" class="share-btn bg-gray-800 hover:bg-red-600 text-white transition">
+                <button onclick="shareContent('copy')" class="share-btn bg-gray-800 hover:bg-red-600 text-white transition">
                     <i class="fas fa-link"></i>
                 </button>
-                <button onclick="ShareContent('whatsapp')" class="share-btn bg-gray-800 hover:bg-green-600 text-white transition">
+                <button onclick="shareContent('whatsapp')" class="share-btn bg-gray-800 hover:bg-green-600 text-white transition">
                     <i class="fab fa-whatsapp"></i>
                 </button>
-                <button onclick="ShareContent('telegram')" class="share-btn bg-gray-800 hover:bg-blue-600 text-white transition">
+                <button onclick="shareContent('telegram')" class="share-btn bg-gray-800 hover:bg-blue-600 text-white transition">
                     <i class="fab fa-telegram"></i>
                 </button>
-                <button onclick="ShareContent('twitter')" class="share-btn bg-gray-800 hover:bg-blue-400 text-white transition">
+                <button onclick="shareContent('twitter')" class="share-btn bg-gray-800 hover:bg-blue-400 text-white transition">
                     <i class="fab fa-twitter"></i>
                 </button>
             </div>
@@ -805,172 +744,158 @@
                 <p class="text-sm text-gray-400 mb-2">Or share this link:</p>
                 <input type="text" id="share-link" class="form-input text-center" readonly>
             </div>
+            
+            <button onclick="hideShareModal()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold">
+                Close
+            </button>
         </div>
     </div>
 
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-gray-800 px-6 py-3 flex justify-around items-center z-40" style="display: none;">
-        <button onclick="ShowScreen('main-screen')" class="nav-item active flex flex-col items-center gap-1 text-red-500 transition" data-screen="main-screen">
+        <button onclick="showScreen('main-screen')" class="nav-item active flex flex-col items-center gap-1 text-red-500 transition" data-screen="main-screen">
             <i class="fas fa-home text-xl"></i>
             <span class="text-xs">Home</span>
         </button>
-        <button onclick="ShowScreen('search-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen">
+        <button onclick="showScreen('search-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen">
             <i class="fas fa-search text-xl"></i>
             <span class="text-xs">Search</span>
         </button>
-        <button onclick="ShowScreen('profile-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen">
+        <button onclick="showScreen('profile-screen')" class="nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen">
             <i class="fas fa-user text-xl"></i>
             <span class="text-xs">Profile</span>
         </button>
     </div>
 
     <script>
-        // ===== GLOBAL STATE =====
-        let Movies = [];
-        let Watchlist = [];
-        let ContinueWatching = [];
-        let ActiveCategory = 'All';
-        let CurrentMovie = null;
-        let CurrentEpisode = null;
-        let IsPlaying = false;
-        let IsAdmin = false;
-        let UpdateInterval = null;
-        let CurrentQuality = 'auto';
+        let movies = [];
+        let watchlist = [];
+        let continueWatching = [];
+        let activeCategory = 'All';
+        let currentMovie = null;
+        let currentEpisode = null;
+        let isPlaying = false;
+        let isAdmin = false;
+        let updateInterval = null;
+        let currentQuality = 'auto';
         
-        const FallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450"%3E%3Crect fill="%231a1a1a" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23666"%3ENO IMAGE%3C/text%3E%3C/svg%3E';
+        const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450"%3E%3Crect fill="%231a1a1a" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23666"%3ENO IMAGE%3C/text%3E%3C/svg%3E';
         
-        // ===== INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
-            LoadMovies();
-            LoadUserData();
-            SetupUploadHandlers();
+            loadMovies();
+            loadUserData();
+            setupUploadHandlers();
         });
         
-        // ===== DATA MANAGEMENT =====
-        function LoadUserData() {
-            const SavedWatchlist = localStorage.getItem('Streamer_watchlist');
-            const SavedContinue = localStorage.getItem('Streamer_continue');
-            const SavedMovies = localStorage.getItem('Streamer_movies');
+        function loadUserData() {
+            const savedWatchlist = localStorage.getItem('streamer_watchlist');
+            const savedContinue = localStorage.getItem('streamer_continue');
+            const savedMovies = localStorage.getItem('streamer_movies');
             
-            if (SavedWatchlist) Watchlist = JSON.parse(SavedWatchlist);
-            If (SavedContinue) ContinueWatching = JSON.parse(SavedContinue);
-            If (SavedMovies) {
-                const Parsed = JSON.parse(SavedMovies);
-                Movies = Parsed.content || Parsed.movies || [];
+            if (savedWatchlist) watchlist = JSON.parse(savedWatchlist);
+            if (savedContinue) continueWatching = JSON.parse(savedContinue);
+            if (savedMovies) {
+                const parsed = JSON.parse(savedMovies);
+                movies = parsed.content || parsed.movies || [];
             }
             
-            UpdateProfileStats();
-            CheckAdminSession();
+            updateProfileStats();
+            checkAdminSession();
         }
         
-        Function SaveUserData() {
-            localStorage.setItem('Streamer_watchlist', JSON.stringify(Watchlist));
-            localStorage.SetItem('Streamer_continue', JSON.stringify(ContinueWatching));
-            localStorage.SetItem('Streamer_movies', JSON.stringify({ content: Movies }));
-            UpdateProfileStats();
+        function saveUserData() {
+            localStorage.setItem('streamer_watchlist', JSON.stringify(watchlist));
+            localStorage.setItem('streamer_continue', JSON.stringify(continueWatching));
+            localStorage.setItem('streamer_movies', JSON.stringify({ content: movies }));
+            updateProfileStats();
         }
         
-        Function UpdateProfileStats() {
-            const Wc = document.getElementById('watchlist-count');
-            const Cc = document.getElementById('Continue-count');
-            If (Wc) Wc.textContent = Watchlist.length;
-            If (Cc) Cc.textContent = ContinueWatching.length;
+        function updateProfileStats() {
+            const wc = document.getElementById('watchlist-count');
+            const cc = document.getElementById('continue-count');
+            if (wc) wc.textContent = watchlist.length;
+            if (cc) cc.textContent = continueWatching.length;
         }
         
-        Function CheckAdminSession() {
-            // Check if admin was logged in previously (session only)
-            const AdminSession = sessionStorage.getItem('Streamer_admin');
-            If (AdminSession === 'true') {
-                IsAdmin = true;
+        function checkAdminSession() {
+            const adminSession = sessionStorage.getItem('streamer_admin');
+            if (adminSession === 'true') {
+                isAdmin = true;
                 document.getElementById('admin-badge').classList.add('visible');
+                document.getElementById('profile-admin-btn').style.display = 'block';
             }
         }
         
-        // ===== MOVIE LOADING =====
-        Async Function LoadMovies() {
-            Try {
-                Const Saved = localStorage.getItem('Streamer_movies');
-                If (Saved) {
-                    Const Parsed = JSON.parse(Saved);
-                    Movies = Parsed.content || Parsed.movies || [];
-                    RenderMovies();
-                    Return;
+        async function loadMovies() {
+            try {
+                const saved = localStorage.getItem('streamer_movies');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    movies = parsed.content || parsed.movies || [];
+                    renderMovies();
+                    return;
                 }
-                
-                Const Response = await fetch('Movies.json');
-                If (!Response.ok) throw new Error('Failed to load');
-                
-                Const Data = await Response.json();
-                Movies = Data.content || Data.movies || [];
-                
-                localStorage.setItem('Streamer_movies', JSON.stringify(Data));
-                RenderMovies();
-            } Catch (Error) {
-                Console.error('Error loading movies:', Error);
-                ShowEmptyState();
+                showEmptyState();
+            } catch (error) {
+                console.error('Error loading movies:', error);
+                showEmptyState();
             }
         }
         
-        Function ShowEmptyState() {
-            Const Hero = document.getElementById('hero-section');
-            If (Hero) {
-                Hero.querySelector('#Hero-content').innerHTML = `
+        function showEmptyState() {
+            const hero = document.getElementById('hero-section');
+            if (hero) {
+                hero.querySelector('#hero-content').innerHTML = `
                     <div class="w-full h-full flex flex-col items-center justify-center">
                         <i class="fas fa-film text-6xl text-gray-700 mb-4"></i>
                         <p class="text-gray-500 mb-2">No content available</p>
-                        <p class="text-gray-600 text-sm">Use Admin Panel to add Content</p>
+                        <p class="text-gray-600 text-sm">Admin login to add Content</p>
                     </div>`;
             }
         }
         
-        // ===== RENDER FUNCTIONS =====
-        Function RenderMovies() {
-            If (!Movies || Movies.length === 0) {
-                ShowEmptyState();
-                Return;
+        function renderMovies() {
+            if (!movies || movies.length === 0) {
+                showEmptyState();
+                return;
             }
             
-            Const Hero = document.getElementById('hero-section');
-            Const ForYou = document.getElementById('Foryou-container');
-            Const Trending = document.getElementById('Trending-container');
-            Const NewReleases = document.getElementById('New-container');
-            Const ContinueContainer = document.getElementById('Continue-container');
-            Const ContinueSection = document.getElementById('Continue-watching-section');
+            const hero = document.getElementById('hero-section');
+            const forYou = document.getElementById('foryou-container');
+            const trending = document.getElementById('trending-container');
+            const newReleases = document.getElementById('new-container');
+            const continueContainer = document.getElementById('continue-container');
+            const continueSection = document.getElementById('continue-watching-section');
             
-            Let Filtered = ActiveCategory === 'All' 
-                ? Movies 
-                : Movies.filter(M => M.category?.toLowerCase() === ActiveCategory.toLowerCase());
+            let filtered = activeCategory === 'All' 
+                ? movies 
+                : movies.filter(m => m.category?.toLowerCase() === activeCategory.toLowerCase());
             
-            If (ContinueSection) {
-                ContinueSection.style.display = ContinueWatching.length > 0 ? 'block' : 'none';
+            if (continueSection) {
+                continueSection.style.display = continueWatching.length > 0 ? 'block' : 'none';
             }
             
-            Const Featured = Movies.find(M => M.featured) || Movies[0];
-            If (Featured && Hero) {
-                Hero.querySelector('#Hero-content').innerHTML = `
-                    <div class="relative w-full h-full overflow-hidden rounded-2xl cursor-pointer group" onclick="PlayMovie('${Featured.id}')">
-                        <img src="${Featured.backdrop || Featured.poster}" 
-                             class="w-full h-full object-cover" 
-                             Onerror="this.src='${Featured.poster || FallbackImage}'">
+            const featured = movies.find(m => m.featured) || movies[0];
+            if (featured && hero) {
+                hero.querySelector('#hero-content').innerHTML = `
+                    <div class="relative w-full h-full overflow-hidden rounded-2xl cursor-pointer group" onclick="playMovie('${featured.id}')">
+                        <img src="${featured.backdrop || featured.poster}" class="w-full h-full object-cover" onerror="this.src='${featured.poster || fallbackImage}'">
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 right-0 p-6">
                             <span class="inline-block px-3 py-1 bg-red-600 rounded-full text-xs font-bold mb-3">
-                                ${Featured.trending ? '🔥 TRENDING' : 'FEATURED'}
+                                ${featured.trending ? '🔥 TRENDING' : 'FEATURED'}
                             </span>
-                            <h2 class="text-2xl md:text-4xl font-bold mb-2">${Featured.title}</h2>
-                            <p class="text-gray-300 text-sm mb-3 line-clamp-2">${Featured.description || ''}</p>
+                            <h2 class="text-2xl md:text-4xl font-bold mb-2">${featured.title}</h2>
+                            <p class="text-gray-300 text-sm mb-3 line-clamp-2">${featured.description || ''}</p>
                             <div class="flex items-center gap-3 mb-4 text-sm">
-                                <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${Featured.rating || 'N/A'}</span>
-                                <span class="text-gray-400">${Featured.year || ''}</span>
-                                <span class="text-gray-400">${Featured.duration || ''}</span>
+                                <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${featured.rating || 'N/A'}</span>
+                                <span class="text-gray-400">${featured.year || ''}</span>
+                                <span class="text-gray-400">${featured.duration || ''}</span>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="event.stopPropagation(); PlayMovie('${Featured.id}')" 
-                                        Class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold flex items-center justify-center gap-2 transition">
+                                <button onclick="event.stopPropagation(); playMovie('${featured.id}')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full font-bold flex items-center justify-center gap-2 transition">
                                     <i class="fas fa-play"></i> Play Now
                                 </button>
-                                <button onclick="event.stopPropagation(); ToggleWatchlist('${Featured.id}')" 
-                                        Class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:scale-110 transition">
+                                <button onclick="event.stopPropagation(); toggleWatchlist('${featured.id}')" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:scale-110 transition">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -978,484 +903,727 @@
                     </div>`;
             }
             
-            If (ForYou) ForYou.innerHTML = Filtered.slice(0, 10).map(M => CreateCard(M)).join('');
-            If (Trending) Trending.innerHTML = Movies.filter(M => M.trending).slice(0, 8).map(M => CreateCard(M)).join('');
-            If (NewReleases) NewReleases.innerHTML = Movies.filter(M => M.newRelease).slice(0, 8).map(M => CreateCard(M)).join('');
+            if (forYou) forYou.innerHTML = filtered.slice(0, 10).map(m => createCard(m)).join('');
+            if (trending) trending.innerHTML = movies.filter(m => m.trending).slice(0, 8).map(m => createCard(m)).join('');
+            if (newReleases) newReleases.innerHTML = movies.filter(m => m.newRelease).slice(0, 8).map(m => createCard(m)).join('');
             
-            If (ContinueContainer && ContinueWatching.length > 0) {
-                ContinueContainer.innerHTML = ContinueWatching.slice(0, 6).map(Item => {
-                    Const Movie = Movies.find(M => M.id === Item.movieId);
-                    If (!Movie) return '';
-                    Return `
-                        <div onclick="PlayMovie('${Movie.id}', ${Item.episode || 0})" 
-                             Class="flex-shrink-0 w-40 cursor-pointer group">
+            if (continueContainer && continueWatching.length > 0) {
+                continueContainer.innerHTML = continueWatching.slice(0, 6).map(item => {
+                    const movie = movies.find(m => m.id === item.movieId);
+                    if (!movie) return '';
+                    return `
+                        <div onclick="playMovie('${movie.id}', ${item.episode || 0})" class="flex-shrink-0 w-40 cursor-pointer group">
                             <div class="relative rounded-xl overflow-hidden mb-2 aspect-[2/3]">
-                                <img Src="${Movie.poster}" Class="w-full h-full object-cover group-hover:scale-105 transition" 
-                                     Onerror="this.src='${FallbackImage}'">
+                                <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='${fallbackImage}'">
                                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
-                                    <div Class="h-full bg-red-600" style="width: ${Item.progress || 0}%"></div>
+                                    <div class="h-full bg-red-600" style="width: ${item.progress || 0}%"></div>
                                 </div>
                             </div>
-                            <p class="text-sm font-medium truncate">${Movie.title}</p>
-                            <p class="text-xs text-gray-500">${Math.round(Item.progress || 0)}% watched</p>
+                            <p class="text-sm font-medium truncate">${movie.title}</p>
+                            <p class="text-xs text-gray-500">${Math.round(item.progress || 0)}% watched</p>
                         </div>`;
                 }).join('');
             }
         }
         
-        Function CreateCard(Movie) {
-            Return `
-                <div Class="flex-shrink-0 w-36 md:w-44 cursor-pointer group movie-card" onclick="ShowDetails('${Movie.id}')">
-                    <div Class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3]">
-                        <img Src="${Movie.poster}" 
-                             Class="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
-                             Onerror="this.src='${FallbackImage}'">
-                        ${Movie.newRelease ? '<div class="absolute top-2 left-2 bg-green-500 text-xs font-bold px-2 py-1 rounded">NEW</div>' : ''}
-                        ${Movie.trending ? '<div class="absolute top-2 right-2 bg-red-600 text-xs font-bold px-2 py-1 rounded"><i class="fas fa-fire"></i></div>' : ''}
-                        <div Class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
-                            <button onclick="event.stopPropagation(); PlayMovie('${Movie.id}')" 
-                                    Class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition opacity-0 group-hover:opacity-100">
+        function createCard(movie) {
+            return `
+                <div class="flex-shrink-0 w-36 md:w-44 cursor-pointer group movie-card" onclick="showDetails('${movie.id}')">
+                    <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3]">
+                        <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='${fallbackImage}'">
+                        ${movie.newRelease ? '<div class="absolute top-2 left-2 bg-green-500 text-xs font-bold px-2 py-1 rounded">NEW</div>' : ''}
+                        ${movie.trending ? '<div class="absolute top-2 right-2 bg-red-600 text-xs font-bold px-2 py-1 rounded"><i class="fas fa-fire"></i></div>' : ''}
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
+                            <button onclick="event.stopPropagation(); playMovie('${movie.id}')" class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition opacity-0 group-hover:opacity-100">
                                 <i class="fas fa-play text-white ml-1"></i>
                             </button>
                         </div>
                     </div>
-                    <p Class="text-sm font-semibold truncate">${Movie.title}</p>
-                    <div Class="flex items-center gap-2 text-xs text-gray-500">
-                        <span>${Movie.year || ''}</span>
+                    <p class="text-sm font-semibold truncate">${movie.title}</p>
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <span>${movie.year || ''}</span>
                         <span>•</span>
-                        <span Class="text-yellow-400"><i class="fas fa-star mr-0.5"></i>${Movie.rating || 'N/A'}</span>
+                        <span class="text-yellow-400"><i class="fas fa-star mr-0.5"></i>${movie.rating || 'N/A'}</span>
                     </div>
                 </div>`;
         }
         
-        // ===== NAVIGATION =====
-        Function ShowScreen(ScreenId) {
-            Document.querySelectorAll('.screen').forEach(S => {
-                S.classList.remove('active');
-                S.style.display = 'none';
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
             });
             
-            Const Target = document.getElementById(ScreenId);
-            If (Target) {
-                Target.classList.add('active');
-                Target.style.display = 'block';
+            const target = document.getElementById(screenId);
+            if (target) {
+                target.classList.add('active');
+                target.style.display = 'block';
             }
             
-            Const HideNav = ['welcome-screen', 'admin-login-screen', 'player-screen'];
-            Const Nav = document.getElementById('bottom-nav');
-            If (Nav) {
-                Nav.style.display = HideNav.includes(ScreenId) ? 'none' : 'flex';
+            const hideNav = ['welcome-screen', 'admin-login-screen', 'player-screen'];
+            const nav = document.getElementById('bottom-nav');
+            if (nav) {
+                nav.style.display = hideNav.includes(screenId) ? 'none' : 'flex';
             }
             
-            Document.querySelectorAll('.nav-item').forEach(Item => {
-                Const IsActive = Item.dataset.screen === ScreenId;
-                Item.classList.toggle('text-red-500', IsActive);
-                Item.classList.toggle('text-gray-400', !IsActive);
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const isActive = item.dataset.screen === screenId;
+                item.classList.toggle('text-red-500', isActive);
+                item.classList.toggle('text-gray-400', !isActive);
             });
             
-            Window.scrollTo(0, 0);
+            window.scrollTo(0, 0);
         }
         
-        Function GuestLogin() {
-            ShowScreen('main-screen');
-            ShowToast('Welcome! Start watching now.', 'success');
+        function guestLogin() {
+            showScreen('main-screen');
+            showToast('Welcome! Start watching now.', 'success');
         }
         
-        Function FilterCategory(Cat) {
-            ActiveCategory = Cat;
+        function filterCategory(cat) {
+            activeCategory = cat;
             
-            Document.querySelectorAll('.Category-pill').forEach(P => {
-                Const IsActive = P.textContent.trim() === Cat;
-                If (IsActive) {
-                    P.classList.add('bg-red-600', 'text-white');
-                    P.classList.remove('bg-gray-800', 'text-gray-400');
-                } Else {
-                    P.classList.remove('bg-red-600', 'text-white');
-                    P.classList.add('bg-gray-800', 'text-gray-400');
+            document.querySelectorAll('.category-pill').forEach(p => {
+                const isActive = p.textContent.trim() === cat;
+                if (isActive) {
+                    p.classList.add('bg-red-600', 'text-white');
+                    p.classList.remove('bg-gray-800', 'text-gray-400');
+                } else {
+                    p.classList.remove('bg-red-600', 'text-white');
+                    p.classList.add('bg-gray-800', 'text-gray-400');
                 }
             });
             
-            RenderMovies();
+            renderMovies();
         }
         
-        // ===== ADMIN FUNCTIONS =====
-        Function ShowAdminLogin() {
-            ShowScreen('admin-login-screen');
+        function showAdminLogin() {
+            showScreen('admin-login-screen');
         }
         
-        Function AdminLogin() {
-            Const Password = document.getElementById('admin-password').value;
-            If (Password === 'Sumit.streamer@81#live.ott') {
-                IsAdmin = true;
-                SessionStorage.setItem('Streamer_admin', 'true');
-                ShowScreen('main-screen');
-                ShowAdminPanel();
-                ShowToast('Admin access granted!', 'success');
-            } Else {
-                ShowToast('Invalid password', 'error');
+        function adminLogin() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'Sumit.streamer@81#live.ott') {
+                isAdmin = true;
+                sessionStorage.setItem('streamer_admin', 'true');
+                showScreen('main-screen');
+                
+                document.getElementById('admin-badge').classList.add('visible');
+                document.getElementById('profile-admin-btn').style.display = 'block';
+                document.getElementById('admin-panel').classList.add('visible');
+                
+                showToast('Admin access granted!', 'success');
+            } else {
+                showToast('Invalid password', 'error');
             }
         }
         
-        Function ShowAdminPanel() {
-            Const Panel = document.getElementById('admin-panel');
-            If (Panel) Panel.style.display = 'block';
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            if (panel.classList.contains('visible')) {
+                hideAdminPanel();
+            } else {
+                panel.classList.add('visible');
+            }
         }
         
-        Function HideAdminPanel() {
-            Const Panel = document.getElementById('Admin-panel');
-            If (Panel) Panel.style.display = 'none';
+        function hideAdminPanel() {
+            document.getElementById('admin-panel').classList.remove('visible');
         }
         
-        // ===== IMAGE UPLOAD =====
-        Function SetupUploadHandlers() {
-            Const UploadArea = document.getElementById('Upload-area');
-            Const FileInput = document.getElementById('Image-upload');
+        function setupUploadHandlers() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('image-upload');
             
-            If (!UploadArea || !FileInput) return;
+            if (!uploadArea || !fileInput) return;
             
-            // Click to upload
-            UploadArea.addEventListener('click', () => {
-                FileInput.click();
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
             });
             
-            // Drag and drop
-            UploadArea.addEventListener('dragover', (E) => {
-                E.preventDefault();
-                UploadArea.classList.add('dragover');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
             });
             
-            UploadArea.addEventListener('dragleave', () => {
-                UploadArea.classList.remove('dragover');
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
             });
             
-            UploadArea.addEventListener('drop', (E) => {
-                E.preventDefault();
-                UploadArea.classList.remove('dragover');
-                Const Files = E.dataTransfer.files;
-                If (Files.length > 0) {
-                    HandleImageFile(Files[0]);
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleImageFile(files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    handleImageFile(e.target.files[0]);
                 }
             });
         }
         
-        Function TriggerUpload() {
-            Document.getElementById('Image-upload').click();
-        }
-        
-        Function HandleImageUpload(Event) {
-            Const File = Event.target.files[0];
-            If (File) HandleImageFile(File);
-        }
-        
-        Function HandleImageFile(File) {
-            If (!File.type.startsWith('image/')) {
-                ShowToast('Please upload an image file', 'error');
-                Return;
+        function handleImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('Please upload an image file', 'error');
+                return;
             }
             
-            Const Reader = new FileReader();
-            Reader.onload = (E) => {
-                Const Preview = document.getElementById('Upload-preview');
-                Const PosterInput = document.getElementById('Admin-poster');
-                
-                Preview.src = E.target.result;
-                Preview.style.display = 'block';
-                
-                // Auto-fill poster input with data URL
-                PosterInput.value = E.target.result;
-                ShowToast('Image uploaded successfully!', 'success');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('upload-preview');
+                preview.src = e.target.result;
+                preview.classList.add('visible');
+                showToast('Image uploaded successfully!', 'success');
             };
-            Reader.readAsDataURL(File);
+            reader.readAsDataURL(file);
         }
         
-        // ===== EPISODE MANAGEMENT =====
-        Function AddAdminEpisode() {
-            Const Container = document.getElementById('Admin-episodes');
-            Const Index = Container.children.length + 1;
+        function addAdminEpisode() {
+            const container = document.getElementById('admin-episodes');
+            const index = container.children.length + 1;
             
-            Const Div = document.createElement('div');
-            Div.className = 'flex gap-3 items-start';
-            Div.innerHTML = `
-                <div Class="flex-1 grid grid-cols-3 gap-3">
-                    <input type="number" Class="form-input episode-ep" placeholder="Ep#" value="${Index}">
-                    <input type="text" Class="form-input episode-title" placeholder="Title">
-                    <input type="url" Class="form-input episode-url" placeholder="Video URL">
+            const div = document.createElement('div');
+            div.className = 'flex gap-3 items-start';
+            div.innerHTML = `
+                <div class="flex-1 grid grid-cols-3 gap-3">
+                    <input type="number" class="form-input episode-ep" placeholder="Ep#" value="${index}">
+                    <input type="text" class="form-input episode-title" placeholder="Title">
+                    <input type="url" class="form-input episode-url" placeholder="Video URL">
                 </div>
-                <button onclick="this.parentElement.remove()" Class="text-red-500 hover:text-red-400 mt-3">
+                <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-400 mt-3">
                     <i class="fas fa-times"></i>
                 </button>
             `;
-            Container.appendChild(Div);
+            container.appendChild(div);
         }
         
-        Function SaveAdminContent() {
-            Const Title = document.getElementById('Admin-title').value;
-            const Category = document.getElementById('Admin-category').value;
-            const Year = parseInt(document.getElementById('Admin-year').value) || new Date().getFullYear();
-            const Duration = document.getElementById('Admin-duration').value;
-            const Rating = parseFloat(document.getElementById('Admin-rating').value) || 0;
-            const Description = document.getElementById('Admin-description').value;
-            const Poster = document.getElementById('Admin-poster').value;
-            const VideoUrl = document.getElementById('Admin-video').value;
-            const Featured = document.getElementById('Admin-featured').checked;
-            const Trending = document.getElementById('Admin-trending').checked;
-            const NewRelease = document.getElementById('Admin-new').checked;
+        function saveAdminContent() {
+            const title = document.getElementById('admin-title').value;
+            const category = document.getElementById('admin-category').value;
+            const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
+            const duration = document.getElementById('admin-duration').value;
+            const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
+            const description = document.getElementById('admin-description').value;
+            const poster = document.getElementById('upload-preview').src;
+            const videoUrl = document.getElementById('admin-video').value;
+            const featured = document.getElementById('admin-featured').checked;
+            const trending = document.getElementById('admin-trending').checked;
+            const newRelease = document.getElementById('admin-new').checked;
             
-            If (!Title || !Category || !Poster || !VideoUrl) {
-                ShowToast('Please fill all required fields', 'error');
-                Return;
+            if (!title || !category || poster === '' || !videoUrl) {
+                showToast('Please fill all required fields', 'error');
+                return;
             }
             
-            // Collect episodes
-            Const Episodes = [];
-            Document.querySelectorAll('#Admin-episodes > div').forEach(Div => {
-                Const Ep = Div.querySelector('.Episode-ep').value;
-                const Title = Div.querySelector('.Episode-title').value;
-                const Url = Div.querySelector('.Episode-url').value;
-                If (Ep && Title && Url) {
-                    Episodes.push({ ep: parseInt(Ep), title, videoUrl: Url });
+            const episodes = [];
+            document.querySelectorAll('#admin-episodes > div').forEach(div => {
+                const ep = div.querySelector('.episode-ep').value;
+                const title = div.querySelector('.episode-title').value;
+                const url = div.querySelector('.episode-url').value;
+                if (ep && title && url) {
+                    episodes.push({ ep: parseInt(ep), title, videoUrl: url });
                 }
             });
             
-            const ContentData = {
+            const contentData = {
                 id: Date.now().toString(36),
-                title: Title,
-                category: Category,
-                poster: Poster,
-                videoUrl: VideoUrl,
-                year: Year,
-                duration: Duration,
-                rating: Rating,
-                description: Description,
-                featured: Featured,
-                trending: Trending,
-                newRelease: NewRelease,
-                episodes: Episodes,
+                title: title,
+                category: category,
+                poster: poster,
+                videoUrl: videoUrl,
+                year: year,
+                duration: duration,
+                rating: rating,
+                description: description,
+                featured: featured,
+                trending: trending,
+                newRelease: newRelease,
+                episodes: episodes,
                 views: 0,
                 likes: 0
             };
             
-            Movies.push(ContentData);
-            SaveUserData();
-            RenderMovies();
+            movies.push(contentData);
+            saveUserData();
+            renderMovies();
             
-            // Clear form
-            Document.getElementById('Admin-title').value = '';
-            Document.getElementById('Admin-poster').value = '';
-            Document.getElementById('Admin-video').value = '';
-            Document.getElementById('Upload-preview').style.display = 'none';
-            Document.getElementById('Admin-episodes').innerHTML = '';
+            document.getElementById('admin-title').value = '';
+            document.getElementById('admin-video').value = '';
+            document.getElementById('upload-preview').classList.remove('visible');
+            document.getElementById('admin-episodes').innerHTML = '';
             
-            ShowToast('Content saved successfully!', 'success');
+            showToast('Content saved successfully!', 'success');
         }
         
-        Function ExportAdminJSON() {
-            const Data = {
+        function exportAdminJSON() {
+            const data = {
                 metadata: {
                     version: "1.0",
                     lastUpdated: new Date().toISOString(),
-                    totalContent: Movies.length
+                    totalContent: movies.length
                 },
-                content: Movies
+                content: movies
             };
             
-            const Blob = new Blob([JSON.stringify(Data, null, 2)], { type: 'application/json' });
-            const Url = URL.createObjectURL(Blob);
-            const A = document.createElement('a');
-            A.href = Url;
-            A.download = 'Movies.json';
-            A.click();
-            URL.revokeObjectURL(Url);
-            ShowToast('JSON exported!', 'success');
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'movies.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('JSON exported!', 'success');
         }
         
-        // ===== WATCHLIST =====
-        Function ToggleWatchlist(MovieId) {
-            const Index = Watchlist.indexOf(MovieId);
-            If (Index > -1) {
-                Watchlist.splice(Index, 1);
-                ShowToast('Removed from Watchlist', 'info');
-            } Else {
-                Watchlist.push(MovieId);
-                ShowToast('Added to Watchlist', 'success');
+        function toggleWatchlist(movieId) {
+            const index = watchlist.indexOf(movieId);
+            if (index > -1) {
+                watchlist.splice(index, 1);
+                showToast('Removed from Watchlist', 'info');
+            } else {
+                watchlist.push(movieId);
+                showToast('Added to Watchlist', 'success');
             }
-            SaveUserData();
+            saveUserData();
         }
         
-        // ===== SEARCH =====
-        Function SearchMovies() {
-            const Query = document.getElementById('Search-input')?.value.toLowerCase() || '';
-            const Container = document.getElementById('Search-container');
+        function searchMovies() {
+            const query = document.getElementById('search-input')?.value.toLowerCase() || '';
+            const container = document.getElementById('search-container');
             
-            If (!Query) {
-                Container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Type to search...</p>';
-                Return;
+            if (!query) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">Type to search...</p>';
+                return;
             }
             
-            const Filtered = Movies.filter(M => 
-                M.title?.toLowerCase().includes(Query) ||
-                M.genre?.some(G => G.toLowerCase().includes(Query))
+            const filtered = movies.filter(m => 
+                m.title?.toLowerCase().includes(query) ||
+                m.category?.toLowerCase().includes(query)
             );
             
-            If (Filtered.length === 0) {
-                Container.innerHTML = `<div class="Col-span-full text-center py-12"><i class="fas fa-search text-4xl text-gray-600 mb-4"></i><p class="text-gray-400">No results for "${Query}"</p></div>`;
-            } Else {
-                Container.innerHTML = Filtered.map(M => CreateCard(M)).join('');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12"><i class="fas fa-search text-4xl text-gray-600 mb-4"></i><p class="text-gray-400">No results for "${query}"</p></div>`;
+            } else {
+                container.innerHTML = filtered.map(m => createCard(m)).join('');
             }
         }
         
-        // ===== DETAILS MODAL =====
-        Function ShowDetails(MovieId) {
-            const Movie = Movies.find(M => M.id === MovieId);
-            If (!Movie) return;
+        function showDetails(movieId) {
+            const movie = movies.find(m => m.id === movieId);
+            if (!movie) return;
             
-            const HasEpisodes = Movie.episodes && Movie.episodes.length > 0;
+            const hasEpisodes = movie.episodes && movie.episodes.length > 0;
             
-            CloseDetails();
+            closeDetails();
             
-            const Modal = document.createElement('div');
-            Modal.id = 'Details-modal';
-            Modal.className = 'Fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm';
-            Modal.innerHTML = `
+            const modal = document.createElement('div');
+            modal.id = 'details-modal';
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm';
+            modal.innerHTML = `
                 <div class="bg-gray-900 rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                     <div class="relative">
-                        <img Src="${Movie.backdrop || Movie.poster}" class="w-full h-48 object-cover rounded-t-3xl" 
-                             Onerror="this.src='${Movie.poster}'">
-                        <button onclick="CloseDetails()" Class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70">
+                        <img src="${movie.backdrop || movie.poster}" class="w-full h-48 object-cover rounded-t-3xl" onerror="this.src='${movie.poster}'">
+                        <button onclick="closeDetails()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-black/70">
                             <i class="fas fa-times"></i>
                         </button>
                         <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent h-20"></div>
                     </div>
                     <div class="p-6">
-                        <h2 class="text-2xl font-bold mb-2">${Movie.title}</h2>
-                        <div Class="flex items-center gap-3 mb-4 text-sm text-gray-400">
-                            <span Class="text-yellow-400"><i class="fas fa-star mr-1"></i>${Movie.rating || 'N/A'}</span>
-                            <span>${Movie.year || ''}</span>
-                            <span>${Movie.duration || ''}</span>
-                            <span Class="px-2 py-0.5 bg-gray-800 rounded text-xs">${Movie.category || 'Movie'}</span>
+                        <h2 class="text-2xl font-bold mb-2">${movie.title}</h2>
+                        <div class="flex items-center gap-3 mb-4 text-sm text-gray-400">
+                            <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${movie.rating || 'N/A'}</span>
+                            <span>${movie.year || ''}</span>
+                            <span>${movie.duration || ''}</span>
+                            <span class="px-2 py-0.5 bg-gray-800 rounded text-xs">${movie.category || 'Movie'}</span>
                         </div>
-                        <p Class="text-gray-300 mb-6 text-sm">${Movie.description || 'No description.'}</p>
+                        <p class="text-gray-300 mb-6 text-sm">${movie.description || 'No description.'}</p>
                         
-                        ${HasEpisodes ? `
+                        ${hasEpisodes ? `
                         <div class="mb-4">
-                            <h3 Class="font-bold mb-2">Episodes (${Movie.episodes.length})</h3>
-                            <div Class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
-                                ${Movie.episodes.map((Ep, Idx) => `
-                                    <button onclick="PlayMovie('${Movie.id}', ${Idx}); CloseDetails();" 
-                                            Class="flex-shrink-0 bg-gray-800 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition">
-                                        Ep ${Ep.ep || Idx + 1}
+                            <h3 class="font-bold mb-2">Episodes (${movie.episodes.length})</h3>
+                            <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                                ${movie.episodes.map((ep, idx) => `
+                                    <button onclick="playMovie('${movie.id}', ${idx}); closeDetails();" class="flex-shrink-0 bg-gray-800 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition">
+                                        Ep ${ep.ep || idx + 1}
                                     </button>
                                 `).join('')}
                             </div>
-                        ` : ''}
+                        </div>` : ''}
                         
-                        <div Class="flex gap-3">
-                            <button onclick="PlayMovie('${Movie.id}'); CloseDetails();" 
-                                    Class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                                <i class="fas fa-play"></i> ${HasEpisodes ? 'Watch Ep 1' : 'Play Now'}
+                        <div class="flex gap-3">
+                            <button onclick="playMovie('${movie.id}'); closeDetails();" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                                <i class="fas fa-play"></i> ${hasEpisodes ? 'Watch Ep 1' : 'Play Now'}
                             </button>
-                            <Button Onclick="ShowShareModal()" Class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                            <button onclick="showShareModal()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                                 <i class="fas fa-share-alt"></i> Share
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </div>`;
-            Document.body.appendChild(Modal);
-            Modal.onclick = (E) => { if (E.target === Modal) CloseDetails(); };
+            document.body.appendChild(modal);
+            modal.onclick = (e) => { if (e.target === modal) closeDetails(); };
         }
         
-        Function CloseDetails() {
-            const Modal = document.getElementById('Details-modal');
-            If (Modal) Modal.remove();
+        function closeDetails() {
+            const modal = document.getElementById('details-modal');
+            if (modal) modal.remove();
         }
         
-        // ===== VIDEO PLAYER =====
-        Function PlayMovie(MovieId, EpisodeIndex = 0) {
-            const Movie = Movies.find(M => M.id === MovieId);
-            If (!Movie) {
-                ShowToast('Movie not found', 'error');
-                Return;
+        function playMovie(movieId, episodeIndex = 0) {
+            const movie = movies.find(m => m.id === movieId);
+            if (!movie) {
+                showToast('Movie not found', 'error');
+                return;
             }
             
-            CurrentMovie = Movie;
-            let VideoUrl = Movie.videoUrl;
+            currentMovie = movie;
+            let videoUrl = movie.videoUrl;
             
-            If (Movie.episodes && Movie.episodes.length > EpisodeIndex) {
-                CurrentEpisode = Movie.episodes[EpisodeIndex];
-                VideoUrl = CurrentEpisode.videoUrl || VideoUrl;
+            if (movie.episodes && movie.episodes.length > episodeIndex) {
+                currentEpisode = movie.episodes[episodeIndex];
+                videoUrl = currentEpisode.videoUrl || videoUrl;
             }
             
-            If (!VideoUrl) {
-                ShowToast('Video URL not available', 'error');
-                Return;
+            if (!videoUrl) {
+                showToast('Video URL not available', 'error');
+                return;
             }
             
-            const DmId = ExtractDailymotionId(VideoUrl);
-            If (!DmId) {
-                ShowToast('Invalid video URL', 'error');
-                Return;
+            const dmId = extractDailymotionId(videoUrl);
+            if (!dmId) {
+                showToast('Invalid video URL', 'error');
+                return;
             }
             
-            ShowScreen('Player-screen');
-            InitDailymotionPlayer(DmId);
-            SetupEpisodeList(Movie, EpisodeIndex);
-            AddToContinueWatching(MovieId, EpisodeIndex, 0);
+            showScreen('player-screen');
+            initDailymotionPlayer(dmId);
+            setupEpisodeList(movie, episodeIndex);
+            addToContinueWatching(movieId, episodeIndex, 0);
         }
         
-        Function ExtractDailymotionId(Url) {
-            // Extract video ID from various Dailymotion URL formats
-            Let Match = Url.match(/video\/([a-zA-Z0-9]+)/);
-            If (Match) return Match[1];
+        function extractDailymotionId(url) {
+            let match = url.match(/video\/([a-zA-Z0-9]+)/);
+            if (match) return match[1];
             
-            Match = Url.match(/dm=(\w+)/);
-            If (Match) return Match[1];
+            match = url.match(/dm=(\w+)/);
+            if (match) return match[1];
             
-            Match = Url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
-            If (Match) return Match[1];
+            match = url.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
+            if (match) return match[1];
             
-            Return Url; // Return full URL if no match
+            return url;
         }
         
-        Function InitDailymotionPlayer(VideoId) {
-            const Container = document.getElementById('Dailymotion-player');
-            Container.innerHTML = '';
+        function initDailymotionPlayer(videoId) {
+            const container = document.getElementById('dailymotion-player');
+            container.innerHTML = '';
             
-            const Iframe = document.createElement('iframe');
-            // Use Dailymotion embed with parameters
-            Iframe.src = `https://www.dailymotion.com/embed/video/${VideoId}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0&quality=auto`;
-            Iframe.width = '100%';
-            Iframe.height = '100%';
-            Iframe.frameBorder = '0';
-            Iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-            Iframe.allowFullscreen = true;
-            Iframe.id = 'Dm-player';
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0&quality=${currentQuality}`;
+            iframe.width = '100%';
+            iframe.height = '100%';
+            iframe.frameBorder = '0';
+            iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.id = 'dm-player';
             
-            Container.appendChild(Iframe);
-            IsPlaying = true;
+            container.appendChild(iframe);
+            isPlaying = true;
             
-            // Update progress bar
-            If (UpdateInterval) clearInterval(UpdateInterval);
-            UpdateInterval = setInterval(() => {
-                // Simulate progress (in real app, use player API)
-                const ProgressBar = document.getElementById('Progress-fill');
-                Let CurrentWidth = parseFloat(ProgressBar.style.width) || 0;
-                If (CurrentWidth < 100) {
-                    ProgressBar.style.width = (CurrentWidth + 0.5) + '%';
+            document.getElementById('play-pause-btn').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(() => {
+                const progressBar = document.getElementById('progress-fill');
+                let currentWidth = parseFloat(progressBar.style.width) || 0;
+                if (currentWidth < 100 && isPlaying) {
+                    progressBar.style.width = (currentWidth + 0.1) + '%';
+                    updateTimeDisplay(currentWidth);
                 }
             }, 1000);
         }
         
-        Function SetupEpisodeList(Movie, CurrentIdx) {
-            const Btn = document.getElementById('Episode-btn');
-            const List = document.getElementById('Episode-list-content');
+        function updateTimeDisplay(percent) {
+            const current = Math.floor((percent / 100) * 24);
+            const total = 24;
+            document.getElementById('time-display').textContent = `${current}:00 / ${total}:00`;
+        }
+        
+        function setupEpisodeList(movie, currentIdx) {
+            const btn = document.getElementById('episode-btn');
+            const list = document.getElementById('episode-list-content');
             
-            If (!Movie.episodes || Movie.episodes.length === 0) {
-                Btn.style.display = 'none';
-                Return;
+            if (!movie.episodes || movie.episodes.length === 0) {
+                btn.style.display = 'none';
+                return;
             }
             
-            Btn.style.display = 'flex';
-            List.innerHTML = Movie.episodes.map((Ep, Idx) => `
-                <div Class="Episode-item ${Idx === CurrentIdx ? 'active' : ''}" onclick="PlayEpisode(${Idx})">
-                    <div Class="w-12 h-12 rounded bg-gray-800 flex items-center justify-center text-sm font-bold">${Ep.ep || Idx + 1}</div>
-                    <div Class="flex-1">
+            btn.style.display = 'flex';
+            list.innerHTML = movie.episodes.map((ep, idx) => `
+                <div class="episode-item ${idx === currentIdx ? 'active' : ''}" onclick="playEpisode(${idx})">
+                    <div class="w-12 h-12 rounded bg-gray-800 flex items-center justify-center text-sm font-bold">${ep.ep || idx + 1}</div>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">${ep.title || `Episode ${ep.ep || idx + 1}`}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function playEpisode(index) {
+            if (currentMovie && currentMovie.episodes[index]) {
+                playMovie(currentMovie.id, index);
+                toggleEpisodeList();
+            }
+        }
+        
+        function togglePlay() {
+            const btn = document.getElementById('play-pause-btn');
+            
+            if (isPlaying) {
+                isPlaying = false;
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                showToast('Paused', 'info');
+            } else {
+                isPlaying = true;
+                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                showToast('Playing', 'success');
+            }
+        }
+        
+        function seekVideo(event) {
+            const container = document.getElementById('progress-bar');
+            const rect = container.getBoundingClientRect();
+            const percent = ((event.clientX - rect.left) / rect.width) * 100;
+            document.getElementById('progress-fill').style.width = percent + '%';
+            updateTimeDisplay(percent);
+        }
+        
+        function toggleEpisodeList() {
+            document.getElementById('episode-list').classList.toggle('show');
+        }
+        
+        function toggleQualityMenu() {
+            document.getElementById('quality-menu').classList.toggle('show');
+            document.getElementById('subtitle-menu').classList.remove('show');
+        }
+        
+        function toggleSubtitleMenu() {
+            document.getElementById('subtitle-menu').classList.toggle('show');
+            document.getElementById('quality-menu').classList.remove('show');
+        }
+        
+        function changeQuality(quality) {
+            currentQuality = quality;
+            document.querySelectorAll('.quality-option').forEach(opt => {
+                opt.classList.remove('active');
+                if (opt.textContent.includes(quality) || (quality === 'auto' && opt.textContent === 'Auto')) {
+                    opt.classList.add('active');
+                }
+            });
+            document.getElementById('quality-menu').classList.remove('show');
+            showToast(`Quality: ${quality === 'auto' ? 'Auto' : quality + 'p'}`, 'info');
+            
+            if (currentMovie) {
+                const videoUrl = currentEpisode?.videoUrl || currentMovie.videoUrl;
+                const dmId = extractDailymotionId(videoUrl);
+                if (dmId) {
+                    const iframe = document.getElementById('dm-player');
+                    if (iframe) {
+                        iframe.src = `https://www.dailymotion.com/embed/video/${dmId}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0&quality=${quality}`;
+                    }
+                }
+            }
+        }
+        
+        function changeSubtitle(lang) {
+            document.querySelectorAll('.subtitle-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('subtitle-menu').classList.remove('show');
+            
+            const display = document.getElementById('subtitle-display');
+            if (lang === 'off') {
+                display.style.display = 'none';
+                showToast('Subtitles off', 'info');
+            } else {
+                display.style.display = 'block';
+                display.textContent = 'Subtitles: ' + lang.toUpperCase();
+                showToast('Subtitles: ' + lang.toUpperCase(), 'success');
+            }
+        }
+        
+        function toggleFullscreen() {
+            const container = document.getElementById('video-container');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    showToast('Fullscreen error: ' + err.message, 'error');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        function closePlayer() {
+            if (updateInterval) clearInterval(updateInterval);
+            isPlaying = false;
+            document.getElementById('dailymotion-player').innerHTML = '';
+            showScreen('main-screen');
+        }
+        
+        function showShareModal() {
+            const modal = document.getElementById('share-modal');
+            const linkInput = document.getElementById('share-link');
+            
+            const shareUrl = currentMovie 
+                ? `${window.location.origin}?movie=${currentMovie.id}`
+                : window.location.origin;
+            
+            linkInput.value = shareUrl;
+            modal.classList.add('show');
+        }
+        
+        function hideShareModal(event) {
+            if (!event || event.target.id === 'share-modal') {
+                document.getElementById('share-modal').classList.remove('show');
+            }
+        }
+        
+        function shareContent(platform) {
+            const url = document.getElementById('share-link').value;
+            const text = currentMovie ? `Watch ${currentMovie.title} on STREAMER!` : 'Check out STREAMER - Unlimited Anime Streaming!';
+            
+            let shareUrl = '';
+            
+            switch(platform) {
+                case 'copy':
+                    navigator.clipboard.writeText(url).then(() => {
+                        showToast('Link copied!', 'success');
+                    }).catch(() => {
+                        const input = document.getElementById('share-link');
+                        input.select();
+                        document.execCommand('copy');
+                        showToast('Link copied!', 'success');
+                    });
+                    return;
+                    
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+                    break;
+                    
+                case 'telegram':
+                    shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+                    break;
+                    
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                    break;
+            }
+            
+            if (shareUrl) {
+                window.open(shareUrl, '_blank');
+            }
+        }
+        
+        function addToContinueWatching(movieId, episode, progress) {
+            const existing = continueWatching.find(item => item.movieId === movieId);
+            if (existing) {
+                existing.episode = episode;
+                existing.progress = progress;
+                existing.timestamp = Date.now();
+            } else {
+                continueWatching.push({
+                    movieId,
+                    episode,
+                    progress,
+                    timestamp: Date.now()
+                });
+            }
+            continueWatching.sort((a, b) => b.timestamp - a.timestamp);
+            saveUserData();
+            renderMovies();
+        }
+        
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>${message}`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(-100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone!')) {
+                localStorage.removeItem('streamer_watchlist');
+                localStorage.removeItem('streamer_continue');
+                localStorage.removeItem('streamer_movies');
+                sessionStorage.removeItem('streamer_admin');
+                
+                watchlist = [];
+                continueWatching = [];
+                movies = [];
+                isAdmin = false;
+                
+                document.getElementById('admin-badge').classList.remove('visible');
+                document.getElementById('admin-panel').classList.remove('visible');
+                document.getElementById('profile-admin-btn').style.display = 'none';
+                
+                updateProfileStats();
+                renderMovies();
+                showToast('All data cleared!', 'success');
+            }
+        }
+        
+        function handleUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const movieId = params.get('movie');
+            
+            if (movieId) {
+                const movie = movies.find(m => m.id === movieId);
+                if (movie) {
+                    setTimeout(() => {
+                        showDetails(movieId);
+                    }, 1000);
+                }
+            }
+        }
+        
+        window.addEventListener('load', handleUrlParams);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDetails();
+                hideShareModal();
+                if (document.getElementById('player-screen').classList.contains('active')) {
+                    closePlayer();
+                }
+            }
+            
+            if (e.key === 'a' || e.key === 'A') {
+                window.adminKeyPresses = (window.adminKeyPresses || 0) + 1;
+                setTimeout(() => {
+                    window.adminKeyPresses = 0;
+                }, 1000);
+                
+                if (window.adminKeyPresses >= 3 && !isAdmin) {
+                    showAdminLogin();
+                    window.adminKeyPresses = 0;
+                }
+            }
+        });
+        
+        document.getElementById('video-container')?.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
