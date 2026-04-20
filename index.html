@@ -685,8 +685,7 @@
         async function loadMoviesFromFirebase() {
             try {
                 showToast('Loading content...', 'info');
-                const q = query(collection(db, "movies"), orderBy("timestamp", "desc"));
-                const snapshot = await getDocs(q);
+                const snapshot = await getDocs(collection(db, "movies"));
                 window.movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 console.log('Loaded movies:', window.movies.length); // Debug
