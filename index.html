@@ -33,7 +33,6 @@
         .movie-card { transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
         .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(239,68,68,0.3); }
         
-        /* REAL VIDEO PLAYER */
         .video-player-wrapper {
             position: relative;
             width: 100%;
@@ -148,15 +147,29 @@
         }
         
         .admin-panel {
-            background: #0f0f0f;
-            border: 1px solid #222;
+            background: linear-gradient(135deg, #1a0a0a 0%, #0f0f0f 100%);
+            border: 2px solid #ef4444;
             border-radius: 16px;
             padding: 24px;
-            margin-bottom: 24px;
+            margin: 0 16px 24px 16px;
             display: none;
+            position: relative;
         }
         
-        .admin-panel.visible { display: block; }
+        .admin-panel.visible { display: block; animation: slideDown 0.3s ease; }
+        
+        .admin-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
         
         .upload-area {
             border: 2px dashed #333;
@@ -294,9 +307,21 @@
         
         .subtitle-display.show { display: block; }
         
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
         @media (max-width: 640px) {
             .subtitle-display { font-size: 14px; bottom: 100px; }
             .center-play-btn { width: 60px; height: 60px; }
+            .admin-panel { margin: 0 8px 16px 8px; padding: 16px; }
         }
     </style>
 </head>
@@ -319,7 +344,7 @@
                     <i class="fas fa-play-circle"></i> Start Watching
                 </button>
                 
-                <p class="text-gray-600 text-xs">No account needed • Free forever</p>
+                <p class="text-gray-600 text-xs">Firebase Powered • HLS Streaming</p>
             </div>
         </div>
     </div>
@@ -339,11 +364,12 @@
                 </div>
             </div>
             
-            <!-- ADMIN PANEL (Hidden by default, only shows with ?admin=sumit81) -->
-            <div id="admin-panel" class="admin-panel mx-4">
-                <div class="flex justify-between items-center mb-6">
+            <!-- ADMIN PANEL - Hidden by default -->
+            <div id="admin-panel" class="admin-panel">
+                <div class="admin-badge">ADMIN MODE</div>
+                <div class="flex justify-between items-center mb-6 mt-2">
                     <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-cog text-red-500"></i> Admin Panel
+                        <i class="fas fa-cog text-red-500"></i> Content Manager
                     </h3>
                     <button onclick="hideAdminPanel()" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times"></i>
@@ -351,28 +377,29 @@
                 </div>
                 
                 <div class="mb-6">
-                    <label class="form-label">Poster Image</label>
+                    <label class="form-label">Poster Image (Base64 or URL)</label>
                     <div class="upload-area" id="upload-area">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4"></i>
-                        <p class="text-gray-400 mb-2">Click to upload or drag & drop</p>
-                        <p class="text-xs text-gray-600">Supports: JPG, PNG, WebP</p>
+                        <p class="text-gray-400 mb-2">Click to upload image</p>
+                        <p class="text-xs text-gray-600">JPG, PNG, WebP</p>
                         <input type="file" id="image-upload" accept="image/*" style="display: none;">
                     </div>
                     <img id="upload-preview" class="upload-preview">
+                    <input type="url" id="poster-url" class="form-input mt-3" placeholder="Or paste image URL here">
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="form-label">Title *</label>
-                        <input type="text" id="admin-title" class="form-input" placeholder="e.g., Attack on Titan">
+                        <input type="text" id="admin-title" class="form-input" placeholder="e.g., Demon Slayer">
                     </div>
                     <div>
                         <label class="form-label">Category *</label>
                         <select id="admin-category" class="form-input">
-                            <option value="Anime">Anime</option>
-                            <option value="Chinese Anime">Chinese Anime</option>
+                            <option value="Anime">Japanese Anime</option>
+                            <option value="Chinese Anime">Chinese Anime (Donghua)</option>
+                            <option value="Korean Drama">Korean Drama</option>
                             <option value="Movies">Movies</option>
-                            <option value="Shows">TV Shows</option>
                         </select>
                     </div>
                 </div>
@@ -384,33 +411,36 @@
                     </div>
                     <div>
                         <label class="form-label">Duration</label>
-                        <input type="text" id="admin-duration" class="form-input" placeholder="24m">
+                        <input type="text" id="admin-duration" class="form-input" placeholder="24 min">
                     </div>
                     <div>
-                        <label class="form-label">Rating (0-10)</label>
+                        <label class="form-label">Rating</label>
                         <input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
                     </div>
                 </div>
                 
                 <div class="mb-6">
                     <label class="form-label">Description</label>
-                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Enter description..."></textarea>
+                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="form-label">HLS Video URL (M3U8) *</label>
-                    <input type="url" id="admin-video" class="form-input" placeholder="https://example.com/video.m3u8">
-                    <p class="text-xs text-gray-600 mt-2">Real HLS streaming URL required</p>
+                    <label class="form-label">HLS Video URL (.m3u8) *</label>
+                    <input type="url" id="admin-video" class="form-input" placeholder="https://cdn.example.com/video.m3u8">
+                    <p class="text-xs text-gray-500 mt-2">Must be HLS format for adaptive streaming</p>
                 </div>
                 
                 <div class="mb-6">
-                    <label class="form-label">Subtitle URL (VTT) - Optional</label>
+                    <label class="form-label">Subtitle URL (.vtt) - Optional</label>
                     <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
                 </div>
                 
-                <div class="flex gap-3 mb-4">
+                <div class="flex gap-3">
                     <button onclick="saveAdminContent()" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-bold transition">
                         <i class="fas fa-save"></i> Save to Firebase
+                    </button>
+                    <button onclick="addDemoContent()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold transition" title="Add sample content">
+                        <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
@@ -419,6 +449,7 @@
                 <button onclick="filterCategory('All')" class="category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition">All</button>
                 <button onclick="filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Anime</button>
                 <button onclick="filterCategory('Chinese Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Chinese Anime</button>
+                <button onclick="filterCategory('Korean Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">K-Drama</button>
                 <button onclick="filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition">Movies</button>
             </div>
         </div>
@@ -426,7 +457,12 @@
         <div id="hero-section" class="mb-8 px-4">
             <div class="w-full h-[50vh] bg-gray-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent z-10"></div>
-                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-6 z-10" id="hero-content">
+                    <div class="empty-state">
+                        <i class="fas fa-film"></i>
+                        <p class="text-gray-500">Loading content from Firebase...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -444,12 +480,22 @@
                         <i class="fas fa-fire text-orange-500"></i> Trending Now
                     </h3>
                 </div>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container"></div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
+                    <div class="empty-state w-full">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p class="text-gray-500">Loading...</p>
+                    </div>
+                </div>
             </section>
 
             <section>
                 <h3 class="text-lg font-bold mb-4">For You</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container"></div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
+                    <div class="empty-state w-full">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p class="text-gray-500">Loading...</p>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
@@ -491,12 +537,12 @@
             <div class="flex flex-col items-center py-12">
                 <div class="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center text-3xl font-bold mb-4">G</div>
                 <h2 class="text-2xl font-bold mb-2">Guest User</h2>
-                <p class="text-gray-400 mb-6">Free Plan</p>
+                <p class="text-gray-400 mb-6">Firebase OTT Plan</p>
                 
                 <div class="grid grid-cols-2 gap-4 w-full mb-8">
                     <div class="bg-gray-900 rounded-xl p-4 text-center">
                         <p class="text-2xl font-bold text-blue-500" id="continue-count">0</p>
-                        <p class="text-xs text-gray-400">In Progress</p>
+                        <p class="text-xs text-gray-400">Continue Watching</p>
                     </div>
                     <div class="bg-gray-900 rounded-xl p-4 text-center">
                         <p class="text-2xl font-bold text-green-500" id="total-count">0</p>
@@ -504,8 +550,13 @@
                     </div>
                 </div>
                 
-                <button onclick="clearAllData()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all mb-4">
-                    <i class="fas fa-trash"></i> Clear All Data
+                <div id="admin-info" class="w-full bg-gray-900 rounded-xl p-4 mb-4 hidden">
+                    <p class="text-sm text-gray-400 mb-2">Admin Access:</p>
+                    <p class="text-xs text-gray-500 break-all">URL: ?admin=sumit81</p>
+                </div>
+                
+                <button onclick="clearAllData()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-red-600 hover:text-white transition-all">
+                    <i class="fas fa-trash"></i> Clear Local Data
                 </button>
             </div>
         </div>
@@ -514,8 +565,8 @@
     <!-- REAL PLAYER SCREEN -->
     <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
         <div class="video-player-wrapper" id="video-container">
-            <video id="real-video-player" class="w-full h-full bg-black"></video>
-            <track id="subtitle-track" kind="subtitles" srclang="en" label="English" default>
+            <video id="real-video-player" class="w-full h-full bg-black" playsinline></video>
+            <track id="subtitle-track" kind="subtitles" srclang="en" label="English">
             
             <div class="buffering-spinner" id="buffering-spinner"></div>
             
@@ -599,7 +650,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // GLOBAL VARIABLES
+        // GLOBALS
         window.db = db;
         window.movies = [];
         window.continueWatching = JSON.parse(localStorage.getItem('streamer_continue') || '[]');
@@ -608,42 +659,99 @@
         window.isAdmin = false;
         window.activeCategory = 'All';
         
-        // CHECK ADMIN MODE (SECRET URL)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('admin') === 'sumit81') {
-            window.isAdmin = true;
-            document.getElementById('admin-panel').classList.add('visible');
-            showToast('Admin Mode Activated', 'success');
+        // CHECK ADMIN MODE - FIXED
+        function checkAdminMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const adminParam = urlParams.get('admin');
+            
+            console.log('URL param admin:', adminParam); // Debug
+            
+            if (adminParam === 'sumit81') {
+                window.isAdmin = true;
+                const adminPanel = document.getElementById('admin-panel');
+                if (adminPanel) {
+                    adminPanel.classList.add('visible');
+                    console.log('Admin panel activated'); // Debug
+                }
+                showToast('🔥 Admin Mode Activated', 'success');
+                
+                // Show admin info in profile
+                const adminInfo = document.getElementById('admin-info');
+                if (adminInfo) adminInfo.classList.remove('hidden');
+            }
         }
         
         // LOAD MOVIES FROM FIREBASE
         async function loadMoviesFromFirebase() {
             try {
+                showToast('Loading content...', 'info');
                 const q = query(collection(db, "movies"), orderBy("timestamp", "desc"));
                 const snapshot = await getDocs(q);
                 window.movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderMovies();
+                
+                console.log('Loaded movies:', window.movies.length); // Debug
+                
+                if (window.movies.length === 0) {
+                    // No content - show empty state with hint
+                    renderEmptyState();
+                } else {
+                    renderMovies();
+                }
+                
                 updateStats();
             } catch (error) {
                 console.error("Error loading movies:", error);
-                showToast('Error loading content', 'error');
+                showToast('Error: ' + error.message, 'error');
             }
+        }
+        
+        function renderEmptyState() {
+            const hero = document.getElementById('hero-content');
+            const forYou = document.getElementById('foryou-container');
+            const trending = document.getElementById('trending-container');
+            
+            const emptyHTML = `
+                <div class="empty-state w-full">
+                    <i class="fas fa-film"></i>
+                    <p class="text-gray-500 mb-2">No content yet</p>
+                    ${window.isAdmin ? 
+                        '<p class="text-xs text-gray-600">Add content using Admin Panel above</p>' : 
+                        '<p class="text-xs text-gray-600">Admin: Add ?admin=sumit81 to URL</p>'
+                    }
+                </div>`;
+            
+            if (hero) hero.innerHTML = emptyHTML;
+            if (forYou) forYou.innerHTML = emptyHTML;
+            if (trending) trending.innerHTML = emptyHTML;
         }
         
         // SAVE MOVIE TO FIREBASE
         window.saveAdminContent = async function() {
-            const title = document.getElementById('admin-title').value;
+            const title = document.getElementById('admin-title').value.trim();
             const category = document.getElementById('admin-category').value;
             const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
-            const duration = document.getElementById('admin-duration').value;
+            const duration = document.getElementById('admin-duration').value.trim();
             const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
-            const description = document.getElementById('admin-description').value;
-            const poster = document.getElementById('upload-preview').src;
-            const videoUrl = document.getElementById('admin-video').value;
-            const subtitleUrl = document.getElementById('admin-subtitle').value;
+            const description = document.getElementById('admin-description').value.trim();
+            const videoUrl = document.getElementById('admin-video').value.trim();
+            const subtitleUrl = document.getElementById('admin-subtitle').value.trim();
+            const posterUrl = document.getElementById('poster-url').value.trim();
             
-            if (!title || !category || poster === '' || !videoUrl) {
-                showToast('Please fill all required fields', 'error');
+            // Get poster from upload or URL
+            let poster = posterUrl;
+            const uploadPreview = document.getElementById('upload-preview');
+            if (uploadPreview.classList.contains('visible') && uploadPreview.src) {
+                poster = uploadPreview.src;
+            }
+            
+            if (!title || !category || !poster || !videoUrl) {
+                showToast('Fill all required fields (*)', 'error');
+                return;
+            }
+            
+            // Validate HLS URL
+            if (!videoUrl.includes('.m3u8') && !videoUrl.includes('m3u8')) {
+                showToast('Warning: URL should be HLS (.m3u8) format', 'error');
                 return;
             }
             
@@ -662,19 +770,63 @@
             };
             
             try {
+                showToast('Saving to Firebase...', 'info');
                 await addDoc(collection(db, "movies"), movieData);
-                showToast('Content saved to Firebase!', 'success');
+                showToast('✅ Content saved!', 'success');
                 
                 // Reset form
                 document.getElementById('admin-title').value = '';
                 document.getElementById('admin-video').value = '';
                 document.getElementById('admin-subtitle').value = '';
+                document.getElementById('poster-url').value = '';
                 document.getElementById('upload-preview').classList.remove('visible');
                 
+                // Reload
                 loadMoviesFromFirebase();
             } catch (error) {
                 console.error("Error saving:", error);
-                showToast('Error saving content', 'error');
+                showToast('Error: ' + error.message, 'error');
+            }
+        };
+        
+        // ADD DEMO CONTENT
+        window.addDemoContent = async function() {
+            const demoMovies = [
+                {
+                    title: "Demon Slayer",
+                    category: "Anime",
+                    year: 2019,
+                    duration: "24 min",
+                    rating: 8.7,
+                    description: "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko.",
+                    poster: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
+                    videoUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                    views: 0,
+                    timestamp: Date.now()
+                },
+                {
+                    title: "Soul Land (Donghua)",
+                    category: "Chinese Anime",
+                    year: 2018,
+                    duration: "20 min",
+                    rating: 8.2,
+                    description: "Tang San embarks on a journey to become a Spirit Master in the Soul Land.",
+                    poster: "https://m.media-amazon.com/images/M/MV5BNzBjZTBiZDgtYjA1OS00MjViLThkYWItMDU3YzcxNmQxNmRhXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_.jpg",
+                    videoUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+                    views: 0,
+                    timestamp: Date.now() - 1000
+                }
+            ];
+            
+            try {
+                showToast('Adding demo content...', 'info');
+                for (const movie of demoMovies) {
+                    await addDoc(collection(db, "movies"), movie);
+                }
+                showToast('✅ Demo content added!', 'success');
+                loadMoviesFromFirebase();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
             }
         };
         
@@ -692,24 +844,17 @@
             const video = document.getElementById('real-video-player');
             const spinner = document.getElementById('buffering-spinner');
             
-            // Destroy previous HLS instance
+            // Destroy previous HLS
             if (window.hls) {
                 window.hls.destroy();
                 window.hls = null;
             }
             
-            // Setup subtitles
-            const track = document.getElementById('subtitle-track');
-            const subtitleDisplay = document.getElementById('subtitle-display');
-            if (movie.subtitleUrl) {
-                track.src = movie.subtitleUrl;
-                track.mode = 'hidden';
-                subtitleDisplay.classList.add('show');
-            } else {
-                subtitleDisplay.classList.remove('show');
-            }
+            // Reset UI
+            document.getElementById('progress-fill').style.width = '0%';
+            document.getElementById('time-display').textContent = '0:00 / 0:00';
             
-            // Initialize HLS
+            // Setup HLS
             if (Hls.isSupported()) {
                 window.hls = new Hls({
                     maxBufferLength: 30,
@@ -724,27 +869,35 @@
                     video.play();
                     setupQualityLevels(data.levels);
                     spinner.style.display = 'none';
+                    showToast('Playing: ' + movie.title, 'success');
                 });
                 
-                window.hls.on(Hls.Events.BUFFERING, () => {
-                    spinner.style.display = 'block';
-                });
-                
-                window.hls.on(Hls.Events.BUFFERED, () => {
-                    spinner.style.display = 'none';
-                });
+                window.hls.on(Hls.Events.BUFFERING, () => spinner.style.display = 'block');
+                window.hls.on(Hls.Events.BUFFERED, () => spinner.style.display = 'none');
                 
                 window.hls.on(Hls.Events.ERROR, function(event, data) {
                     if (data.fatal) {
-                        showToast('Streaming error', 'error');
+                        showToast('Stream error - trying to recover...', 'error');
+                        window.hls.recoverMediaError();
                     }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 video.src = movie.videoUrl;
                 video.play();
             } else {
-                showToast('HLS not supported in this browser', 'error');
+                showToast('HLS not supported - use Chrome/Safari', 'error');
                 return;
+            }
+            
+            // Setup subtitles
+            const track = document.getElementById('subtitle-track');
+            const subtitleDisplay = document.getElementById('subtitle-display');
+            if (movie.subtitleUrl) {
+                track.src = movie.subtitleUrl;
+                track.mode = 'hidden';
+                subtitleDisplay.classList.add('show');
+            } else {
+                subtitleDisplay.classList.remove('show');
             }
             
             setupVideoTracking(video, movieId);
@@ -754,14 +907,14 @@
             const container = document.getElementById('quality-options');
             container.innerHTML = '';
             
-            // Auto option
+            // Auto
             const autoDiv = document.createElement('div');
             autoDiv.className = 'quality-option active';
             autoDiv.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
             autoDiv.onclick = () => changeQuality(-1, autoDiv);
             container.appendChild(autoDiv);
             
-            // Quality levels
+            // Levels
             levels.forEach((level, index) => {
                 const height = level.height || 0;
                 const div = document.createElement('div');
@@ -779,18 +932,16 @@
             
             document.querySelectorAll('.quality-option').forEach(opt => {
                 opt.classList.remove('active');
-                opt.querySelector('i')?.remove();
+                const check = opt.querySelector('i');
+                if (check) check.remove();
             });
             
             element.classList.add('active');
-            if (levelIndex === -1) {
-                element.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
-            } else {
-                element.innerHTML = `<span>${element.querySelector('span').textContent}</span><i class="fas fa-check text-xs"></i>`;
-            }
+            const span = element.querySelector('span').textContent;
+            element.innerHTML = `<span>${span}</span><i class="fas fa-check text-xs"></i>`;
             
             document.getElementById('quality-menu').classList.remove('show');
-            showToast(levelIndex === -1 ? 'Quality: Auto' : `Quality: ${element.querySelector('span').textContent}`, 'info');
+            showToast('Quality: ' + span, 'info');
         };
         
         function setupVideoTracking(video, movieId) {
@@ -800,22 +951,19 @@
             const centerBtn = document.getElementById('center-play-btn');
             const container = document.getElementById('video-container');
             
-            // Time update
             video.addEventListener('timeupdate', () => {
                 if (video.duration) {
                     const percent = (video.currentTime / video.duration) * 100;
                     progressFill.style.width = percent + '%';
+                    timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
                     
-                    const current = formatTime(video.currentTime);
-                    const total = formatTime(video.duration);
-                    timeDisplay.textContent = `${current} / ${total}`;
-                    
-                    // Save progress
-                    saveContinueWatching(movieId, video.currentTime, video.duration, percent);
+                    // Auto save progress every 5 seconds
+                    if (Math.floor(video.currentTime) % 5 === 0) {
+                        saveContinueWatching(movieId, video.currentTime, video.duration, percent);
+                    }
                 }
             });
             
-            // Play/Pause states
             video.addEventListener('play', () => {
                 playBtn.innerHTML = '<i class="fas fa-pause"></i>';
                 centerBtn.innerHTML = '<i class="fas fa-pause text-2xl"></i>';
@@ -828,7 +976,10 @@
                 container.classList.add('paused');
             });
             
-            // Click video to toggle play
+            video.addEventListener('ended', () => {
+                showToast('Video ended', 'info');
+            });
+            
             video.addEventListener('click', togglePlay);
         }
         
@@ -916,6 +1067,7 @@
                 window.continueWatching.push(item);
             }
             
+            window.continueWatching.sort((a, b) => b.timestamp - a.timestamp);
             localStorage.setItem('streamer_continue', JSON.stringify(window.continueWatching));
         }
         
@@ -948,9 +1100,9 @@
         };
         
         window.guestLogin = function() {
+            checkAdminMode(); // Check admin on login
             showScreen('main-screen');
             loadMoviesFromFirebase();
-            showToast('Welcome to Real OTT!', 'success');
         };
         
         window.filterCategory = function(cat) {
@@ -958,13 +1110,9 @@
             
             document.querySelectorAll('.category-pill').forEach(p => {
                 const isActive = p.textContent.trim() === cat;
-                if (isActive) {
-                    p.classList.add('bg-red-600', 'text-white');
-                    p.classList.remove('bg-gray-800', 'text-gray-400');
-                } else {
-                    p.classList.remove('bg-red-600', 'text-white');
-                    p.classList.add('bg-gray-800', 'text-gray-400');
-                }
+                p.className = isActive 
+                    ? 'category-pill bg-red-600 text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition'
+                    : 'category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap hover:bg-gray-700 transition';
             });
             
             renderMovies();
@@ -1003,7 +1151,7 @@
                 continueSection.style.display = 'none';
             }
             
-            // Hero (first movie)
+            // Hero
             if (movies.length > 0 && hero) {
                 const featured = movies[0];
                 hero.innerHTML = `
@@ -1012,12 +1160,13 @@
                         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 right-0 p-6">
                             <span class="inline-block px-3 py-1 bg-red-600 rounded-full text-xs font-bold mb-3">FEATURED</span>
-                            <h2 class="text-2xl md:text-4xl font-bold mb-2">${featured.title}</h2>
+                            <h2 class="text-2xl md:text-4xl font-bold mb-2 line-clamp-2">${featured.title}</h2>
                             <p class="text-gray-300 text-sm mb-3 line-clamp-2">${featured.description || ''}</p>
                             <div class="flex items-center gap-3 mb-4 text-sm">
                                 <span class="text-yellow-400"><i class="fas fa-star mr-1"></i>${featured.rating || 'N/A'}</span>
                                 <span class="text-gray-400">${featured.year || ''}</span>
                                 <span class="text-gray-400">${featured.duration || ''}</span>
+                                <span class="px-2 py-0.5 bg-red-600/30 rounded text-xs">${featured.category}</span>
                             </div>
                             <button class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 transition">
                                 <i class="fas fa-play"></i> Play Now
@@ -1027,8 +1176,21 @@
             }
             
             // Lists
-            if (forYou) forYou.innerHTML = movies.slice(0, 10).map(m => createCard(m)).join('');
-            if (trending) trending.innerHTML = movies.slice(0, 8).map(m => createCard(m)).join('');
+            if (forYou) {
+                if (movies.length === 0) {
+                    forYou.innerHTML = `<div class="empty-state w-full"><i class="fas fa-film"></i><p class="text-gray-500">No content in this category</p></div>`;
+                } else {
+                    forYou.innerHTML = movies.slice(0, 10).map(m => createCard(m)).join('');
+                }
+            }
+            
+            if (trending) {
+                if (movies.length === 0) {
+                    trending.innerHTML = `<div class="empty-state w-full"><i class="fas fa-film"></i><p class="text-gray-500">No trending content</p></div>`;
+                } else {
+                    trending.innerHTML = movies.slice(0, 8).map(m => createCard(m)).join('');
+                }
+            }
         }
         
         function createCard(movie) {
@@ -1036,6 +1198,9 @@
                 <div class="flex-shrink-0 w-36 md:w-44 cursor-pointer group movie-card" onclick="playMovie('${movie.id}')">
                     <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3]">
                         <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
+                        <div class="absolute top-2 right-2 bg-black/60 px-2 py-1 rounded text-xs">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>${movie.rating || '-'}
+                        </div>
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
                             <button class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center hover:scale-110 transition opacity-0 group-hover:opacity-100">
                                 <i class="fas fa-play text-white ml-1"></i>
@@ -1046,13 +1211,13 @@
                     <div class="flex items-center gap-2 text-xs text-gray-500">
                         <span>${movie.year || ''}</span>
                         <span>•</span>
-                        <span class="text-yellow-400"><i class="fas fa-star mr-0.5"></i>${movie.rating || 'N/A'}</span>
+                        <span>${movie.category}</span>
                     </div>
                 </div>`;
         }
         
         window.searchMovies = function() {
-            const query = document.getElementById('search-input')?.value.toLowerCase() || '';
+            const query = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
             const container = document.getElementById('search-container');
             
             if (!query) {
@@ -1062,7 +1227,8 @@
             
             const filtered = window.movies.filter(m => 
                 m.title?.toLowerCase().includes(query) ||
-                m.category?.toLowerCase().includes(query)
+                m.category?.toLowerCase().includes(query) ||
+                m.description?.toLowerCase().includes(query)
             );
             
             if (filtered.length === 0) {
@@ -1077,12 +1243,12 @@
         };
         
         window.clearAllData = function() {
-            if (confirm('Clear all local data?')) {
+            if (confirm('Clear all local watch history?')) {
                 localStorage.removeItem('streamer_continue');
                 window.continueWatching = [];
                 updateStats();
                 renderMovies();
-                showToast('Data cleared', 'success');
+                showToast('Local data cleared', 'success');
             }
         };
         
@@ -1120,8 +1286,14 @@
         
         // INIT
         window.addEventListener('load', () => {
-            if (window.isAdmin) {
-                loadMoviesFromFirebase();
+            console.log('Page loaded, checking admin...');
+            checkAdminMode();
+        });
+        
+        // Close menus on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.quality-menu') && !e.target.closest('#quality-btn')) {
+                document.getElementById('quality-menu')?.classList.remove('show');
             }
         });
     </script>
