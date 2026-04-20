@@ -1280,9 +1280,11 @@
         
         // INIT
         window.addEventListener('load', () => {
-            console.log('Page loaded, checking admin...');
-            checkAdminMode();
-        });
+    console.log('Page loaded');
+
+    checkAdminMode();
+    loadMoviesFromFirebase(); // 🔥 ADD THIS LINE
+});
         
         // Close menus on click outside
         document.addEventListener('click', (e) => {
