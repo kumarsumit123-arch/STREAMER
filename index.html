@@ -6,94 +6,112 @@
     <meta name="theme-color" content="#0f0f0f">
     <title>STREAMER - Premium OTT</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Firebase SDK -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // REPLACE WITH YOUR REAL FIREBASE CONFIG
+        // TUMHARA FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
             authDomain: "streamer-a5ea9.firebaseapp.com",
             projectId: "streamer-a5ea9",
-            storageBucket: "streamer-a5ea9.appspot.com",
+            storageBucket: "streamer-a5ea9.firebasestorage.app",
             messagingSenderId: "821781298641",
-            appId: "1:821781298641:web:1fcec50709460dcdd8f4f0"
+            appId: "1:821781298641:web:1fcec50709460dcdd8f4f0",
+            measurementId: "G-21LF69JH1Q"
         };
         
-        window.firebaseApp = initializeApp(firebaseConfig);
-        window.db = getFirestore(window.firebaseApp);
-        window.auth = getAuth(window.firebaseApp);
-        
-        console.log('Firebase initialized!');
+        try {
+            window.firebaseApp = initializeApp(firebaseConfig);
+            window.db = getFirestore(window.firebaseApp);
+            window.auth = getAuth(window.firebaseApp);
+            console.log('✅ Firebase initialized successfully');
+        } catch (e) {
+            console.error('❌ Firebase init error:', e);
+        }
     </script>
 </head>
 <body>
-    <!-- Particles -->
+
+    <!-- Particles Background -->
     <div id="particles-bg" class="particles-container"></div>
+    
+    <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- WELCOME SCREEN -->
-    <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse-slow"></div>
-            <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
-        </div>
-        
-        <div class="relative z-10 text-center max-w-md w-full animate-fade-up">
-            <div class="mb-8">
-                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20 animate-glow">
-                    <i class="fas fa-play text-3xl text-white ml-1"></i>
-                </div>
-                <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text animate-shimmer">STREAMER</h1>
-                <p class="text-gray-400 text-lg font-light">Premium OTT Experience</p>
+    <!-- ==================== WELCOME SCREEN ==================== -->
+    <div id="welcome-screen" class="screen active">
+        <div class="flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
+            <!-- Background Effects -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse-slow"></div>
+                <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+                <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
             </div>
             
-            <div class="space-y-4">
-                <button id="btn-start" class="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20 ripple-btn">
-                    <i class="fas fa-play-circle group-hover:animate-bounce"></i> 
-                    <span>Start Watching</span>
-                </button>
+            <div class="relative z-10 text-center max-w-md w-full animate-fade-up">
+                <div class="mb-8">
+                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20 animate-glow">
+                        <i class="fas fa-play text-3xl text-white ml-1"></i>
+                    </div>
+                    <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text animate-shimmer">STREAMER</h1>
+                    <p class="text-gray-400 text-lg font-light">Premium OTT Experience</p>
+                </div>
                 
-                <button id="btn-admin" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50 hover:border-red-500/50">
-                    <i class="fas fa-lock"></i> Admin Access
-                </button>
+                <div class="space-y-4">
+                    <button id="btn-start" class="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20 ripple-btn">
+                        <i class="fas fa-play-circle group-hover:animate-bounce"></i> 
+                        <span>Start Watching</span>
+                    </button>
+                    
+                    <button id="btn-admin-welcome" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50 hover:border-red-500/50">
+                        <i class="fas fa-lock"></i> Admin Access
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MAIN SCREEN -->
-    <div id="main-screen" class="screen pb-24">
+    <!-- ==================== MAIN SCREEN ==================== -->
+    <div id="main-screen" class="screen">
+        <!-- Sticky Header -->
         <div class="sticky top-0 z-40 glass-header">
             <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
                 <h1 class="text-2xl font-black tracking-tight gradient-text animate-shimmer">STREAMER</h1>
                 <div class="flex items-center gap-3">
-                    <button id="btn-search" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <button id="btn-search-header" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition hover:shadow-lg hover:shadow-red-500/20">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button id="btn-profile" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition animate-glow-pulse">
+                    <button id="btn-profile-header" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition animate-glow-pulse">
                         <i class="fas fa-user text-sm"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Admin Panel -->
+            <!-- Admin Panel (Hidden by default) -->
             <div id="admin-panel" class="admin-panel hidden">
                 <div class="admin-badge">Admin Mode</div>
                 <div class="flex justify-between items-center mb-6 mt-2">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <i class="fas fa-cog text-red-500 animate-spin-slow"></i> Content Manager
                     </h3>
-                    <button id="btn-close-admin" class="text-gray-400 hover:text-white transition hover:rotate-90 duration-300">
+                    <button id="btn-close-admin-panel" class="text-gray-400 hover:text-white transition hover:rotate-90 duration-300">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
+                <!-- Image Upload -->
                 <div class="mb-6">
                     <label class="form-label">Poster Image</label>
                     <div class="upload-area" id="upload-area">
@@ -106,6 +124,7 @@
                     <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL here">
                 </div>
                 
+                <!-- Title & Category -->
                 <div class="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="form-label">Title *</label>
@@ -124,6 +143,7 @@
                     </div>
                 </div>
                 
+                <!-- Year, Duration, Rating -->
                 <div class="grid md:grid-cols-3 gap-4 mb-4">
                     <div>
                         <label class="form-label">Year</label>
@@ -139,20 +159,22 @@
                     </div>
                 </div>
                 
+                <!-- Description -->
                 <div class="mb-4">
                     <label class="form-label">Description</label>
                     <textarea id="admin-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
                 </div>
                 
+                <!-- Video URL -->
                 <div class="mb-4">
                     <label class="form-label">Video URL *</label>
                     <div class="space-y-2">
                         <input type="url" id="admin-video" class="form-input" placeholder="Dailymotion URL or MP4/CDN URL">
                         <div class="flex gap-2">
-                            <button class="flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30" id="btn-dailymotion">
+                            <button id="btn-type-dailymotion" class="flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30 transition-all">
                                 <i class="fab fa-dailymotion mr-1"></i> Dailymotion
                             </button>
-                            <button class="flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600" id="btn-mp4">
+                            <button id="btn-type-mp4" class="flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600 transition-all">
                                 <i class="fas fa-file-video mr-1"></i> MP4/CDN
                             </button>
                         </div>
@@ -160,23 +182,25 @@
                     <p class="text-xs text-gray-500 mt-2" id="video-help">Paste Dailymotion video URL</p>
                 </div>
                 
+                <!-- Subtitle URL -->
                 <div class="mb-6">
                     <label class="form-label">Subtitle URL (.vtt) - Optional</label>
                     <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
                 </div>
                 
+                <!-- Action Buttons -->
                 <div class="flex gap-3">
-                    <button id="btn-save" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 ripple-btn">
+                    <button id="btn-save-content" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 ripple-btn">
                         <i class="fas fa-save mr-2"></i> Save to Firebase
                     </button>
-                    <button id="btn-demo" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition ripple-btn">
+                    <button id="btn-add-demo" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition ripple-btn">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
             
             <!-- Category Pills -->
-            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto category-scroll" id="category-pills">
+            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto" id="category-pills">
                 <button class="category-pill active" data-cat="All"><span>All</span></button>
                 <button class="category-pill" data-cat="Anime"><span>Anime</span></button>
                 <button class="category-pill" data-cat="Donghua"><span>Donghua</span></button>
@@ -189,9 +213,10 @@
 
         <!-- Hero Slider -->
         <div id="hero-section" class="mb-8 px-4">
-            <div class="hero-slider-container relative w-full h-[60vh] rounded-2xl overflow-hidden">
+            <div class="hero-slider-container relative w-full h-[60vh] rounded-2xl overflow-hidden group">
                 <div id="hero-slides" class="hero-slides">
-                    <div class="w-full h-full flex items-center justify-center">
+                    <!-- Slides injected by JS -->
+                    <div class="w-full h-full flex items-center justify-center bg-gray-900">
                         <div class="text-center">
                             <div class="skeleton w-64 h-96 mx-auto mb-4 rounded-xl"></div>
                             <p class="text-gray-500 animate-pulse">Loading content...</p>
@@ -199,12 +224,13 @@
                     </div>
                 </div>
                 
+                <!-- Slider Controls -->
                 <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20" id="hero-dots"></div>
                 
-                <button id="btn-prev-slide" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20">
+                <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20 opacity-0 group-hover:opacity-100">
                     <i class="fas fa-chevron-left"></i>
                 </button>
-                <button id="btn-next-slide" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20">
+                <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20 opacity-0 group-hover:opacity-100">
                     <i class="fas fa-chevron-right"></i>
                 </button>
                 
@@ -214,6 +240,8 @@
 
         <!-- Content Sections -->
         <div class="px-4 max-w-7xl mx-auto space-y-10">
+            
+            <!-- Continue Watching -->
             <section id="continue-watching-section" class="hidden animate-fade-up">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -226,6 +254,7 @@
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
             </section>
 
+            <!-- Trending -->
             <section class="animate-fade-up" style="animation-delay: 0.1s">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -241,6 +270,7 @@
                 </div>
             </section>
 
+            <!-- For You -->
             <section class="animate-fade-up" style="animation-delay: 0.2s">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-sparkles text-purple-500 animate-sparkle"></i> For You
@@ -254,6 +284,7 @@
                 </div>
             </section>
             
+            <!-- New Releases -->
             <section class="animate-fade-up" style="animation-delay: 0.3s">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
                     <i class="fas fa-clock text-green-500 animate-pulse"></i> New Releases
@@ -269,18 +300,18 @@
         </div>
     </div>
 
-    <!-- SEARCH SCREEN -->
-    <div id="search-screen" class="screen pb-24 min-h-screen">
+    <!-- ==================== SEARCH SCREEN ==================== -->
+    <div id="search-screen" class="screen">
         <div class="sticky top-0 z-40 glass-header px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button id="btn-back-search" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
+                <button id="search-back" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Search</h1>
             </div>
             <div class="relative mt-4 max-w-2xl mx-auto">
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition" placeholder="Search anime, movies, dramas...">
+                <input type="text" id="search-input" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition focus:shadow-lg focus:shadow-red-500/20" placeholder="Search anime, movies, dramas...">
             </div>
         </div>
         <div class="px-4 py-6 max-w-7xl mx-auto">
@@ -293,11 +324,11 @@
         </div>
     </div>
 
-    <!-- PROFILE SCREEN -->
-    <div id="profile-screen" class="screen pb-24 min-h-screen">
+    <!-- ==================== PROFILE SCREEN ==================== -->
+    <div id="profile-screen" class="screen">
         <div class="sticky top-0 z-40 glass-header px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button id="btn-back-profile" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
+                <button id="profile-back" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Profile</h1>
@@ -327,11 +358,11 @@
                 </div>
                 
                 <div class="w-full space-y-3">
-                    <button id="btn-admin-panel" class="w-full glass-card hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30 group">
+                    <button id="btn-admin-profile" class="w-full glass-card hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30 group">
                         <i class="fas fa-crown text-yellow-500 group-hover:animate-bounce"></i> Admin Panel
                     </button>
                     
-                    <button id="btn-clear-all" class="w-full glass-card bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition hover:scale-[1.02]">
+                    <button id="btn-clear-all-data" class="w-full glass-card bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition hover:scale-[1.02]">
                         <i class="fas fa-trash"></i> Clear Watch History
                     </button>
                 </div>
@@ -339,29 +370,37 @@
         </div>
     </div>
 
-    <!-- VIDEO PLAYER -->
-    <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
+    <!-- ==================== VIDEO PLAYER ==================== -->
+    <div id="player-screen" class="screen">
         <div class="video-player-wrapper" id="video-container">
+            <!-- Dailymotion Player -->
             <div id="dailymotion-player" class="w-full h-full hidden"></div>
+            
+            <!-- Native Video Player -->
             <video id="video-element" class="w-full h-full bg-black hidden" playsinline></video>
             
+            <!-- Buffering Spinner -->
             <div class="buffering-spinner" id="buffering-spinner">
                 <div class="spinner-ring"></div>
             </div>
             
+            <!-- Center Play Button -->
             <div class="center-play-btn" id="center-play-btn">
                 <i class="fas fa-play text-2xl ml-1"></i>
             </div>
             
+            <!-- Subtitle Display -->
             <div id="subtitle-display" class="subtitle-display"></div>
             
-            <button id="btn-ai-sub" class="absolute top-20 right-4 z-50 w-10 h-10 rounded-full bg-purple-600/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-500 transition animate-glow" style="display: none;">
+            <!-- AI Subtitle Button -->
+            <button id="btn-ai-subtitles" class="absolute top-20 right-4 z-50 w-10 h-10 rounded-full bg-purple-600/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-500 transition animate-glow" style="display: none;">
                 <i class="fas fa-robot"></i>
             </button>
             
+            <!-- Top Bar -->
             <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
                 <div class="flex items-center gap-3">
-                    <button id="btn-close-player" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md hover:rotate-12">
+                    <button id="player-back" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md hover:rotate-12">
                         <i class="fas fa-arrow-left"></i>
                     </button>
                     <div>
@@ -371,6 +410,7 @@
                 </div>
             </div>
             
+            <!-- Player Controls -->
             <div class="player-controls">
                 <div class="progress-container" id="progress-bar">
                     <div class="progress-fill" id="progress-fill">
@@ -380,14 +420,14 @@
                 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button class="control-btn ripple-btn" id="btn-play-pause">
+                        <button class="control-btn ripple-btn" id="play-pause-btn">
                             <i class="fas fa-pause"></i>
                         </button>
-                        <button class="control-btn" id="btn-skip-back">
+                        <button class="control-btn" id="skip-back-btn">
                             <i class="fas fa-undo-alt"></i>
                             <span class="text-[8px] absolute bottom-1">10</span>
                         </button>
-                        <button class="control-btn" id="btn-skip-fwd">
+                        <button class="control-btn" id="skip-fwd-btn">
                             <i class="fas fa-redo-alt"></i>
                             <span class="text-[8px] absolute bottom-1">10</span>
                         </button>
@@ -395,10 +435,10 @@
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button class="control-btn" id="btn-subtitle">
+                        <button class="control-btn" id="subtitle-toggle-btn">
                             <i class="fas fa-closed-captioning"></i>
                         </button>
-                        <button class="control-btn" id="btn-fullscreen">
+                        <button class="control-btn" id="fullscreen-btn">
                             <i class="fas fa-expand"></i>
                         </button>
                     </div>
@@ -407,25 +447,26 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
+    <!-- ==================== BOTTOM NAVIGATION ==================== -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass-nav px-6 py-3 flex justify-around items-center z-40 hidden">
-        <button class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen" id="nav-home">
+        <button class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen" id="bottom-nav-home">
             <i class="fas fa-home text-xl"></i>
             <span class="text-xs font-medium">Home</span>
         </button>
-        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen" id="nav-search">
+        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen" id="bottom-nav-search">
             <i class="fas fa-search text-xl"></i>
             <span class="text-xs font-medium">Search</span>
         </button>
-        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen" id="nav-profile">
+        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen" id="bottom-nav-profile">
             <i class="fas fa-user text-xl"></i>
             <span class="text-xs font-medium">Profile</span>
         </button>
     </div>
 
-    <!-- Scripts -->
+    <!-- ==================== SCRIPTS ==================== -->
     <script src="https://api.dmcdn.net/all.js"></script>
     <script type="module" src="app.js"></script>
     <script src="player.js"></script>
+
 </body>
 </html>
