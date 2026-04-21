@@ -1,13 +1,11 @@
-// ==================== FIREBASE IMPORTS ====================
 import { 
     getFirestore, collection, addDoc, getDocs, query, orderBy, 
-    doc, deleteDoc, updateDoc, where 
+    doc, deleteDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { 
     getAuth, signInAnonymously, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// ==================== APP CLASS ====================
 class StreamerApp {
     constructor() {
         this.db = window.db;
@@ -19,38 +17,95 @@ class StreamerApp {
         this.isAdmin = false;
         this.activeCategory = 'All';
         this.isLoading = false;
-        this.videoType = 'dailymotion'; // 'dailymotion' or 'mp4'
+        this.videoType = 'dailymotion';
         this.dmPlayer = null;
         this.currentSlide = 0;
         this.slideInterval = null;
         this.heroMovies = [];
         
-        this.init();
+        // Wait for DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
     
     async init() {
-        this.setupEventListeners();
+        console.log('App initializing...');
+        this.bindEvents();
+        this.setupParticles();
         this.checkFirstTime();
         this.checkAdminMode();
-        this.setupParticles();
         
-        // Auth state listener
         onAuthStateChanged(this.auth, (user) => {
-            if (user) {
-                console.log('User signed in:', user.uid);
-            } else {
-                this.signInGuest();
-            }
+            if (!user) this.signInGuest();
         });
     }
     
-    // ==================== AUTHENTICATION ====================
-    async signInGuest() {
-        try {
-            await signInAnonymously(this.auth);
-        } catch (error) {
-            console.error('Auth error:', error);
-        }
+    // ==================== EVENT BINDING (FIXED) ====================
+    bindEvents() {
+        // Welcome screen
+        document.getElementById('btn-start')?.addEventListener('click', () => this.guestLogin());
+        document.getElementById('btn-admin')?.addEventListener('click', () => this.showAdminLogin());
+        
+        // Navigation
+        document.getElementById('btn-search')?.addEventListener('click', () => this.showScreen('search-screen'));
+        document.getElementById('btn-profile')?.addEventListener('click', () => this.showScreen('profile-screen'));
+        document.getElementById('btn-back-search')?.addEventListener('click', () => this.showScreen('main-screen'));
+        document.getElementById('btn-back-profile')?.addEventListener('click', () => this.showScreen('main-screen'));
+        
+        // Bottom nav
+        document.getElementById('nav-home')?.addEventListener('click', () => this.showScreen('main-screen'));
+        document.getElementById('nav-search')?.addEventListener('click', () => this.showScreen('search-screen'));
+        document.getElementById('nav-profile')?.addEventListener('click', () => this.showScreen('profile-screen'));
+        
+        // Admin panel
+        document.getElementById('btn-close-admin')?.addEventListener('click', () => this.hideAdminPanel());
+        document.getElementById('btn-admin-panel')?.addEventListener('click', () => this.showAdminLogin());
+        document.getElementById('upload-area')?.addEventListener('click', () => {
+            document.getElementById('image-upload')?.click();
+        });
+        document.getElementById('image-upload')?.addEventListener('change', (e) => this.handleImageUpload(e));
+        document.getElementById('poster-url')?.addEventListener('input', (e) => this.handleUrlInput(e.target.value));
+        document.getElementById('btn-save')?.addEventListener('click', () => this.saveContent());
+        document.getElementById('btn-demo')?.addEventListener('click', () => this.addDemoContent());
+        
+        // Video type buttons
+        document.getElementById('btn-dailymotion')?.addEventListener('click', () => this.setVideoType('dailymotion'));
+        document.getElementById('btn-mp4')?.addEventListener('click', () => this.setVideoType('mp4'));
+        
+        // Category pills
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            pill.addEventListener('click', () => this.filterCategory(pill.dataset.cat));
+        });
+        
+        // Slider buttons
+        document.getElementById('btn-prev-slide')?.addEventListener('click', () => this.prevSlide());
+        document.getElementById('btn-next-slide')?.addEventListener('click', () => this.nextSlide());
+        
+        // Search
+        document.getElementById('search-input')?.addEventListener('keyup', () => this.searchMovies());
+        
+        // Player controls
+        document.getElementById('btn-play-pause')?.addEventListener('click', () => this.togglePlay());
+        document.getElementById('center-play-btn')?.addEventListener('click', () => this.togglePlay());
+        document.getElementById('btn-skip-fwd')?.addEventListener('click', () => this.skipForward());
+        document.getElementById('btn-skip-back')?.addEventListener('click', () => this.skipBackward());
+        document.getElementById('btn-close-player')?.addEventListener('click', () => this.closePlayer());
+        document.getElementById('btn-subtitle')?.addEventListener('click', () => this.toggleSubtitle());
+        document.getElementById('btn-fullscreen')?.addEventListener('click', () => this.toggleFullscreen());
+        document.getElementById('progress-bar')?.addEventListener('click', (e) => this.seekVideo(e));
+        
+        // AI Subtitles
+        document.getElementById('btn-ai-sub')?.addEventListener('click', () => this.toggleAISubtitles());
+        
+        // Profile
+        document.getElementById('btn-clear-continue')?.addEventListener('click', () => this.clearContinueWatching());
+        document.getElementById('btn-clear-all')?.addEventListener('click', () => this.clearAllData());
+        
+        // Keyboard
+        document.addEventListener('keydown', (e) => this.handleKeydown(e));
     }
     
     // ==================== FIRST TIME CHECK ====================
@@ -59,63 +114,54 @@ class StreamerApp {
         if (hasVisited) {
             this.showScreen('main-screen');
             this.loadMovies();
-        } else {
-            localStorage.setItem('streamer_visited', 'true');
-            this.showScreen('welcome-screen');
         }
     }
     
-    // ==================== PARTICLES BACKGROUND ====================
+    // ==================== PARTICLES ====================
     setupParticles() {
         const container = document.getElementById('particles-bg');
         if (!container) return;
         
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
-            particle.style.width = (2 + Math.random() * 4) + 'px';
-            particle.style.height = particle.style.width;
-            
-            const colors = ['rgba(239,68,68,0.5)', 'rgba(168,85,247,0.5)', 'rgba(236,72,153,0.5)'];
-            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-            
-            container.appendChild(particle);
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.cssText = `
+                left: ${Math.random() * 100}%;
+                animation-delay: ${Math.random() * 15}s;
+                animation-duration: ${10 + Math.random() * 10}s;
+                width: ${2 + Math.random() * 4}px;
+                height: ${p.style.width};
+            `;
+            container.appendChild(p);
         }
     }
     
-    // ==================== ADMIN & AUTH ====================
+    // ==================== AUTH ====================
+    async signInGuest() {
+        try { await signInAnonymously(this.auth); } 
+        catch (e) { console.log('Auth error:', e); }
+    }
+    
+    // ==================== ADMIN ====================
     checkAdminMode() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminParam = urlParams.get('admin');
-        const sessionAdmin = sessionStorage.getItem('streamer_admin');
+        const url = new URLSearchParams(window.location.search);
+        const session = sessionStorage.getItem('streamer_admin');
         
-        if (adminParam === 'sumit81' || sessionAdmin === 'true') {
+        if (url.get('admin') === 'sumit81' || session === 'true') {
             this.isAdmin = true;
             sessionStorage.setItem('streamer_admin', 'true');
-            this.showAdminUI();
+            document.getElementById('admin-panel')?.classList.remove('hidden');
         }
-    }
-    
-    showAdminUI() {
-        const adminPanel = document.getElementById('admin-panel');
-        if (adminPanel) {
-            adminPanel.classList.remove('hidden');
-            adminPanel.classList.add('visible');
-        }
-        this.showToast('🔥 Admin Mode Activated', 'success');
     }
     
     showAdminLogin() {
-        const password = prompt('Enter admin password:');
-        if (password === 'sumit81') {
+        const pass = prompt('Enter admin password:');
+        if (pass === 'sumit81') {
             this.isAdmin = true;
             sessionStorage.setItem('streamer_admin', 'true');
-            this.showAdminUI();
+            document.getElementById('admin-panel')?.classList.remove('hidden');
+            this.showToast('Admin Mode Activated', 'success');
             
-            // Update URL without reload
             const url = new URL(window.location);
             url.searchParams.set('admin', 'sumit81');
             window.history.pushState({}, '', url);
@@ -125,49 +171,38 @@ class StreamerApp {
     }
     
     hideAdminPanel() {
-        const panel = document.getElementById('admin-panel');
-        if (panel) {
-            panel.classList.add('hidden');
-            panel.classList.remove('visible');
-        }
+        document.getElementById('admin-panel')?.classList.add('hidden');
     }
     
-    // ==================== VIDEO TYPE SELECTION ====================
+    // ==================== VIDEO TYPE ====================
     setVideoType(type) {
         this.videoType = type;
-        const dmBtn = document.getElementById('btn-dailymotion');
-        const mp4Btn = document.getElementById('btn-mp4');
+        const dm = document.getElementById('btn-dailymotion');
+        const mp4 = document.getElementById('btn-mp4');
         const help = document.getElementById('video-help');
         
         if (type === 'dailymotion') {
-            dmBtn.classList.add('bg-red-600/20', 'text-red-400', 'border-red-600/30');
-            dmBtn.classList.remove('bg-gray-700/50', 'text-gray-400', 'border-gray-600');
-            mp4Btn.classList.remove('bg-red-600/20', 'text-red-400', 'border-red-600/30');
-            mp4Btn.classList.add('bg-gray-700/50', 'text-gray-400', 'border-gray-600');
-            help.textContent = 'Paste Dailymotion video URL (e.g., https://www.dailymotion.com/video/xXXXXX)';
+            dm.className = 'flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30';
+            mp4.className = 'flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600';
+            help.textContent = 'Paste Dailymotion video URL';
         } else {
-            mp4Btn.classList.add('bg-red-600/20', 'text-red-400', 'border-red-600/30');
-            mp4Btn.classList.remove('bg-gray-700/50', 'text-gray-400', 'border-gray-600');
-            dmBtn.classList.remove('bg-red-600/20', 'text-red-400', 'border-red-600/30');
-            dmBtn.classList.add('bg-gray-700/50', 'text-gray-400', 'border-gray-600');
-            help.textContent = 'Paste direct MP4 or CDN URL (must end in .mp4 or .m3u8)';
+            mp4.className = 'flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30';
+            dm.className = 'flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600';
+            help.textContent = 'Paste direct MP4 or CDN URL';
         }
     }
     
-    // ==================== DATA LOADING ====================
+    // ==================== LOAD MOVIES ====================
     async loadMovies() {
         if (this.isLoading) return;
         this.isLoading = true;
         
         try {
+            console.log('Loading from Firebase...');
             const q = query(collection(this.db, "movies"), orderBy("timestamp", "desc"));
-            const snapshot = await getDocs(q);
+            const snap = await getDocs(q);
             
-            this.movies = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
+            this.movies = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             console.log(`Loaded ${this.movies.length} movies`);
             
             if (this.movies.length === 0) {
@@ -176,63 +211,129 @@ class StreamerApp {
                 this.renderMovies();
                 this.setupHeroSlider();
             }
-            
             this.updateStats();
             
-        } catch (error) {
-            console.error("Error loading movies:", error);
-            this.showToast('Failed to load content', 'error');
-            this.renderEmptyState();
+        } catch (err) {
+            console.error('Load error:', err);
+            this.showToast('Failed to load: ' + err.message, 'error');
+            // Load demo data if Firebase fails
+            this.loadDemoData();
         } finally {
             this.isLoading = false;
         }
     }
     
+    // ==================== DEMO DATA (FALLBACK) ====================
+    loadDemoData() {
+        this.movies = [
+            {
+                id: 'demo1',
+                title: "Demon Slayer",
+                category: "Anime",
+                year: 2019,
+                duration: "24 min",
+                rating: 8.7,
+                description: "A family is attacked by demons and only two members survive.",
+                poster: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
+                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
+                videoType: "dailymotion",
+                views: 1250,
+                timestamp: Date.now()
+            },
+            {
+                id: 'demo2',
+                title: "Soul Land",
+                category: "Donghua",
+                year: 2018,
+                duration: "20 min",
+                rating: 8.2,
+                description: "Tang San embarks on a journey to become a Spirit Master.",
+                poster: "https://m.media-amazon.com/images/M/MV5BNzBjZTBiZDgtYjA1OS00MjViLThkYWItMDU3YzcxNmQxNmRhXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_.jpg",
+                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
+                videoType: "dailymotion",
+                views: 980,
+                timestamp: Date.now() - 1000
+            },
+            {
+                id: 'demo3',
+                title: "Squid Game",
+                category: "K-Drama",
+                year: 2021,
+                duration: "60 min",
+                rating: 8.0,
+                description: "Hundreds of cash-strapped players accept a strange invitation.",
+                poster: "https://m.media-amazon.com/images/M/MV5BYWE3MDVkN2EtNjQ5MS00ZDQ4LTllNzQtM2I1N2JkZDZlNTkwXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_.jpg",
+                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
+                videoType: "dailymotion",
+                views: 2100,
+                timestamp: Date.now() - 2000
+            }
+        ];
+        
+        this.renderMovies();
+        this.setupHeroSlider();
+        this.updateStats();
+        this.showToast('Demo mode: Firebase connection failed', 'info');
+    }
+    
     // ==================== HERO SLIDER ====================
     setupHeroSlider() {
-        const featured = [...this.movies]
-            .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-            .slice(0, 5);
-        
+        const featured = [...this.movies].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 5);
         this.heroMovies = featured;
         this.currentSlide = 0;
-        
         this.renderHeroSlides();
         this.startSlideTimer();
     }
     
     renderHeroSlides() {
         const container = document.getElementById('hero-slides');
-        const dotsContainer = document.getElementById('hero-dots');
+        const dots = document.getElementById('hero-dots');
         
         if (!container || !this.heroMovies.length) return;
         
-        container.innerHTML = this.heroMovies.map((movie, index) => `
-            <div class="hero-slide ${index === 0 ? 'active' : ''}" data-index="${index}">
-                <img src="${movie.poster}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/1200x600/1a1a1a/666?text=NO+IMAGE'">
+        container.innerHTML = this.heroMovies.map((m, i) => `
+            <div class="hero-slide ${i === 0 ? 'active' : ''}" data-index="${i}">
+                <img src="${m.poster}" alt="${m.title}" onerror="this.src='https://via.placeholder.com/1200x600/1a1a1a/666?text=NO+IMAGE'">
                 <div class="hero-slide-content">
                     <div class="flex items-center gap-3 mb-3">
                         <span class="px-3 py-1 bg-red-600 rounded-full text-xs font-bold animate-pulse">FEATURED</span>
-                        <span class="px-2 py-1 bg-white/10 rounded text-xs backdrop-blur-md">${movie.category}</span>
-                        <span class="text-yellow-400 text-sm font-bold"><i class="fas fa-star mr-1"></i>${movie.rating || 'N/A'}</span>
+                        <span class="px-2 py-1 bg-white/10 rounded text-xs backdrop-blur-md">${m.category}</span>
+                        <span class="text-yellow-400 text-sm font-bold"><i class="fas fa-star mr-1"></i>${m.rating || 'N/A'}</span>
                     </div>
-                    <h2 class="text-3xl md:text-5xl font-black mb-3 line-clamp-2 leading-tight">${movie.title}</h2>
-                    <p class="text-gray-300 text-sm md:text-base mb-4 line-clamp-2 max-w-xl">${movie.description || ''}</p>
+                    <h2 class="text-3xl md:text-5xl font-black mb-3 line-clamp-2 leading-tight">${m.title}</h2>
+                    <p class="text-gray-300 text-sm md:text-base mb-4 line-clamp-2 max-w-xl">${m.description || ''}</p>
                     <div class="flex items-center gap-4 mb-6 text-sm text-gray-400">
-                        <span>${movie.year || ''}</span>
+                        <span>${m.year || ''}</span>
                         <span class="w-1 h-1 rounded-full bg-gray-600"></span>
-                        <span>${movie.duration || ''}</span>
+                        <span>${m.duration || ''}</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-600"></span>
+                        <span><i class="fas fa-eye mr-1"></i>${m.views || 0}</span>
                     </div>
-                    <button onclick="app.playMovie('${movie.id}')" class="bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-full font-bold flex items-center gap-2 transition transform hover:scale-105 ripple-btn">
+                    <button class="hero-play-btn bg-white text-black hover:bg-gray-200 px-8 py-3 rounded-full font-bold flex items-center gap-2 transition transform hover:scale-105 ripple-btn" data-movie-id="${m.id}">
                         <i class="fas fa-play"></i> Play Now
                     </button>
                 </div>
             </div>
         `).join('');
         
-        dotsContainer.innerHTML = this.heroMovies.map((_, index) => `
-            <div class="hero-dot ${index === 0 ? 'active' : ''}" onclick="app.goToSlide(${index})"></div>
+        dots.innerHTML = this.heroMovies.map((_, i) => `
+            <div class="hero-dot ${i === 0 ? 'active' : ''}" data-slide="${i}"></div>
         `).join('');
+        
+        // Bind hero play buttons (CRITICAL FIX)
+        container.querySelectorAll('.hero-play-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const movieId = btn.dataset.movieId;
+                console.log('Hero play clicked:', movieId);
+                this.playMovie(movieId);
+            });
+        });
+        
+        // Bind dots
+        dots.querySelectorAll('.hero-dot').forEach(dot => {
+            dot.addEventListener('click', () => this.goToSlide(parseInt(dot.dataset.slide)));
+        });
     }
     
     startSlideTimer() {
@@ -253,42 +354,19 @@ class StreamerApp {
     goToSlide(index) {
         if (this.slideInterval) clearInterval(this.slideInterval);
         
-        const slides = document.querySelectorAll('.hero-slide');
-        const dots = document.querySelectorAll('.hero-dot');
-        
-        slides.forEach((slide, i) => {
-            slide.classList.toggle('active', i === index);
+        document.querySelectorAll('.hero-slide').forEach((s, i) => {
+            s.classList.toggle('active', i === index);
         });
         
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === index);
+        document.querySelectorAll('.hero-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === index);
         });
         
         this.currentSlide = index;
         this.startSlideTimer();
     }
     
-    // ==================== RENDERING ====================
-    renderEmptyState() {
-        const emptyHTML = `
-            <div class="text-center py-12 animate-fade-in">
-                <i class="fas fa-film text-5xl text-gray-700 mb-4 animate-bounce-slow"></i>
-                <p class="text-gray-500 mb-2">No content available</p>
-                ${this.isAdmin ? 
-                    '<p class="text-xs text-gray-600">Add content using the Admin Panel above</p>' : 
-                    '<p class="text-xs text-gray-600">Check back later for new content</p>'
-                }
-            </div>`;
-        
-        const hero = document.getElementById('hero-slides');
-        if (hero) hero.innerHTML = emptyHTML;
-        
-        ['trending-container', 'foryou-container', 'new-container'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = emptyHTML;
-        });
-    }
-    
+    // ==================== RENDER MOVIES ====================
     renderMovies() {
         const movies = this.activeCategory === 'All' 
             ? this.movies 
@@ -315,18 +393,27 @@ class StreamerApp {
                 <div class="text-center py-8 text-gray-500 w-full animate-fade-in">
                     <i class="fas fa-inbox text-3xl mb-3 opacity-50"></i>
                     <p class="text-sm">No content in this category</p>
-                    <span class="coming-soon-badge mt-2 inline-block">Coming Soon</span>
+                    <span class="inline-block mt-2 px-3 py-1 bg-gradient-to-r from-red-600 to-purple-600 rounded-full text-xs font-bold">Coming Soon</span>
                 </div>`;
             return;
         }
         
         container.innerHTML = movies.map(m => this.createCard(m)).join('');
+        
+        // Bind card clicks (CRITICAL FIX)
+        container.querySelectorAll('.movie-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const movieId = card.dataset.movieId;
+                console.log('Card clicked:', movieId);
+                this.playMovie(movieId);
+            });
+        });
     }
     
     createCard(movie) {
         return `
-            <div class="flex-shrink-0 w-36 md:w-44 movie-card movie-card-3d" onclick="app.playMovie('${movie.id}')">
-                <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3] bg-gray-800 group">
+            <div class="flex-shrink-0 w-36 md:w-44 movie-card movie-card-3d" data-movie-id="${movie.id}">
+                <div class="relative rounded-xl overflow-hidden mb-2 shadow-lg aspect-[2/3] bg-gray-800 group cursor-pointer">
                     <img src="${movie.poster}" class="w-full h-full object-cover" loading="lazy" 
                          onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
                     <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-bold">
@@ -353,6 +440,20 @@ class StreamerApp {
             </div>`;
     }
     
+    renderEmptyState() {
+        const html = `
+            <div class="text-center py-12 animate-fade-in">
+                <i class="fas fa-film text-5xl text-gray-700 mb-4 animate-bounce-slow"></i>
+                <p class="text-gray-500 mb-2">No content available</p>
+                <p class="text-xs text-gray-600">Add content using Admin Panel</p>
+            </div>`;
+        
+        document.getElementById('hero-slides').innerHTML = html;
+        ['trending-container', 'foryou-container', 'new-container'].forEach(id => {
+            document.getElementById(id).innerHTML = html;
+        });
+    }
+    
     renderContinueWatching() {
         const section = document.getElementById('continue-watching-section');
         const container = document.getElementById('continue-container');
@@ -369,13 +470,12 @@ class StreamerApp {
             const movie = this.movies.find(m => m.id === item.movieId);
             if (!movie) return '';
             return `
-                <div onclick="app.playMovie('${movie.id}')" class="flex-shrink-0 w-40 cursor-pointer group animate-fade-up">
+                <div class="flex-shrink-0 w-40 cursor-pointer group animate-fade-up" data-movie-id="${movie.id}">
                     <div class="relative rounded-xl overflow-hidden mb-2 aspect-[2/3] shadow-lg">
                         <img src="${movie.poster}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" 
                              onerror="this.src='https://via.placeholder.com/300x450/1a1a1a/666?text=NO+IMAGE'">
                         <div class="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-800">
-                            <div class="h-full bg-gradient-to-r from-red-500 to-purple-500 transition-all duration-300" 
-                                 style="width: ${item.percent || 0}%"></div>
+                            <div class="h-full bg-gradient-to-r from-red-500 to-purple-500 transition-all duration-300" style="width: ${item.percent || 0}%"></div>
                         </div>
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center">
                             <div class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition transform scale-0 group-hover:scale-100">
@@ -387,6 +487,11 @@ class StreamerApp {
                     <p class="text-xs text-gray-500">${item.percent || 0}% watched</p>
                 </div>`;
         }).join('');
+        
+        // Bind clicks
+        container.querySelectorAll('[data-movie-id]').forEach(el => {
+            el.addEventListener('click', () => this.playMovie(el.dataset.movieId));
+        });
     }
     
     // ==================== CATEGORY FILTER ====================
@@ -394,12 +499,10 @@ class StreamerApp {
         this.activeCategory = cat;
         
         document.querySelectorAll('.category-pill').forEach(pill => {
-            const isActive = pill.dataset.cat === cat;
-            pill.classList.toggle('active', isActive);
+            pill.classList.toggle('active', pill.dataset.cat === cat);
         });
         
         this.renderMovies();
-        this.showToast(`Showing: ${cat}`, 'info');
     }
     
     // ==================== SEARCH ====================
@@ -420,25 +523,30 @@ class StreamerApp {
         
         const filtered = this.movies.filter(m => 
             m.title?.toLowerCase().includes(query) ||
-            m.category?.toLowerCase().includes(query) ||
-            m.description?.toLowerCase().includes(query)
+            m.category?.toLowerCase().includes(query)
         );
         
         if (filtered.length === 0) {
             container.innerHTML = `
                 <div class="col-span-full text-center py-12 animate-fade-in">
-                    <i class="fas fa-search text-4xl text-gray-600 mb-4 animate-bounce-slow"></i>
+                    <i class="fas fa-search text-4xl text-gray-600 mb-4"></i>
                     <p class="text-gray-400">No results for "${query}"</p>
-                    <span class="coming-soon-badge mt-4 inline-block">Try different keywords</span>
                 </div>`;
         } else {
             container.innerHTML = `<div class="col-span-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 animate-fade-in">${filtered.map(m => this.createCard(m)).join('')}</div>`;
+            
+            // Bind clicks
+            container.querySelectorAll('.movie-card').forEach(card => {
+                card.addEventListener('click', () => this.playMovie(card.dataset.movieId));
+            });
         }
     }
     
-    // ==================== VIDEO PLAYER ====================
+    // ==================== VIDEO PLAYER (FIXED) ====================
     async playMovie(movieId) {
+        console.log('Playing movie:', movieId);
         const movie = this.movies.find(m => m.id === movieId);
+        
         if (!movie) {
             this.showToast('Content not found', 'error');
             return;
@@ -452,31 +560,31 @@ class StreamerApp {
             await updateDoc(doc(this.db, "movies", movieId), {
                 views: (movie.views || 0) + 1
             });
-        } catch (e) { console.log('View update failed', e); }
+        } catch (e) {}
         
-        // Setup player based on video type
-        if (movie.videoUrl.includes('dailymotion.com') || movie.videoType === 'dailymotion') {
+        // Setup player
+        const isDM = movie.videoUrl?.includes('dailymotion.com') || movie.videoType === 'dailymotion';
+        
+        if (isDM) {
             this.setupDailymotionPlayer(movie);
         } else {
             this.setupNativePlayer(movie);
         }
         
-        // Setup subtitle
-        const subtitleDisplay = document.getElementById('subtitle-display');
-        const aiBtn = document.getElementById('ai-sub-btn');
-        
-        if (movie.subtitleUrl) {
-            subtitleDisplay.classList.add('show');
-            aiBtn.style.display = 'flex';
-        } else {
-            subtitleDisplay.classList.remove('show');
-            aiBtn.style.display = 'none';
-        }
+        // Show AI button if subtitles available
+        const aiBtn = document.getElementById('btn-ai-sub');
+        if (aiBtn) aiBtn.style.display = movie.subtitleUrl ? 'flex' : 'none';
         
         // Resume progress
         const progress = this.continueWatching.find(item => item.movieId === movieId);
         if (progress && progress.currentTime > 10) {
-            this.showToast(`Resumed from ${this.formatTime(progress.currentTime)}`, 'info');
+            setTimeout(() => {
+                const video = document.getElementById('video-element');
+                if (video && !isDM) {
+                    video.currentTime = progress.currentTime;
+                }
+                this.showToast(`Resumed from ${this.formatTime(progress.currentTime)}`, 'info');
+            }, 1000);
         }
     }
     
@@ -492,7 +600,7 @@ class StreamerApp {
         title.textContent = movie.title;
         meta.textContent = `${movie.category} • ${movie.year || ''} • ${movie.duration || ''}`;
         
-        // Extract video ID from URL
+        // Extract video ID
         let videoId = '';
         const match = movie.videoUrl.match(/video\/([a-zA-Z0-9]+)/);
         if (match) videoId = match[1];
@@ -502,29 +610,35 @@ class StreamerApp {
             return;
         }
         
-        // Destroy existing player
-        if (this.dmPlayer) {
-            this.dmPlayer.destroy();
-        }
+        // Clear previous
+        dmContainer.innerHTML = '';
         
-        // Create Dailymotion player
-        if (window.dailymotion) {
-            this.dmPlayer = window.dailymotion.createPlayer('dailymotion-player', {
-                video: videoId,
-                params: {
-                    autoplay: true,
-                    mute: false,
-                    controls: false,
-                    'queue-autoplay-next': false,
-                    'queue-enable': false
-                }
-            });
-            
-            this.setupDMTracking();
-        }
+        // Create iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&controls=0&ui-start-screen-info=0`;
+        iframe.style.cssText = 'width:100%;height:100%;border:none;';
+        iframe.allowFullscreen = true;
         
-        // Show quality button for DM
-        document.getElementById('quality-btn').style.display = 'flex';
+        dmContainer.appendChild(iframe);
+        this.showToast(`Playing: ${movie.title}`, 'success');
+        
+        // Setup DM tracking simulation
+        this.setupDMTracking();
+    }
+    
+    setupDMTracking() {
+        // Dailymotion doesn't expose currentTime easily without API
+        // So we simulate progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (!this.currentMovie || document.getElementById('player-screen').style.display === 'none') {
+                clearInterval(interval);
+                return;
+            }
+            progress += 0.5;
+            document.getElementById('progress-fill').style.width = Math.min(progress, 100) + '%';
+            document.getElementById('time-display').textContent = `${this.formatTime(progress * 0.6)} / Live`;
+        }, 1000);
     }
     
     setupNativePlayer(movie) {
@@ -539,11 +653,8 @@ class StreamerApp {
         title.textContent = movie.title;
         meta.textContent = `${movie.category} • ${movie.year || ''} • ${movie.duration || ''}`;
         
-        // Destroy DM player if exists
-        if (this.dmPlayer) {
-            this.dmPlayer.destroy();
-            this.dmPlayer = null;
-        }
+        // Clear DM
+        dmContainer.innerHTML = '';
         
         video.src = movie.videoUrl;
         video.load();
@@ -556,56 +667,24 @@ class StreamerApp {
         }
         
         this.setupVideoTracking(video, movie.id);
-        
-        // Hide quality button for native (browser handles it)
-        <button id="quality-btn" class="control-btn">
-    <i class="fas fa-cog"></i>
-</button>
-    }
-    
-    setupDMTracking() {
-        // Dailymotion tracking through API events
-        if (!this.dmPlayer) return;
-        
-        const updateProgress = async () => {
-            try {
-                const currentTime = await this.dmPlayer.currentTime;
-                const duration = await this.dmPlayer.duration;
-                
-                if (duration > 0) {
-                    const percent = (currentTime / duration) * 100;
-                    document.getElementById('progress-fill').style.width = percent + '%';
-                    document.getElementById('time-display').textContent = 
-                        `${this.formatTime(currentTime)} / ${this.formatTime(duration)}`;
-                    
-                    if (Math.floor(currentTime) % 5 === 0) {
-                        this.saveContinueWatching(this.currentMovie.id, currentTime, duration, percent);
-                    }
-                }
-            } catch (e) {}
-        };
-        
-        // Update progress every second
-        this.dmProgressInterval = setInterval(updateProgress, 1000);
     }
     
     setupVideoTracking(video, movieId) {
         const progressFill = document.getElementById('progress-fill');
         const timeDisplay = document.getElementById('time-display');
-        const playBtn = document.getElementById('play-pause-btn');
+        const playBtn = document.getElementById('btn-play-pause');
         const centerBtn = document.getElementById('center-play-btn');
         const container = document.getElementById('video-container');
         const spinner = document.getElementById('buffering-spinner');
         
-        // Remove old listeners
-        video.onplay = null;
-        video.onpause = null;
-        video.ontimeupdate = null;
-        video.onended = null;
-        video.onwaiting = null;
-        video.onplaying = null;
+        const updatePlayState = () => {
+            const isPlaying = !video.paused;
+            playBtn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play ml-1"></i>';
+            centerBtn.innerHTML = isPlaying ? '<i class="fas fa-pause text-2xl"></i>' : '<i class="fas fa-play text-2xl ml-1"></i>';
+            container.classList.toggle('paused', !isPlaying);
+        };
         
-        video.addEventListener('timeupdate', () => {
+        video.ontimeupdate = () => {
             if (video.duration) {
                 const percent = (video.currentTime / video.duration) * 100;
                 progressFill.style.width = percent + '%';
@@ -614,65 +693,38 @@ class StreamerApp {
                 if (Math.floor(video.currentTime) % 5 === 0) {
                     this.saveContinueWatching(movieId, video.currentTime, video.duration, percent);
                 }
-                
-                this.watchTime++;
-                if (this.watchTime % 60 === 0) {
-                    localStorage.setItem('streamer_watchtime', this.watchTime);
-                }
             }
-        });
+        };
         
-        video.addEventListener('play', () => {
-            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            centerBtn.innerHTML = '<i class="fas fa-pause text-2xl"></i>';
-            container.classList.remove('paused');
-        });
-        
-        video.addEventListener('pause', () => {
-            playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
-            centerBtn.innerHTML = '<i class="fas fa-play text-2xl ml-1"></i>';
-            container.classList.add('paused');
-        });
-        
-        video.addEventListener('ended', () => {
+        video.onplay = updatePlayState;
+        video.onpause = updatePlayState;
+        video.onended = () => {
             this.showToast('Video ended', 'info');
             this.continueWatching = this.continueWatching.filter(item => item.movieId !== movieId);
             localStorage.setItem('streamer_continue', JSON.stringify(this.continueWatching));
-        });
+        };
         
-        video.addEventListener('waiting', () => {
-            spinner.style.display = 'block';
-        });
+        video.onwaiting = () => spinner.style.display = 'block';
+        video.onplaying = () => spinner.style.display = 'none';
         
-        video.addEventListener('playing', () => {
-            spinner.style.display = 'none';
-        });
-        
-        video.addEventListener('click', () => this.togglePlay());
-        
-        // Resume progress
-        const progress = this.continueWatching.find(item => item.movieId === movieId);
-        if (progress && progress.currentTime > 10) {
-            video.currentTime = progress.currentTime;
-        }
+        updatePlayState();
     }
     
     // ==================== PLAYER CONTROLS ====================
     togglePlay() {
         const video = document.getElementById('video-element');
-        const dmPlayer = this.dmPlayer;
+        const dmContainer = document.getElementById('dailymotion-player');
         
-        if (dmPlayer) {
-            dmPlayer.then ? dmPlayer.then(p => {
-                p.getState().then(state => {
-                    if (state.playerIsPlaying) {
-                        p.pause();
-                    } else {
-                        p.play();
-                    }
-                });
-            }) : null;
-        } else if (video) {
+        // If Dailymotion is active, toggle via postMessage
+        if (!dmContainer.classList.contains('hidden')) {
+            const iframe = dmContainer.querySelector('iframe');
+            if (iframe) {
+                iframe.contentWindow.postMessage('{"event":"command","func":"togglePlay","args":""}', '*');
+            }
+            return;
+        }
+        
+        if (video) {
             video.paused ? video.play() : video.pause();
         }
     }
@@ -682,83 +734,43 @@ class StreamerApp {
         const rect = event.currentTarget.getBoundingClientRect();
         const percent = (event.clientX - rect.left) / rect.width;
         
-        if (this.dmPlayer) {
-            this.dmPlayer.then ? this.dmPlayer.then(p => {
-                p.duration.then(duration => {
-                    p.seek(percent * duration);
-                });
-            }) : null;
-        } else if (video && video.duration) {
+        if (video && video.duration) {
             video.currentTime = percent * video.duration;
         }
     }
     
     skipForward() {
         const video = document.getElementById('video-element');
-        
-        if (this.dmPlayer) {
-            this.dmPlayer.then ? this.dmPlayer.then(p => {
-                p.currentTime.then(time => {
-                    p.duration.then(duration => {
-                        p.seek(Math.min(time + 10, duration));
-                    });
-                });
-            }) : null;
-        } else if (video) {
-            video.currentTime = Math.min(video.currentTime + 10, video.duration);
-        }
-        
+        if (video) video.currentTime = Math.min(video.currentTime + 10, video.duration);
         this.showToast('+10 seconds', 'info');
     }
     
     skipBackward() {
         const video = document.getElementById('video-element');
-        
-        if (this.dmPlayer) {
-            this.dmPlayer.then ? this.dmPlayer.then(p => {
-                p.currentTime.then(time => {
-                    p.seek(Math.max(time - 10, 0));
-                });
-            }) : null;
-        } else if (video) {
-            video.currentTime = Math.max(video.currentTime - 10, 0);
-        }
-        
+        if (video) video.currentTime = Math.max(video.currentTime - 10, 0);
         this.showToast('-10 seconds', 'info');
     }
     
     toggleSubtitle() {
-        const track = document.getElementById('subtitle-track');
         const display = document.getElementById('subtitle-display');
-        const btn = document.getElementById('subtitle-toggle');
+        const btn = document.getElementById('btn-subtitle');
         
         if (display.classList.contains('show')) {
             display.classList.remove('show');
             btn.classList.remove('text-red-500');
-            this.showToast('Subtitles off', 'info');
         } else {
             display.classList.add('show');
             btn.classList.add('text-red-500');
-            this.showToast('Subtitles on', 'success');
+            if (this.currentMovie?.subtitleUrl) {
+                display.innerHTML = 'Loading subtitles...';
+            }
         }
-    }
-    
-    toggleAISubtitles() {
-        this.showToast('AI Subtitles: Analyzing audio...', 'info');
-        
-        // Simulate AI subtitle generation
-        setTimeout(() => {
-            const display = document.getElementById('subtitle-display');
-            display.innerHTML = '<span class="ai-indicator">AI</span> [Auto-generated subtitles enabled]';
-            display.classList.add('show');
-            this.showToast('AI Subtitles active', 'success');
-        }, 2000);
     }
     
     toggleFullscreen() {
         const container = document.getElementById('video-container');
         if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(() => this.showToast('Fullscreen error', 'error'));
+            container.requestFullscreen().catch(() => {});
         } else {
             document.exitFullscreen();
         }
@@ -766,20 +778,18 @@ class StreamerApp {
     
     closePlayer() {
         const video = document.getElementById('video-element');
+        const dmContainer = document.getElementById('dailymotion-player');
         
         if (video) {
             video.pause();
             video.src = '';
+            video.ontimeupdate = null;
+            video.onplay = null;
+            video.onpause = null;
         }
         
-        if (this.dmPlayer) {
-            this.dmPlayer.destroy();
-            this.dmPlayer = null;
-        }
-        
-        if (this.dmProgressInterval) {
-            clearInterval(this.dmProgressInterval);
-        }
+        dmContainer.innerHTML = '';
+        dmContainer.classList.add('hidden');
         
         this.showScreen('main-screen');
     }
@@ -796,13 +806,7 @@ class StreamerApp {
     // ==================== CONTINUE WATCHING ====================
     saveContinueWatching(movieId, currentTime, duration, percent) {
         const existing = this.continueWatching.find(item => item.movieId === movieId);
-        const item = {
-            movieId,
-            currentTime,
-            duration,
-            percent: Math.round(percent),
-            timestamp: Date.now()
-        };
+        const item = { movieId, currentTime, duration, percent: Math.round(percent), timestamp: Date.now() };
         
         if (existing) Object.assign(existing, item);
         else this.continueWatching.push(item);
@@ -821,21 +825,21 @@ class StreamerApp {
         }
     }
     
-    // ==================== ADMIN: SAVE CONTENT ====================
+    // ==================== ADMIN SAVE ====================
     async saveContent() {
-        const title = document.getElementById('admin-title').value.trim();
-        const category = document.getElementById('admin-category').value;
-        const year = parseInt(document.getElementById('admin-year').value) || new Date().getFullYear();
-        const duration = document.getElementById('admin-duration').value.trim();
-        const rating = parseFloat(document.getElementById('admin-rating').value) || 0;
-        const description = document.getElementById('admin-description').value.trim();
-        const videoUrl = document.getElementById('admin-video').value.trim();
-        const subtitleUrl = document.getElementById('admin-subtitle').value.trim();
-        const posterUrl = document.getElementById('poster-url').value.trim();
+        const title = document.getElementById('admin-title')?.value.trim();
+        const category = document.getElementById('admin-category')?.value;
+        const year = parseInt(document.getElementById('admin-year')?.value) || new Date().getFullYear();
+        const duration = document.getElementById('admin-duration')?.value.trim();
+        const rating = parseFloat(document.getElementById('admin-rating')?.value) || 0;
+        const description = document.getElementById('admin-description')?.value.trim();
+        const videoUrl = document.getElementById('admin-video')?.value.trim();
+        const subtitleUrl = document.getElementById('admin-subtitle')?.value.trim();
+        const posterUrl = document.getElementById('poster-url')?.value.trim();
         
         let poster = posterUrl;
         const uploadPreview = document.getElementById('upload-preview');
-        if (!uploadPreview.classList.contains('hidden') && uploadPreview.src && !uploadPreview.src.includes('placeholder')) {
+        if (!uploadPreview?.classList.contains('hidden') && uploadPreview?.src) {
             poster = uploadPreview.src;
         }
         
@@ -845,153 +849,90 @@ class StreamerApp {
         }
         
         const movieData = {
-            title,
-            category,
-            year,
-            duration,
-            rating,
-            description,
-            poster,
-            videoUrl,
-            videoType: this.videoType,
+            title, category, year, duration, rating, description,
+            poster, videoUrl, videoType: this.videoType,
             subtitleUrl: subtitleUrl || null,
-            views: 0,
-            timestamp: Date.now()
+            views: 0, timestamp: Date.now()
         };
         
         try {
-            this.showToast('Saving to Firebase...', 'info');
+            this.showToast('Saving...', 'info');
             await addDoc(collection(this.db, "movies"), movieData);
-            this.showToast('✅ Content saved!', 'success');
-            
+            this.showToast('Content saved!', 'success');
             this.resetAdminForm();
             await this.loadMovies();
         } catch (error) {
-            console.error("Error saving:", error);
-            let errorMsg = error.message;
-            if (error.code === 'permission-denied') {
-                errorMsg = 'Firebase rules not updated. Wait 2-3 mins & refresh.';
-            }
-            this.showToast('Error: ' + errorMsg, 'error');
-        }
-    }
-    
-    resetAdminForm() {
-        document.getElementById('admin-title').value = '';
-        document.getElementById('admin-video').value = '';
-        document.getElementById('admin-subtitle').value = '';
-        document.getElementById('poster-url').value = '';
-        document.getElementById('admin-description').value = '';
-        document.getElementById('admin-duration').value = '';
-        document.getElementById('admin-rating').value = '';
-        document.getElementById('upload-preview').classList.add('hidden');
-        document.getElementById('upload-preview').src = '';
-    }
-    
-    // ==================== DEMO CONTENT ====================
-    async addDemoContent() {
-        const demoMovies = [
-            {
-                title: "Demon Slayer",
-                category: "Anime",
-                year: 2019,
-                duration: "24 min",
-                rating: 8.7,
-                description: "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko.",
-                poster: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
-                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
-                videoType: "dailymotion",
-                views: 0,
-                timestamp: Date.now()
-            },
-            {
-                title: "Soul Land",
-                category: "Donghua",
-                year: 2018,
-                duration: "20 min",
-                rating: 8.2,
-                description: "Tang San embarks on a journey to become a Spirit Master in the Soul Land.",
-                poster: "https://m.media-amazon.com/images/M/MV5BNzBjZTBiZDgtYjA1OS00MjViLThkYWItMDU3YzcxNmQxNmRhXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_.jpg",
-                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
-                videoType: "dailymotion",
-                views: 0,
-                timestamp: Date.now() - 1000
-            },
-            {
-                title: "Squid Game",
-                category: "K-Drama",
-                year: 2021,
-                duration: "60 min",
-                rating: 8.0,
-                description: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games.",
-                poster: "https://m.media-amazon.com/images/M/MV5BYWE3MDVkN2EtNjQ5MS00ZDQ4LTllNzQtM2I1N2JkZDZlNTkwXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_.jpg",
-                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
-                videoType: "dailymotion",
-                views: 0,
-                timestamp: Date.now() - 2000
-            },
-            {
-                title: "The Batman",
-                category: "Movies",
-                year: 2022,
-                duration: "176 min",
-                rating: 7.8,
-                description: "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.",
-                poster: "https://m.media-amazon.com/images/M/MV5BMDdmMTBiNTYtMDIzNi00NGVlLWIzMDYtZTk3MTQ3NGQxZGEwXkEyXkFqcGdeQXVyMzMwOTU5MDk@._V1_.jpg",
-                videoUrl: "https://www.dailymotion.com/video/x7yg6mc",
-                videoType: "dailymotion",
-                views: 0,
-                timestamp: Date.now() - 3000
-            }
-        ];
-        
-        try {
-            this.showToast('Adding demo content...', 'info');
-            for (const movie of demoMovies) {
-                await addDoc(collection(this.db, "movies"), movie);
-            }
-            this.showToast('✅ Demo content added!', 'success');
-            await this.loadMovies();
-        } catch (error) {
-            console.error("Demo error:", error);
+            console.error('Save error:', error);
             this.showToast('Error: ' + error.message, 'error');
         }
     }
     
-    // ==================== IMAGE UPLOAD ====================
+    resetAdminForm() {
+        ['admin-title', 'admin-video', 'admin-subtitle', 'poster-url', 'admin-description', 'admin-duration', 'admin-rating'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const preview = document.getElementById('upload-preview');
+        if (preview) {
+            preview.classList.add('hidden');
+            preview.src = '';
+        }
+    }
+    
+    // ==================== DEMO CONTENT ====================
+    async addDemoContent() {
+        const demos = [
+            { title: "Attack on Titan", category: "Anime", year: 2013, duration: "24 min", rating: 9.0, description: "Humans fight against man-eating giants.", poster: "https://cdn.myanimelist.net/images/anime/10/47347.jpg", videoUrl: "https://www.dailymotion.com/video/x7yg6mc", videoType: "dailymotion", views: 5000, timestamp: Date.now() },
+            { title: "Mo Dao Zu Shi", category: "Donghua", year: 2018, duration: "24 min", rating: 8.5, description: "A cultivator returns to life to solve mysteries.", poster: "https://m.media-amazon.com/images/M/MV5BNzBjZTBiZDgtYjA1OS00MjViLThkYWItMDU3YzcxNmQxNmRhXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_.jpg", videoUrl: "https://www.dailymotion.com/video/x7yg6mc", videoType: "dailymotion", views: 3200, timestamp: Date.now() - 1000 }
+        ];
+        
+        try {
+            this.showToast('Adding demo content...', 'info');
+            for (const movie of demos) {
+                await addDoc(collection(this.db, "movies"), movie);
+            }
+            this.showToast('Demo content added!', 'success');
+            await this.loadMovies();
+        } catch (error) {
+            this.showToast('Error: ' + error.message, 'error');
+        }
+    }
+    
+    // ==================== IMAGE HANDLING ====================
     handleImageUpload(event) {
         const file = event.target.files[0];
-        if (!file) return;
-        
-        if (!file.type.startsWith('image/')) {
-            this.showToast('Please select an image file', 'error');
+        if (!file || !file.type.startsWith('image/')) {
+            this.showToast('Please select an image', 'error');
             return;
         }
         
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById('upload-preview');
-            preview.src = e.target.result;
-            preview.classList.remove('hidden');
+            if (preview) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
             this.showToast('Image loaded', 'success');
         };
         reader.readAsDataURL(file);
     }
     
     handleUrlInput(url) {
-        if (url && url.startsWith('http')) {
-            const preview = document.getElementById('upload-preview');
-            preview.src = url;
-            preview.classList.remove('hidden');
-            preview.onload = () => this.showToast('Image URL valid', 'success');
-            preview.onerror = () => {
-                preview.classList.add('hidden');
-                this.showToast('Invalid image URL', 'error');
-            };
-        }
+        if (!url?.startsWith('http')) return;
+        const preview = document.getElementById('upload-preview');
+        if (!preview) return;
+        
+        preview.src = url;
+        preview.classList.remove('hidden');
+        preview.onload = () => this.showToast('Image valid', 'success');
+        preview.onerror = () => {
+            preview.classList.add('hidden');
+            this.showToast('Invalid image URL', 'error');
+        };
     }
     
-    // ==================== UI UTILITIES ====================
+    // ==================== SCREEN NAVIGATION ====================
     showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => {
             s.classList.remove('active');
@@ -1003,22 +944,14 @@ class StreamerApp {
         const target = document.getElementById(screenId);
         if (target) {
             target.style.display = 'block';
-            // Small delay for transition
-            requestAnimationFrame(() => {
-                target.classList.add('active');
-            });
+            requestAnimationFrame(() => target.classList.add('active'));
         }
         
         const hideNav = ['welcome-screen', 'player-screen'];
         const nav = document.getElementById('bottom-nav');
         if (nav) {
-            if (hideNav.includes(screenId)) {
-                nav.classList.add('hidden');
-                nav.classList.remove('flex');
-            } else {
-                nav.classList.remove('hidden');
-                nav.classList.add('flex');
-            }
+            nav.classList.toggle('hidden', hideNav.includes(screenId));
+            nav.classList.toggle('flex', !hideNav.includes(screenId));
         }
         
         document.querySelectorAll('.bottom-nav-item').forEach(item => {
@@ -1032,33 +965,30 @@ class StreamerApp {
     }
     
     guestLogin() {
+        localStorage.setItem('streamer_visited', 'true');
         this.showScreen('main-screen');
         this.loadMovies();
     }
     
     updateStats() {
-        const continueEl = document.getElementById('continue-count');
-        const totalEl = document.getElementById('total-count');
-        const watchEl = document.getElementById('watch-time');
-        
-        if (continueEl) continueEl.textContent = this.continueWatching.length;
-        if (totalEl) totalEl.textContent = this.movies.length;
-        if (watchEl) watchEl.textContent = Math.floor(this.watchTime / 60) + 'h';
+        document.getElementById('continue-count').textContent = this.continueWatching.length;
+        document.getElementById('total-count').textContent = this.movies.length;
+        document.getElementById('watch-time').textContent = Math.floor(this.watchTime / 60) + 'h';
     }
     
     clearAllData() {
-        if (confirm('Clear all local data?')) {
-            localStorage.removeItem('streamer_continue');
-            localStorage.removeItem('streamer_watchtime');
-            localStorage.removeItem('streamer_visited');
-            this.continueWatching = [];
-            this.watchTime = 0;
-            this.updateStats();
-            this.renderContinueWatching();
-            this.showToast('All data cleared', 'success');
-        }
+        if (!confirm('Clear all local data?')) return;
+        localStorage.removeItem('streamer_continue');
+        localStorage.removeItem('streamer_watchtime');
+        localStorage.removeItem('streamer_visited');
+        this.continueWatching = [];
+        this.watchTime = 0;
+        this.updateStats();
+        this.renderContinueWatching();
+        this.showToast('All data cleared', 'success');
     }
     
+    // ==================== TOAST ====================
     showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -1066,13 +996,9 @@ class StreamerApp {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            info: 'fa-info-circle'
-        };
-        
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
         toast.innerHTML = `<i class="fas ${icons[type]}"></i>${message}`;
+        
         container.appendChild(toast);
         
         setTimeout(() => {
@@ -1081,62 +1007,28 @@ class StreamerApp {
         }, 3000);
     }
     
-    setupEventListeners() {
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (!document.getElementById('player-screen').classList.contains('active')) return;
-            
-            switch(e.key) {
-                case ' ': 
-                    e.preventDefault(); 
-                    this.togglePlay(); 
-                    break;
-                case 'ArrowRight': 
-                    this.skipForward(); 
-                    break;
-                case 'ArrowLeft': 
-                    this.skipBackward(); 
-                    break;
-                case 'f': 
-                    this.toggleFullscreen(); 
-                    break;
-                case 'Escape': 
-                    if (document.fullscreenElement) document.exitFullscreen(); 
-                    break;
-            }
-        });
+    // ==================== KEYBOARD ====================
+    handleKeydown(e) {
+        if (!document.getElementById('player-screen').classList.contains('active')) return;
         
-        // Progress bar hover preview
-        const progressBar = document.getElementById('progress-bar');
-        if (progressBar) {
-            progressBar.addEventListener('mousemove', (e) => {
-                const preview = document.getElementById('progress-preview');
-                const rect = progressBar.getBoundingClientRect();
-                const percent = (e.clientX - rect.left) / rect.width;
-                preview.style.left = (percent * 100) + '%';
-            });
+        switch(e.key) {
+            case ' ': e.preventDefault(); this.togglePlay(); break;
+            case 'ArrowRight': this.skipForward(); break;
+            case 'ArrowLeft': this.skipBackward(); break;
+            case 'f': this.toggleFullscreen(); break;
+            case 'Escape': if (document.fullscreenElement) document.exitFullscreen(); break;
         }
-        
-        // Double tap to skip
-        let lastTap = 0;
-        const videoContainer = document.getElementById('video-container');
-        if (videoContainer) {
-            videoContainer.addEventListener('touchend', (e) => {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-                if (tapLength < 300 && tapLength > 0) {
-                    const screenWidth = window.innerWidth;
-                    if (e.changedTouches[0].clientX < screenWidth / 2) {
-                        this.skipBackward();
-                    } else {
-                        this.skipForward();
-                    }
-                }
-                lastTap = currentTime;
-            });
+    }
+    
+    // ==================== AI SUBTITLES (STUB) ====================
+    toggleAISubtitles() {
+        if (window.aiSubtitles) {
+            window.aiSubtitles.showLanguageSelector();
+        } else {
+            this.showToast('AI Subtitles loading...', 'info');
         }
     }
 }
 
-// ==================== INITIALIZE APP ====================
+// ==================== INIT ====================
 window.app = new StreamerApp();
