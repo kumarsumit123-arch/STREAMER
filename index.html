@@ -6,13 +6,8 @@
     <meta name="theme-color" content="#0f0f0f">
     <title>STREAMER - Premium OTT</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     
     <!-- Firebase -->
@@ -21,7 +16,6 @@
         import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
-        // TUMHARA FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
             authDomain: "streamer-a5ea9.firebaseapp.com",
@@ -36,103 +30,102 @@
             window.firebaseApp = initializeApp(firebaseConfig);
             window.db = getFirestore(window.firebaseApp);
             window.auth = getAuth(window.firebaseApp);
-            console.log('✅ Firebase initialized successfully');
+            console.log('Firebase OK');
         } catch (e) {
-            console.error('❌ Firebase init error:', e);
+            console.error('Firebase Error:', e);
         }
     </script>
 </head>
 <body>
 
-    <!-- Particles Background -->
-    <div id="particles-bg" class="particles-container"></div>
-    
+    <!-- Background Particles -->
+    <div id="particles-bg"></div>
+
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- ==================== WELCOME SCREEN ==================== -->
+    <!-- ========== WELCOME SCREEN ========== -->
     <div id="welcome-screen" class="screen active">
-        <div class="flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
-            <!-- Background Effects -->
-            <div class="absolute inset-0 overflow-hidden pointer-events-none">
-                <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse-slow"></div>
-                <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
-                <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+        <div class="welcome-wrapper">
+            <div class="welcome-bg-effects">
+                <div class="bg-orb orb-1"></div>
+                <div class="bg-orb orb-2"></div>
+                <div class="bg-orb orb-3"></div>
             </div>
             
-            <div class="relative z-10 text-center max-w-md w-full animate-fade-up">
-                <div class="mb-8">
-                    <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20 animate-glow">
-                        <i class="fas fa-play text-3xl text-white ml-1"></i>
-                    </div>
-                    <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text animate-shimmer">STREAMER</h1>
-                    <p class="text-gray-400 text-lg font-light">Premium OTT Experience</p>
+            <div class="welcome-content">
+                <div class="logo-box animate-glow">
+                    <i class="fas fa-play"></i>
                 </div>
                 
-                <div class="space-y-4">
-                    <button id="btn-start" class="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20 ripple-btn">
-                        <i class="fas fa-play-circle group-hover:animate-bounce"></i> 
+                <h1 class="app-title gradient-text animate-shimmer">STREAMER</h1>
+                <p class="app-subtitle">Premium OTT Experience</p>
+                
+                <div class="welcome-buttons">
+                    <button id="btn-start" class="btn-primary ripple-btn">
+                        <i class="fas fa-play-circle"></i>
                         <span>Start Watching</span>
                     </button>
                     
-                    <button id="btn-admin-welcome" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50 hover:border-red-500/50">
-                        <i class="fas fa-lock"></i> Admin Access
+                    <button id="btn-admin-login" class="btn-secondary">
+                        <i class="fas fa-lock"></i>
+                        <span>Admin Access</span>
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MAIN SCREEN ==================== -->
+    <!-- ========== MAIN SCREEN ========== -->
     <div id="main-screen" class="screen">
-        <!-- Sticky Header -->
-        <div class="sticky top-0 z-40 glass-header">
-            <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
-                <h1 class="text-2xl font-black tracking-tight gradient-text animate-shimmer">STREAMER</h1>
-                <div class="flex items-center gap-3">
-                    <button id="btn-search-header" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition hover:shadow-lg hover:shadow-red-500/20">
+        
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-inner">
+                <h1 class="header-logo gradient-text">STREAMER</h1>
+                <div class="header-actions">
+                    <button id="btn-search" class="icon-btn">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button id="btn-profile-header" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition animate-glow-pulse">
-                        <i class="fas fa-user text-sm"></i>
+                    <button id="btn-profile" class="icon-btn avatar-btn">
+                        <i class="fas fa-user"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Admin Panel (Hidden by default) -->
+            <!-- Admin Panel -->
             <div id="admin-panel" class="admin-panel hidden">
                 <div class="admin-badge">Admin Mode</div>
-                <div class="flex justify-between items-center mb-6 mt-2">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-cog text-red-500 animate-spin-slow"></i> Content Manager
-                    </h3>
-                    <button id="btn-close-admin-panel" class="text-gray-400 hover:text-white transition hover:rotate-90 duration-300">
+                
+                <div class="panel-header">
+                    <h3><i class="fas fa-cog"></i> Content Manager</h3>
+                    <button id="btn-close-admin" class="icon-btn-sm">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
-                <!-- Image Upload -->
-                <div class="mb-6">
+                <!-- Upload -->
+                <div class="form-group">
                     <label class="form-label">Poster Image</label>
-                    <div class="upload-area" id="upload-area">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4 animate-bounce-slow"></i>
-                        <p class="text-gray-400 mb-2">Click to upload image</p>
-                        <p class="text-xs text-gray-600">JPG, PNG, WebP</p>
+                    <div class="upload-zone" id="upload-zone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload image</p>
+                        <small>JPG, PNG, WebP</small>
                     </div>
-                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                    <img id="upload-preview" class="mt-4 rounded-xl max-h-48 hidden mx-auto shadow-lg animate-fade-in">
-                    <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL here">
+                    <input type="file" id="file-upload" accept="image/*" hidden>
+                    <img id="preview-img" class="preview-img hidden" alt="Preview">
+                    <input type="url" id="input-poster-url" class="form-input mt-2" placeholder="Or paste image URL">
                 </div>
                 
                 <!-- Title & Category -->
-                <div class="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
+                <div class="form-row">
+                    <div class="form-group">
                         <label class="form-label">Title *</label>
-                        <input type="text" id="admin-title" class="form-input" placeholder="Enter title">
+                        <input type="text" id="input-title" class="form-input" placeholder="Enter title">
                     </div>
-                    <div>
+                    <div class="form-group">
                         <label class="form-label">Category *</label>
-                        <select id="admin-category" class="form-input">
+                        <select id="select-category" class="form-input">
                             <option value="Anime">Anime</option>
                             <option value="Donghua">Donghua (Chinese)</option>
                             <option value="K-Drama">K-Drama</option>
@@ -143,302 +136,253 @@
                     </div>
                 </div>
                 
-                <!-- Year, Duration, Rating -->
-                <div class="grid md:grid-cols-3 gap-4 mb-4">
-                    <div>
+                <!-- Meta -->
+                <div class="form-row three-col">
+                    <div class="form-group">
                         <label class="form-label">Year</label>
-                        <input type="number" id="admin-year" class="form-input" placeholder="2024" value="2024">
+                        <input type="number" id="input-year" class="form-input" value="2024">
                     </div>
-                    <div>
+                    <div class="form-group">
                         <label class="form-label">Duration</label>
-                        <input type="text" id="admin-duration" class="form-input" placeholder="24 min">
+                        <input type="text" id="input-duration" class="form-input" placeholder="24 min">
                     </div>
-                    <div>
+                    <div class="form-group">
                         <label class="form-label">Rating</label>
-                        <input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
+                        <input type="number" id="input-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
                     </div>
                 </div>
                 
                 <!-- Description -->
-                <div class="mb-4">
+                <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
+                    <textarea id="input-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
                 </div>
                 
-                <!-- Video URL -->
-                <div class="mb-4">
+                <!-- Video -->
+                <div class="form-group">
                     <label class="form-label">Video URL *</label>
-                    <div class="space-y-2">
-                        <input type="url" id="admin-video" class="form-input" placeholder="Dailymotion URL or MP4/CDN URL">
-                        <div class="flex gap-2">
-                            <button id="btn-type-dailymotion" class="flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30 transition-all">
-                                <i class="fab fa-dailymotion mr-1"></i> Dailymotion
-                            </button>
-                            <button id="btn-type-mp4" class="flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600 transition-all">
-                                <i class="fas fa-file-video mr-1"></i> MP4/CDN
-                            </button>
-                        </div>
+                    <input type="url" id="input-video" class="form-input" placeholder="Dailymotion or MP4 URL">
+                    <div class="video-type-btns">
+                        <button id="type-dm" class="type-btn active">Dailymotion</button>
+                        <button id="type-mp4" class="type-btn">MP4/CDN</button>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2" id="video-help">Paste Dailymotion video URL</p>
                 </div>
                 
-                <!-- Subtitle URL -->
-                <div class="mb-6">
+                <!-- Subtitle -->
+                <div class="form-group">
                     <label class="form-label">Subtitle URL (.vtt) - Optional</label>
-                    <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
+                    <input type="url" id="input-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
                 </div>
                 
-                <!-- Action Buttons -->
-                <div class="flex gap-3">
-                    <button id="btn-save-content" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 ripple-btn">
-                        <i class="fas fa-save mr-2"></i> Save to Firebase
+                <!-- Actions -->
+                <div class="panel-actions">
+                    <button id="btn-save" class="btn-primary flex-1">
+                        <i class="fas fa-save"></i> Save
                     </button>
-                    <button id="btn-add-demo" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition ripple-btn">
+                    <button id="btn-demo" class="btn-success">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Category Pills -->
-            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto" id="category-pills">
-                <button class="category-pill active" data-cat="All"><span>All</span></button>
-                <button class="category-pill" data-cat="Anime"><span>Anime</span></button>
-                <button class="category-pill" data-cat="Donghua"><span>Donghua</span></button>
-                <button class="category-pill" data-cat="K-Drama"><span>K-Drama</span></button>
-                <button class="category-pill" data-cat="Movies"><span>Movies</span></button>
-                <button class="category-pill" data-cat="Web Series"><span>Web Series</span></button>
-                <button class="category-pill" data-cat="Sports"><span>Sports</span></button>
+            <!-- Categories -->
+            <div class="category-bar" id="category-bar">
+                <button class="cat-pill active" data-cat="All">All</button>
+                <button class="cat-pill" data-cat="Anime">Anime</button>
+                <button class="cat-pill" data-cat="Donghua">Donghua</button>
+                <button class="cat-pill" data-cat="K-Drama">K-Drama</button>
+                <button class="cat-pill" data-cat="Movies">Movies</button>
+                <button class="cat-pill" data-cat="Web Series">Web Series</button>
+                <button class="cat-pill" data-cat="Sports">Sports</button>
             </div>
-        </div>
+        </header>
 
         <!-- Hero Slider -->
-        <div id="hero-section" class="mb-8 px-4">
-            <div class="hero-slider-container relative w-full h-[60vh] rounded-2xl overflow-hidden group">
-                <div id="hero-slides" class="hero-slides">
-                    <!-- Slides injected by JS -->
-                    <div class="w-full h-full flex items-center justify-center bg-gray-900">
-                        <div class="text-center">
-                            <div class="skeleton w-64 h-96 mx-auto mb-4 rounded-xl"></div>
-                            <p class="text-gray-500 animate-pulse">Loading content...</p>
-                        </div>
-                    </div>
+        <section class="hero-section">
+            <div class="hero-slider" id="hero-slider">
+                <div class="hero-slides" id="hero-slides">
+                    <!-- JS injected -->
                 </div>
-                
-                <!-- Slider Controls -->
-                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20" id="hero-dots"></div>
-                
-                <button id="slider-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20 opacity-0 group-hover:opacity-100">
+                <div class="hero-dots" id="hero-dots"></div>
+                <button class="slider-arrow slider-prev" id="slider-prev">
                     <i class="fas fa-chevron-left"></i>
                 </button>
-                <button id="slider-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20 opacity-0 group-hover:opacity-100">
+                <button class="slider-arrow slider-next" id="slider-next">
                     <i class="fas fa-chevron-right"></i>
                 </button>
-                
-                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none"></div>
+                <div class="hero-gradient"></div>
             </div>
-        </div>
+        </section>
 
         <!-- Content Sections -->
-        <div class="px-4 max-w-7xl mx-auto space-y-10">
+        <main class="content-area">
             
             <!-- Continue Watching -->
-            <section id="continue-watching-section" class="hidden animate-fade-up">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-play-circle text-blue-500 animate-pulse"></i> Continue Watching
-                    </h3>
-                    <button id="btn-clear-continue" class="text-xs text-gray-500 hover:text-red-500 transition hover:scale-110">
-                        Clear All
-                    </button>
+            <section id="section-continue" class="content-section hidden">
+                <div class="section-header">
+                    <h3><i class="fas fa-play-circle text-blue-500"></i> Continue Watching</h3>
+                    <button id="clear-continue" class="text-btn">Clear All</button>
                 </div>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
+                <div class="horizontal-scroll" id="continue-scroll"></div>
             </section>
 
             <!-- Trending -->
-            <section class="animate-fade-up" style="animation-delay: 0.1s">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-fire text-orange-500 animate-flame"></i> Trending Now
-                    </h3>
+            <section class="content-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
                 </div>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
-                    <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                    </div>
-                </div>
+                <div class="horizontal-scroll" id="trending-scroll"></div>
             </section>
 
             <!-- For You -->
-            <section class="animate-fade-up" style="animation-delay: 0.2s">
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-sparkles text-purple-500 animate-sparkle"></i> For You
-                </h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
-                    <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                    </div>
+            <section class="content-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-sparkles text-purple-500"></i> For You</h3>
                 </div>
+                <div class="horizontal-scroll" id="foryou-scroll"></div>
             </section>
-            
+
             <!-- New Releases -->
-            <section class="animate-fade-up" style="animation-delay: 0.3s">
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-clock text-green-500 animate-pulse"></i> New Releases
-                </h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container">
-                    <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
-                    </div>
+            <section class="content-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-clock text-green-500"></i> New Releases</h3>
                 </div>
+                <div class="horizontal-scroll" id="new-scroll"></div>
             </section>
-        </div>
+        </main>
     </div>
 
-    <!-- ==================== SEARCH SCREEN ==================== -->
+    <!-- ========== SEARCH SCREEN ========== -->
     <div id="search-screen" class="screen">
-        <div class="sticky top-0 z-40 glass-header px-4 py-4">
-            <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button id="search-back" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h1 class="text-xl font-bold">Search</h1>
-            </div>
-            <div class="relative mt-4 max-w-2xl mx-auto">
-                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition focus:shadow-lg focus:shadow-red-500/20" placeholder="Search anime, movies, dramas...">
-            </div>
+        <header class="page-header">
+            <button id="search-back" class="icon-btn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Search</h2>
+        </header>
+        
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="Search anime, movies, dramas..." autocomplete="off">
         </div>
-        <div class="px-4 py-6 max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="search-container">
-                <div class="col-span-full text-center py-12 text-gray-500 animate-fade-in">
-                    <i class="fas fa-search text-4xl mb-4 opacity-50 animate-bounce-slow"></i>
-                    <p>Type to search content...</p>
-                </div>
+        
+        <div class="search-results" id="search-results">
+            <div class="empty-search">
+                <i class="fas fa-search"></i>
+                <p>Type to search content...</p>
             </div>
         </div>
     </div>
 
-    <!-- ==================== PROFILE SCREEN ==================== -->
+    <!-- ========== PROFILE SCREEN ========== -->
     <div id="profile-screen" class="screen">
-        <div class="sticky top-0 z-40 glass-header px-4 py-4">
-            <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button id="profile-back" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <h1 class="text-xl font-bold">Profile</h1>
+        <header class="page-header">
+            <button id="profile-back" class="icon-btn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Profile</h2>
+        </header>
+        
+        <div class="profile-content">
+            <div class="profile-avatar animate-glow-pulse">
+                <i class="fas fa-user"></i>
             </div>
-        </div>
-        <div class="px-4 py-6 max-w-2xl mx-auto">
-            <div class="flex flex-col items-center py-12 animate-fade-up">
-                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl shadow-red-500/20 animate-glow-pulse">
-                    <i class="fas fa-user"></i>
+            <h3 class="profile-name">Guest User</h3>
+            <p class="profile-plan">Free Plan</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-num" id="stat-continue">0</span>
+                    <span class="stat-label">Continue</span>
                 </div>
-                <h2 class="text-2xl font-bold mb-1">Guest User</h2>
-                <p class="text-gray-400 mb-8">Free Plan</p>
-                
-                <div class="grid grid-cols-3 gap-4 w-full mb-8">
-                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
-                        <p class="text-2xl font-bold text-blue-500" id="continue-count">0</p>
-                        <p class="text-xs text-gray-400 mt-1">Continue</p>
-                    </div>
-                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
-                        <p class="text-2xl font-bold text-green-500" id="total-count">0</p>
-                        <p class="text-xs text-gray-400 mt-1">Total</p>
-                    </div>
-                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
-                        <p class="text-2xl font-bold text-purple-500" id="watch-time">0h</p>
-                        <p class="text-xs text-gray-400 mt-1">Watched</p>
-                    </div>
+                <div class="stat-card">
+                    <span class="stat-num" id="stat-total">0</span>
+                    <span class="stat-label">Total</span>
                 </div>
-                
-                <div class="w-full space-y-3">
-                    <button id="btn-admin-profile" class="w-full glass-card hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30 group">
-                        <i class="fas fa-crown text-yellow-500 group-hover:animate-bounce"></i> Admin Panel
-                    </button>
-                    
-                    <button id="btn-clear-all-data" class="w-full glass-card bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition hover:scale-[1.02]">
-                        <i class="fas fa-trash"></i> Clear Watch History
-                    </button>
+                <div class="stat-card">
+                    <span class="stat-num" id="stat-watch">0h</span>
+                    <span class="stat-label">Watched</span>
                 </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button id="btn-admin-profile" class="btn-outline">
+                    <i class="fas fa-crown text-yellow-500"></i>
+                    <span>Admin Panel</span>
+                </button>
+                <button id="btn-clear-data" class="btn-danger">
+                    <i class="fas fa-trash"></i>
+                    <span>Clear History</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== VIDEO PLAYER ==================== -->
+    <!-- ========== PLAYER SCREEN ========== -->
     <div id="player-screen" class="screen">
-        <div class="video-player-wrapper" id="video-container">
-            <!-- Dailymotion Player -->
-            <div id="dailymotion-player" class="w-full h-full hidden"></div>
+        <div class="player-wrapper" id="player-wrapper">
             
-            <!-- Native Video Player -->
-            <video id="video-element" class="w-full h-full bg-black hidden" playsinline></video>
+            <!-- Video Containers -->
+            <div id="dm-player" class="video-layer hidden"></div>
+            <video id="native-player" class="video-layer hidden" playsinline></video>
             
-            <!-- Buffering Spinner -->
-            <div class="buffering-spinner" id="buffering-spinner">
-                <div class="spinner-ring"></div>
+            <!-- Loading -->
+            <div class="player-loader" id="player-loader">
+                <div class="loader-ring"></div>
             </div>
             
-            <!-- Center Play Button -->
-            <div class="center-play-btn" id="center-play-btn">
-                <i class="fas fa-play text-2xl ml-1"></i>
-            </div>
+            <!-- Center Play -->
+            <button class="center-play" id="center-play">
+                <i class="fas fa-play"></i>
+            </button>
             
-            <!-- Subtitle Display -->
-            <div id="subtitle-display" class="subtitle-display"></div>
+            <!-- Subtitles -->
+            <div class="subtitle-layer" id="subtitle-layer"></div>
             
-            <!-- AI Subtitle Button -->
-            <button id="btn-ai-subtitles" class="absolute top-20 right-4 z-50 w-10 h-10 rounded-full bg-purple-600/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-500 transition animate-glow" style="display: none;">
+            <!-- AI Button -->
+            <button class="ai-btn" id="ai-btn" title="AI Subtitles">
                 <i class="fas fa-robot"></i>
             </button>
             
             <!-- Top Bar -->
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
-                <div class="flex items-center gap-3">
-                    <button id="player-back" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md hover:rotate-12">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div>
-                        <h3 class="font-bold text-sm" id="player-title">Loading...</h3>
-                        <p class="text-xs text-gray-400" id="player-meta"></p>
-                    </div>
+            <div class="player-topbar">
+                <button id="player-back" class="icon-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="player-info">
+                    <h4 id="player-title">Loading...</h4>
+                    <p id="player-meta"></p>
                 </div>
             </div>
             
-            <!-- Player Controls -->
+            <!-- Controls -->
             <div class="player-controls">
-                <div class="progress-container" id="progress-bar">
-                    <div class="progress-fill" id="progress-fill">
-                        <div class="progress-handle"></div>
-                    </div>
+                <div class="progress-track" id="progress-track">
+                    <div class="progress-bar" id="progress-bar"></div>
+                    <div class="progress-thumb"></div>
                 </div>
                 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <button class="control-btn ripple-btn" id="play-pause-btn">
+                <div class="controls-row">
+                    <div class="controls-left">
+                        <button id="ctrl-play" class="ctrl-btn">
                             <i class="fas fa-pause"></i>
                         </button>
-                        <button class="control-btn" id="skip-back-btn">
+                        <button id="ctrl-back" class="ctrl-btn">
                             <i class="fas fa-undo-alt"></i>
-                            <span class="text-[8px] absolute bottom-1">10</span>
+                            <span class="skip-badge">10</span>
                         </button>
-                        <button class="control-btn" id="skip-fwd-btn">
+                        <button id="ctrl-fwd" class="ctrl-btn">
                             <i class="fas fa-redo-alt"></i>
-                            <span class="text-[8px] absolute bottom-1">10</span>
+                            <span class="skip-badge">10</span>
                         </button>
-                        <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
+                        <span class="time-display" id="time-display">0:00 / 0:00</span>
                     </div>
                     
-                    <div class="flex items-center gap-3">
-                        <button class="control-btn" id="subtitle-toggle-btn">
+                    <div class="controls-right">
+                        <button id="ctrl-sub" class="ctrl-btn">
                             <i class="fas fa-closed-captioning"></i>
                         </button>
-                        <button class="control-btn" id="fullscreen-btn">
+                        <button id="ctrl-fullscreen" class="ctrl-btn">
                             <i class="fas fa-expand"></i>
                         </button>
                     </div>
@@ -447,26 +391,27 @@
         </div>
     </div>
 
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
-    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass-nav px-6 py-3 flex justify-around items-center z-40 hidden">
-        <button class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen" id="bottom-nav-home">
-            <i class="fas fa-home text-xl"></i>
-            <span class="text-xs font-medium">Home</span>
+    <!-- ========== BOTTOM NAV ========== -->
+    <nav id="bottom-nav" class="bottom-nav hidden">
+        <button class="nav-item active" data-screen="main-screen">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
         </button>
-        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen" id="bottom-nav-search">
-            <i class="fas fa-search text-xl"></i>
-            <span class="text-xs font-medium">Search</span>
+        <button class="nav-item" data-screen="search-screen">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
         </button>
-        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen" id="bottom-nav-profile">
-            <i class="fas fa-user text-xl"></i>
-            <span class="text-xs font-medium">Profile</span>
+        <button class="nav-item" data-screen="profile-screen">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
         </button>
-    </div>
+    </nav>
 
-    <!-- ==================== SCRIPTS ==================== -->
+    <!-- Scripts -->
     <script src="https://api.dmcdn.net/all.js"></script>
     <script type="module" src="app.js"></script>
     <script src="player.js"></script>
 
 </body>
-</html>
+    </html>
+                    
