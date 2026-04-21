@@ -3,736 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#0f0f0f">
     <title>STREAMER - Premium OTT</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="styles.css">
     
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        
-        * { 
-            font-family: 'Inter', sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-            box-sizing: border-box; 
-        }
-        
-        body { 
-            background-color: #0a0a0a; 
-            color: #ffffff; 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden; 
-        }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ef4444; }
-        
-        .screen { 
-            display: none; 
-            min-height: 100vh; 
-            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .screen.active { display: block; }
-        
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        
-        @keyframes mesh-gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #ef4444 0%, #a855f7 50%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradient-shift 3s ease infinite;
-        }
-        
-        @keyframes gradient-shift {
-            0%, 100% { filter: hue-rotate(0deg); }
-            50% { filter: hue-rotate(30deg); }
-        }
-        
-        .glass {
-            background: rgba(20, 20, 20, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .mesh-bg {
-            background: linear-gradient(-45deg, #0a0a0a, #1a0a0a, #0a0a1a, #1a0a1a);
-            background-size: 400% 400%;
-            animation: mesh-gradient 15s ease infinite;
-        }
-        
-        .movie-card { 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-        
-        .movie-card:hover { 
-            transform: translateY(-8px) scale(1.03) rotateX(5deg); 
-            z-index: 10;
-            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2), 0 0 60px rgba(239, 68, 68, 0.1);
-        }
-        
-        .movie-card .play-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .movie-card:hover .play-overlay { opacity: 1; }
-        
-        .movie-card img { transition: transform 0.5s; }
-        .movie-card:hover img { transform: scale(1.1); }
-        
-        .category-pill {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid transparent;
-        }
-        
-        .category-pill::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #ef4444, #a855f7);
-            opacity: 0;
-            transition: opacity 0.3s;
-            border-radius: inherit;
-        }
-        
-        .category-pill.active::before { opacity: 1; }
-        .category-pill.active { 
-            color: white; 
-            font-weight: 600;
-            border-color: rgba(239, 68, 68, 0.5);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-        .category-pill span { position: relative; z-index: 1; }
-        
-        .category-pill:hover:not(.active) {
-            border-color: rgba(239, 68, 68, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .video-player-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            background: #000;
-        }
-        
-        #video-element, #dailymotion-player {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
-        .player-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
-            padding: 30px 20px 20px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 100;
-        }
-        
-        .video-player-wrapper:hover .player-controls,
-        .video-player-wrapper.paused .player-controls {
-            opacity: 1;
-        }
-        
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 16px;
-            overflow: visible;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ef4444, #a855f7);
-            border-radius: 3px;
-            width: 0%;
-            position: relative;
-            transition: width 0.1s linear;
-        }
-        
-        .progress-handle {
-            position: absolute;
-            right: -8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            background: #ef4444;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.2s, transform 0.2s;
-            box-shadow: 0 0 15px rgba(239,68,68,0.8);
-            border: 2px solid white;
-        }
-        
-        .progress-container:hover .progress-handle { 
-            opacity: 1; 
-            transform: translateY(-50%) scale(1.2);
-        }
-        
-        .control-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .control-btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, rgba(239,68,68,0.4) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .control-btn:hover { 
-            background: rgba(239,68,68,0.8); 
-            transform: scale(1.1); 
-            box-shadow: 0 0 20px rgba(239,68,68,0.4);
-        }
-        
-        .control-btn:hover::after { opacity: 1; }
-        
-        .center-play-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background: rgba(239,68,68,0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 50;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 40px rgba(239,68,68,0.5);
-        }
-        
-        .video-player-wrapper:hover .center-play-btn,
-        .video-player-wrapper.paused .center-play-btn {
-            opacity: 1;
-            animation: pulse-glow 2s infinite;
-        }
-        
-        .buffering-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #ef4444;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-            z-index: 40;
-        }
-        
-        @keyframes spin { 
-            to { transform: translate(-50%, -50%) rotate(360deg); } 
-        }
-        
-        .admin-panel {
-            background: linear-gradient(135deg, #1a0a0a 0%, #0f0f0f 100%);
-            border: 2px solid #ef4444;
-            border-radius: 20px;
-            padding: 24px;
-            margin: 0 16px 24px 16px;
-            display: none;
-            position: relative;
-            animation: slideDown 0.4s ease;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
-        }
-        
-        .admin-panel.visible { display: block; }
-        
-        .admin-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            padding: 6px 20px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(239,68,68,0.4);
-            animation: pulse-glow 2s infinite;
-        }
-        
-        .upload-area {
-            border: 2px dashed #333;
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255,255,255,0.02);
-        }
-        
-        .upload-area:hover, .upload-area.dragover {
-            border-color: #ef4444;
-            background: rgba(239,68,68,0.05);
-            box-shadow: 0 0 20px rgba(239,68,68,0.1);
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1), 0 0 20px rgba(239, 68, 68, 0.1);
-            background: rgba(255,255,255,0.08);
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: #a0a0a0;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .toast {
-            padding: 16px 24px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .toast.success { 
-            background: rgba(34, 197, 94, 0.9); 
-            border-color: rgba(34, 197, 94, 0.3);
-        }
-        .toast.error { 
-            background: rgba(239, 68, 68, 0.9); 
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        .toast.info { 
-            background: rgba(59, 130, 246, 0.9); 
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-        
-        .skeleton {
-            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 12px;
-        }
-        
-        .bottom-nav-item {
-            position: relative;
-            transition: all 0.3s;
-        }
-        
-        .bottom-nav-item.active {
-            color: #ef4444;
-            transform: translateY(-2px);
-        }
-        
-        .bottom-nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: linear-gradient(90deg, #ef4444, #a855f7);
-            border-radius: 3px;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-        
-        .hero-gradient {
-            background: linear-gradient(to top, #0a0a0a 0%, transparent 60%);
-        }
-        
-        .hero-slider {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        .hero-slide {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out, transform 6s ease;
-            transform: scale(1.1);
-        }
-        
-        .hero-slide.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .hero-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .hero-indicators {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 20;
-        }
-        
-        .hero-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .hero-dot.active {
-            background: #ef4444;
-            width: 24px;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-        
-        .subtitle-display {
-            position: absolute;
-            bottom: 140px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: white;
-            font-size: 18px;
-            font-weight: 500;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-            pointer-events: none;
-            z-index: 50;
-            max-width: 80%;
-            line-height: 1.5;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 20px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .subtitle-display.show { display: block; }
-        
-        .quality-menu {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px;
-            min-width: 150px;
-            display: none;
-            z-index: 200;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        
-        .quality-menu.show { display: block; animation: slideUp 0.3s ease; }
-        
-        .quality-option {
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
-            font-size: 13px;
-        }
-        
-        .quality-option:hover { background: rgba(255,255,255,0.1); }
-        .quality-option.active { color: #ef4444; font-weight: 600; }
-        
-        .coming-soon-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: linear-gradient(135deg, #ef4444, #a855f7);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 5;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-        
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple-animation 0.6s ease-out;
-            pointer-events: none;
-        }
-        
-        @keyframes ripple-animation {
-            to { transform: scale(4); opacity: 0; }
-        }
-        
-        .btn-ripple {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .particles {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(239, 68, 68, 0.3);
-            border-radius: 50%;
-            animation: float-particle 10s infinite;
-        }
-        
-        @keyframes float-particle {
-            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
-        }
-        
-        .welcome-logo {
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .glow-btn {
-            position: relative;
-        }
-        
-        .glow-btn::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(135deg, #ef4444, #a855f7, #ec4899);
-            border-radius: inherit;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s;
-            filter: blur(10px);
-        }
-        
-        .glow-btn:hover::before { opacity: 0.7; }
-        
-        @media (max-width: 640px) {
-            .subtitle-display { font-size: 14px; bottom: 120px; }
-            .center-play-btn { width: 60px; height: 60px; }
-            .admin-panel { margin: 0 8px 16px 8px; padding: 16px; }
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        .dm-player {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        // REPLACE WITH YOUR REAL FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
+            authDomain: "streamer-a5ea9.firebaseapp.com",
+            projectId: "streamer-a5ea9",
+            storageBucket: "streamer-a5ea9.appspot.com",
+            messagingSenderId: "821781298641",
+            appId: "1:821781298641:web:1fcec50709460dcdd8f4f0"
+        };
+        
+        window.firebaseApp = initializeApp(firebaseConfig);
+        window.db = getFirestore(window.firebaseApp);
+        window.auth = getAuth(window.firebaseApp);
+        
+        console.log('Firebase initialized!');
+    </script>
 </head>
-<body class="mesh-bg">
-    <div class="particles" id="particles"></div>
+<body>
+    <!-- Particles -->
+    <div id="particles-bg" class="particles-container"></div>
     <div id="toast-container" class="toast-container"></div>
-    
+
     <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6 relative overflow-hidden">
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse"></div>
-            <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-            <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+            <div class="absolute top-20 left-10 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute bottom-40 right-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
         </div>
         
-        <div class="relative z-10 text-center max-w-md w-full">
+        <div class="relative z-10 text-center max-w-md w-full animate-fade-up">
             <div class="mb-8">
-                <div class="welcome-logo w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20">
+                <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20 animate-glow">
                     <i class="fas fa-play text-3xl text-white ml-1"></i>
                 </div>
-                <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
+                <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text animate-shimmer">STREAMER</h1>
                 <p class="text-gray-400 text-lg font-light">Premium OTT Experience</p>
             </div>
             
             <div class="space-y-4">
-                <button onclick="app.guestLogin()" class="btn-ripple glow-btn w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20">
-                    <i class="fas fa-play-circle"></i> Start Watching
+                <button id="btn-start" class="group w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20 ripple-btn">
+                    <i class="fas fa-play-circle group-hover:animate-bounce"></i> 
+                    <span>Start Watching</span>
                 </button>
                 
-                <button onclick="app.showAdminLogin()" class="btn-ripple w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50">
+                <button id="btn-admin" class="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-400 hover:text-white py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all border border-gray-700/50 hover:border-red-500/50">
                     <i class="fas fa-lock"></i> Admin Access
                 </button>
-                
-                <p class="text-gray-600 text-xs pt-4">Next-Gen Streaming • AI Subtitles • 4K Ready</p>
             </div>
         </div>
     </div>
 
     <!-- MAIN SCREEN -->
     <div id="main-screen" class="screen pb-24">
-        <div class="sticky top-0 z-40 glass">
+        <div class="sticky top-0 z-40 glass-header">
             <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
-                <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
+                <h1 class="text-2xl font-black tracking-tight gradient-text animate-shimmer">STREAMER</h1>
                 <div class="flex items-center gap-3">
-                    <button onclick="app.showScreen('search-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <button id="btn-search" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button onclick="app.showScreen('profile-screen')" class="btn-ripple w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition">
+                    <button id="btn-profile" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center hover:shadow-lg hover:shadow-red-500/30 transition animate-glow-pulse">
                         <i class="fas fa-user text-sm"></i>
                     </button>
                 </div>
             </div>
             
             <!-- Admin Panel -->
-            <div id="admin-panel" class="admin-panel">
+            <div id="admin-panel" class="admin-panel hidden">
                 <div class="admin-badge">Admin Mode</div>
                 <div class="flex justify-between items-center mb-6 mt-2">
                     <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-cog text-red-500"></i> Content Manager
+                        <i class="fas fa-cog text-red-500 animate-spin-slow"></i> Content Manager
                     </h3>
-                    <button onclick="app.hideAdminPanel()" class="text-gray-400 hover:text-white transition">
+                    <button id="btn-close-admin" class="text-gray-400 hover:text-white transition hover:rotate-90 duration-300">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
                 <div class="mb-6">
                     <label class="form-label">Poster Image</label>
-                    <div class="upload-area" id="upload-area" onclick="document.getElementById('image-upload').click()">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4"></i>
+                    <div class="upload-area" id="upload-area">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4 animate-bounce-slow"></i>
                         <p class="text-gray-400 mb-2">Click to upload image</p>
                         <p class="text-xs text-gray-600">JPG, PNG, WebP</p>
                     </div>
-                    <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="app.handleImageUpload(event)">
-                    <img id="upload-preview" class="mt-4 rounded-xl max-h-48 hidden mx-auto shadow-lg">
-                    <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL here" oninput="app.handleUrlInput(this.value)">
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                    <img id="upload-preview" class="mt-4 rounded-xl max-h-48 hidden mx-auto shadow-lg animate-fade-in">
+                    <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL here">
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-4 mb-4">
@@ -774,74 +145,52 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label class="form-label">Video Source Type</label>
-                    <select id="video-type" class="form-input mb-2" onchange="app.toggleVideoInput()">
-                        <option value="dailymotion">Dailymotion Embed</option>
-                        <option value="mp4">Direct MP4 / CDN</option>
-                        <option value="hls">HLS Stream (.m3u8)</option>
-                    </select>
-                </div>
-                
-                <div class="mb-4" id="dailymotion-input">
-                    <label class="form-label">Dailymotion Video ID *</label>
-                    <input type="text" id="admin-video-dm" class="form-input" placeholder="x7tgad0 (Video ID only)">
-                    <p class="text-xs text-gray-500 mt-2">Paste only the video ID from Dailymotion URL</p>
-                </div>
-                
-                <div class="mb-4 hidden" id="mp4-input">
-                    <label class="form-label">MP4 / CDN URL *</label>
-                    <input type="url" id="admin-video-mp4" class="form-input" placeholder="https://cdn.example.com/video.mp4">
-                </div>
-                
-                <div class="mb-4 hidden" id="hls-input">
-                    <label class="form-label">HLS URL (.m3u8) *</label>
-                    <input type="url" id="admin-video-hls" class="form-input" placeholder="https://cdn.example.com/video.m3u8">
+                    <label class="form-label">Video URL *</label>
+                    <div class="space-y-2">
+                        <input type="url" id="admin-video" class="form-input" placeholder="Dailymotion URL or MP4/CDN URL">
+                        <div class="flex gap-2">
+                            <button class="flex-1 py-2 px-3 rounded-lg bg-red-600/20 text-red-400 text-xs font-semibold border border-red-600/30" id="btn-dailymotion">
+                                <i class="fab fa-dailymotion mr-1"></i> Dailymotion
+                            </button>
+                            <button class="flex-1 py-2 px-3 rounded-lg bg-gray-700/50 text-gray-400 text-xs font-semibold border border-gray-600" id="btn-mp4">
+                                <i class="fas fa-file-video mr-1"></i> MP4/CDN
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2" id="video-help">Paste Dailymotion video URL</p>
                 </div>
                 
                 <div class="mb-6">
                     <label class="form-label">Subtitle URL (.vtt) - Optional</label>
                     <input type="url" id="admin-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
-                    <p class="text-xs text-gray-500 mt-2">Or leave empty for AI-generated subtitles</p>
                 </div>
                 
                 <div class="flex gap-3">
-                    <button onclick="app.saveContent()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 btn-ripple">
+                    <button id="btn-save" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-red-600/20 ripple-btn">
                         <i class="fas fa-save mr-2"></i> Save to Firebase
                     </button>
-                    <button onclick="app.addDemoContent()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition btn-ripple" title="Add sample content">
+                    <button id="btn-demo" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-xl font-bold transition ripple-btn">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
             
-            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
-                <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>All</span>
-                </button>
-                <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Anime</span>
-                </button>
-                <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Donghua</span>
-                </button>
-                <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>K-Drama</span>
-                </button>
-                <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Movies</span>
-                </button>
-                <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Web Series</span>
-                </button>
-                <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap">
-                    <span>Sports</span>
-                </button>
+            <!-- Category Pills -->
+            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto category-scroll" id="category-pills">
+                <button class="category-pill active" data-cat="All"><span>All</span></button>
+                <button class="category-pill" data-cat="Anime"><span>Anime</span></button>
+                <button class="category-pill" data-cat="Donghua"><span>Donghua</span></button>
+                <button class="category-pill" data-cat="K-Drama"><span>K-Drama</span></button>
+                <button class="category-pill" data-cat="Movies"><span>Movies</span></button>
+                <button class="category-pill" data-cat="Web Series"><span>Web Series</span></button>
+                <button class="category-pill" data-cat="Sports"><span>Sports</span></button>
             </div>
         </div>
 
+        <!-- Hero Slider -->
         <div id="hero-section" class="mb-8 px-4">
-            <div class="w-full h-[55vh] bg-gray-900 rounded-2xl relative overflow-hidden shadow-2xl shadow-red-900/20">
-                <div id="hero-content" class="hero-slider">
+            <div class="hero-slider-container relative w-full h-[60vh] rounded-2xl overflow-hidden">
+                <div id="hero-slides" class="hero-slides">
                     <div class="w-full h-full flex items-center justify-center">
                         <div class="text-center">
                             <div class="skeleton w-64 h-96 mx-auto mb-4 rounded-xl"></div>
@@ -849,62 +198,71 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20" id="hero-dots"></div>
+                
+                <button id="btn-prev-slide" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="btn-next-slide" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-red-600 transition z-20">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none"></div>
             </div>
         </div>
 
+        <!-- Content Sections -->
         <div class="px-4 max-w-7xl mx-auto space-y-10">
-            <section id="continue-watching-section" class="hidden">
+            <section id="continue-watching-section" class="hidden animate-fade-up">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-play-circle text-blue-500"></i> Continue Watching
+                        <i class="fas fa-play-circle text-blue-500 animate-pulse"></i> Continue Watching
                     </h3>
-                    <button onclick="app.clearContinueWatching()" class="text-xs text-gray-500 hover:text-red-500 transition">
+                    <button id="btn-clear-continue" class="text-xs text-gray-500 hover:text-red-500 transition hover:scale-110">
                         Clear All
                     </button>
                 </div>
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
             </section>
 
-            <section>
+            <section class="animate-fade-up" style="animation-delay: 0.1s">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-fire text-orange-500"></i> Trending Now
+                        <i class="fas fa-fire text-orange-500 animate-flame"></i> Trending Now
                     </h3>
                 </div>
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
                     <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
                     </div>
                 </div>
             </section>
 
-            <section>
+            <section class="animate-fade-up" style="animation-delay: 0.2s">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-sparkles text-purple-500"></i> For You
+                    <i class="fas fa-sparkles text-purple-500 animate-sparkle"></i> For You
                 </h3>
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
                     <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
                     </div>
                 </div>
             </section>
             
-            <section>
+            <section class="animate-fade-up" style="animation-delay: 0.3s">
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-clock text-green-500"></i> New Releases
+                    <i class="fas fa-clock text-green-500 animate-pulse"></i> New Releases
                 </h3>
                 <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container">
                     <div class="flex gap-4">
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
-                        <div class="skeleton w-36 h-52 flex-shrink-0"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
+                        <div class="skeleton w-36 h-52 flex-shrink-0 rounded-xl"></div>
                     </div>
                 </div>
             </section>
@@ -913,24 +271,22 @@
 
     <!-- SEARCH SCREEN -->
     <div id="search-screen" class="screen pb-24 min-h-screen">
-        <div class="sticky top-0 z-40 glass px-4 py-4">
+        <div class="sticky top-0 z-40 glass-header px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
+                <button id="btn-back-search" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Search</h1>
             </div>
             <div class="relative mt-4 max-w-2xl mx-auto">
                 <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" onkeyup="app.searchMovies()" 
-                       class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition focus:shadow-lg focus:shadow-red-600/10"
-                       placeholder="Search anime, movies, dramas...">
+                <input type="text" id="search-input" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none transition" placeholder="Search anime, movies, dramas...">
             </div>
         </div>
         <div class="px-4 py-6 max-w-7xl mx-auto">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="search-container">
-                <div class="col-span-full text-center py-12 text-gray-500">
-                    <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
+                <div class="col-span-full text-center py-12 text-gray-500 animate-fade-in">
+                    <i class="fas fa-search text-4xl mb-4 opacity-50 animate-bounce-slow"></i>
                     <p>Type to search content...</p>
                 </div>
             </div>
@@ -939,49 +295,45 @@
 
     <!-- PROFILE SCREEN -->
     <div id="profile-screen" class="screen pb-24 min-h-screen">
-        <div class="sticky top-0 z-40 glass px-4 py-4">
+        <div class="sticky top-0 z-40 glass-header px-4 py-4">
             <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="btn-ripple w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition">
+                <button id="btn-back-profile" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition hover:rotate-12">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h1 class="text-xl font-bold">Profile</h1>
             </div>
         </div>
         <div class="px-4 py-6 max-w-2xl mx-auto">
-            <div class="flex flex-col items-center py-12">
-                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl shadow-red-500/20 animate-pulse">
+            <div class="flex flex-col items-center py-12 animate-fade-up">
+                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl shadow-red-500/20 animate-glow-pulse">
                     <i class="fas fa-user"></i>
                 </div>
                 <h2 class="text-2xl font-bold mb-1">Guest User</h2>
                 <p class="text-gray-400 mb-8">Free Plan</p>
                 
                 <div class="grid grid-cols-3 gap-4 w-full mb-8">
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-red-500/30 transition">
+                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
                         <p class="text-2xl font-bold text-blue-500" id="continue-count">0</p>
                         <p class="text-xs text-gray-400 mt-1">Continue</p>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-purple-500/30 transition">
+                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
                         <p class="text-2xl font-bold text-green-500" id="total-count">0</p>
                         <p class="text-xs text-gray-400 mt-1">Total</p>
                     </div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5 hover:border-pink-500/30 transition">
+                    <div class="glass-card rounded-xl p-4 text-center hover:scale-105 transition duration-300">
                         <p class="text-2xl font-bold text-purple-500" id="watch-time">0h</p>
                         <p class="text-xs text-gray-400 mt-1">Watched</p>
                     </div>
                 </div>
                 
                 <div class="w-full space-y-3">
-                    <button onclick="app.showAdminLogin()" class="btn-ripple w-full bg-white/5 hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30">
-                        <i class="fas fa-crown text-yellow-500"></i> Admin Panel
+                    <button id="btn-admin-panel" class="w-full glass-card hover:bg-white/10 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 transition border border-white/5 hover:border-yellow-500/30 group">
+                        <i class="fas fa-crown text-yellow-500 group-hover:animate-bounce"></i> Admin Panel
                     </button>
                     
-                    <button onclick="app.clearAllData()" class="btn-ripple w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition border border-red-500/20">
+                    <button id="btn-clear-all" class="w-full glass-card bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition hover:scale-[1.02]">
                         <i class="fas fa-trash"></i> Clear Watch History
                     </button>
-                </div>
-                
-                <div class="mt-8 text-center">
-                    <p class="text-xs text-gray-600">STREAMER v3.0 • AI Powered • 4K Ready</p>
                 </div>
             </div>
         </div>
@@ -990,27 +342,26 @@
     <!-- VIDEO PLAYER -->
     <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
         <div class="video-player-wrapper" id="video-container">
-            <!-- Native Video Player -->
-            <video id="video-element" class="w-full h-full bg-black" playsinline style="display: none;"></video>
+            <div id="dailymotion-player" class="w-full h-full hidden"></div>
+            <video id="video-element" class="w-full h-full bg-black hidden" playsinline></video>
             
-            <!-- Dailymotion Player -->
-            <div id="dailymotion-container" style="display: none; width: 100%; height: 100%;">
-                <iframe id="dailymotion-player" class="dm-player" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+            <div class="buffering-spinner" id="buffering-spinner">
+                <div class="spinner-ring"></div>
             </div>
             
-            <track id="subtitle-track" kind="subtitles" srclang="en" label="English">
-            
-            <div class="buffering-spinner" id="buffering-spinner"></div>
-            
-            <div class="center-play-btn" id="center-play-btn" onclick="app.togglePlay()" style="display: none;">
+            <div class="center-play-btn" id="center-play-btn">
                 <i class="fas fa-play text-2xl ml-1"></i>
             </div>
             
             <div id="subtitle-display" class="subtitle-display"></div>
             
+            <button id="btn-ai-sub" class="absolute top-20 right-4 z-50 w-10 h-10 rounded-full bg-purple-600/80 backdrop-blur-md flex items-center justify-center text-white hover:bg-purple-500 transition animate-glow" style="display: none;">
+                <i class="fas fa-robot"></i>
+            </button>
+            
             <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
                 <div class="flex items-center gap-3">
-                    <button onclick="app.closePlayer()" class="btn-ripple w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
+                    <button id="btn-close-player" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md hover:rotate-12">
                         <i class="fas fa-arrow-left"></i>
                     </button>
                     <div>
@@ -1018,13 +369,10 @@
                         <p class="text-xs text-gray-400" id="player-meta"></p>
                     </div>
                 </div>
-                <button onclick="app.shareContent()" class="btn-ripple w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition backdrop-blur-md">
-                    <i class="fas fa-share-alt"></i>
-                </button>
             </div>
             
-            <div class="player-controls" id="native-controls" style="display: none;">
-                <div class="progress-container" id="progress-bar" onclick="app.seekVideo(event)">
+            <div class="player-controls">
+                <div class="progress-container" id="progress-bar">
                     <div class="progress-fill" id="progress-fill">
                         <div class="progress-handle"></div>
                     </div>
@@ -1032,61 +380,52 @@
                 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <button class="control-btn btn-ripple" onclick="app.togglePlay()" id="play-pause-btn">
+                        <button class="control-btn ripple-btn" id="btn-play-pause">
                             <i class="fas fa-pause"></i>
                         </button>
-                        <button class="control-btn btn-ripple" onclick="app.skipBackward()">
-                            <i class="fas fa-undo-10"></i>
-                            <span class="absolute text-[8px] font-bold">10</span>
+                        <button class="control-btn" id="btn-skip-back">
+                            <i class="fas fa-undo-alt"></i>
+                            <span class="text-[8px] absolute bottom-1">10</span>
                         </button>
-                        <button class="control-btn btn-ripple" onclick="app.skipForward()">
-                            <i class="fas fa-redo-10"></i>
-                            <span class="absolute text-[8px] font-bold">10</span>
+                        <button class="control-btn" id="btn-skip-fwd">
+                            <i class="fas fa-redo-alt"></i>
+                            <span class="text-[8px] absolute bottom-1">10</span>
                         </button>
                         <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <button class="control-btn btn-ripple" onclick="app.toggleQualityMenu()" id="quality-btn">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                        <button class="control-btn btn-ripple" onclick="app.toggleSubtitle()" id="subtitle-btn">
+                        <button class="control-btn" id="btn-subtitle">
                             <i class="fas fa-closed-captioning"></i>
                         </button>
-                        <button class="control-btn btn-ripple" onclick="app.toggleFullscreen()">
+                        <button class="control-btn" id="btn-fullscreen">
                             <i class="fas fa-expand"></i>
                         </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="quality-menu" id="quality-menu">
-                <div class="text-sm font-bold mb-3 text-gray-400 px-2">Quality</div>
-                <div id="quality-options"></div>
-            </div>
-            
-            <!-- AI Subtitle Toggle for Dailymotion -->
-            <div id="dm-subtitle-toggle" class="absolute bottom-24 right-4 z-50 hidden">
-                <button onclick="app.toggleAISubtitle()" class="control-btn btn-ripple bg-red-600/80">
-                    <i class="fas fa-closed-captioning"></i>
-                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
-                </button>
-            </div>
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
-    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-3 flex justify-around items-center z-40 hidden">
-        <button onclick="app.showScreen('main-screen')" class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen">
+    <!-- BOTTOM NAV -->
+    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass-nav px-6 py-3 flex justify-around items-center z-40 hidden">
+        <button class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="main-screen" id="nav-home">
             <i class="fas fa-home text-xl"></i>
             <span class="text-xs font-medium">Home</span>
         </button>
-        <button onclick="app.showScreen('search-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen">
+        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="search-screen" id="nav-search">
             <i class="fas fa-search text-xl"></i>
             <span class="text-xs font-medium">Search</span>
         </button>
-        <button onclick="app.showScreen('profile-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen">
+        <button class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400 hover:text-white transition" data-screen="profile-screen" id="nav-profile">
             <i class="fas fa-user text-xl"></i>
             <span class="text-xs font-medium">Profile</span>
         </button>
     </div>
+
+    <!-- Scripts -->
+    <script src="https://api.dmcdn.net/all.js"></script>
+    <script type="module" src="app.js"></script>
+    <script src="player.js"></script>
+</body>
+</html>
