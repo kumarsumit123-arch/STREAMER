@@ -1,61 +1,88 @@
-// ===== FIREBASE BACKEND PROXY =====
-// IMPORTANT: Yeh sirf structure hai. Real implementation ke liye aapko
-// apna backend server banana hoga (Node.js/Express ya Vercel Functions)
+// ===== REAL FIREBASE SETUP =====
+// Yeh file sirf Firebase ko initialize karti hai
+// API keys ismein hain lekin production mein backend proxy use karna chahiye
 
-const FirebaseProxy = {
-    // Development mein localStorage use karte hain
-    // Production mein yeh aapke backend API ko call karega
-    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Firebase Config - Yeh aapke project ki details hain
+const firebaseConfig = {
+    apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
+    authDomain: "streamer-a5ea9.firebaseapp.com",
+    projectId: "streamer-a5ea9",
+    storageBucket: "streamer-a5ea9.appspot.com",
+    messagingSenderId: "821781298641",
+    appId: "1:821781298641:web:1fcec50709460dcdd8f4f0"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== FIREBASE API FUNCTIONS =====
+// Yeh functions sab jagah use honge - app.js mein bhi
+
+const FirebaseAPI = {
+    // MOVIES COLLECTION
     async saveMovie(movieData) {
-        // TODO: Backend API call
-        // const response = await fetch('/api/movies', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(movieData)
-        // });
-        // return response.json();
-        
-        // For now, localStorage mein save karte hain
-        const movies = JSON.parse(localStorage.getItem('streamer_movies') || '[]');
-        movies.unshift(movieData);
-        localStorage.setItem('streamer_movies', JSON.stringify(movies));
-        return { success: true, id: movieData.id };
-    },
-    
-    async getMovies() {
-        // TODO: Backend API call
-        // const response = await fetch('/api/movies');
-        // return response.json();
-        
-        return JSON.parse(localStorage.getItem('streamer_movies') || '[]');
-    },
-    
-    async updateViews(movieId) {
-        // TODO: Backend API call
-        // await fetch(`/api/movies/${movieId}/views`, { method: 'POST' });
-        
-        const movies = JSON.parse(localStorage.getItem('streamer_movies') || '[]');
-        const movie = movies.find(m => m.id === movieId);
-        if (movie) {
-            movie.views = (movie.views || 0) + 1;
-            localStorage.setItem('streamer_movies', JSON.stringify(movies));
+        try {
+            const docRef = await addDoc(collection(db, "movies"), movieData);
+            return { success: true, id: docRef.id };
+        } catch (error) {
+            console.error("Firebase save error:", error);
+            throw error;
         }
     },
-    
-    // Admin authentication backend se hoga
+
+    async getMovies() {
+        try {
+            const q = query(collection(db, "movies"), orderBy("timestamp", "desc"));
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error("Firebase get error:", error);
+            throw error;
+        }
+    },
+
+    async updateViews(movieId) {
+        try {
+            const movieRef = doc(db, "movies", movieId);
+            const movieSnap = await getDoc(movieRef);
+            if (movieSnap.exists()) {
+                const currentViews = movieSnap.data().views || 0;
+                await updateDoc(movieRef, { views: currentViews + 1 });
+            }
+        } catch (error) {
+            console.error("Firebase update error:", error);
+        }
+    },
+
+    async deleteMovie(movieId) {
+        try {
+            await deleteDoc(doc(db, "movies", movieId));
+            return { success: true };
+        } catch (error) {
+            console.error("Firebase delete error:", error);
+            throw error;
+        }
+    },
+
+    // ADMIN VERIFICATION (Firestore mein admin collection)
     async verifyAdmin(password) {
-        // TODO: Backend API call
-        // const response = await fetch('/api/admin/verify', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ password })
-        // });
-        // return response.json();
-        
-        // Temporary: Client side check (production mein hata dein)
-        return { valid: password === 'Sumit.streamer@81#live.ott' };
+        try {
+            // Simple check - production mein backend se karna chahiye
+            return { valid: password === 'Sumit.streamer@81#live.ott' };
+        } catch (error) {
+            console.error("Admin verify error:", error);
+            return { valid: false };
+        }
     }
 };
 
-// Export for use in other files
-window.FirebaseProxy = FirebaseProxy;
+// Export globally
+window.db = db;
+window.FirebaseAPI = FirebaseAPI;
