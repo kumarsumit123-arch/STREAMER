@@ -18,7 +18,6 @@ class StreamerApp {
         this.setupEventListeners();
         this.checkFirstTime();
         this.checkAdminMode();
-        // Wait for Firebase to load
         this.waitForFirebase();
     }
     
@@ -33,7 +32,6 @@ class StreamerApp {
                 }
             }
         }, 100);
-        // Timeout after 5 seconds, use localStorage fallback
         setTimeout(() => {
             if (!this.firebaseReady) {
                 clearInterval(check);
@@ -50,7 +48,6 @@ class StreamerApp {
         const hasVisited = localStorage.getItem('streamer_visited');
         if (hasVisited) {
             this.showScreen('main-screen');
-            // Don't load movies here, wait for Firebase
         }
     }
       
@@ -58,38 +55,54 @@ class StreamerApp {
         const urlParams = new URLSearchParams(window.location.search);
         const adminParam = urlParams.get('admin');
         const savedAdmin = sessionStorage.getItem('streamer_admin');
+        
         if (adminParam === 'sumit81' || savedAdmin === 'true') {
-            this.activateAdmin();
+            this.isAdmin = true;
+            sessionStorage.setItem('streamer_admin', 'true');
+            this.showAdminPanel();
         }
     }
     
-    activateAdmin() {
-        this.isAdmin = true;
-        sessionStorage.setItem('streamer_admin', 'true');
+    showAdminPanel() {
         const adminPanel = document.getElementById('admin-panel');
         if (adminPanel) {
             adminPanel.classList.remove('hidden');
+            adminPanel.style.display = 'block';
+            adminPanel.style.visibility = 'visible';
+            adminPanel.style.opacity = '1';
+        }
+    }
+    
+    hideAdminPanel() {
+        const adminPanel = document.getElementById('admin-panel');
+        if (adminPanel) {
+            adminPanel.classList.add('hidden');
+            adminPanel.style.display = 'none';
         }
     }
       
     showAdminLogin() {
         const password = prompt('Enter admin password:');
         if (password === 'Sumit.streamer@81#live.ott') {
-            this.activateAdmin();
+            this.isAdmin = true;
+            sessionStorage.setItem('streamer_admin', 'true');
+            this.showAdminPanel();
             this.showToast('🔥 Admin Mode Activated', 'success');
+            
             const url = new URL(window.location);
             url.searchParams.set('admin', 'sumit81');
             window.history.pushState({}, '', url);
+            
+            // Load movies if on main screen
             if (document.getElementById('main-screen').classList.contains('active')) {
                 this.loadMovies();
+            } else {
+                this.showScreen('main-screen');
+                setTimeout(() => this.loadMovies(), 300);
             }
         } else {
             this.showToast('Invalid password', 'error');
         }
-    }
-    
-    hideAdminPanel() {
-        document.getElementById('admin-panel').classList.add('hidden');
     }
       
     toggleVideoInput() {
@@ -119,7 +132,6 @@ class StreamerApp {
         try {
             let movies = [];
             
-            // Try Firebase first
             if (this.firebaseReady && window.FirebaseAPI) {
                 try {
                     movies = await window.FirebaseAPI.getMovies();
@@ -129,7 +141,6 @@ class StreamerApp {
                 }
             }
             
-            // Fallback to localStorage
             if (!movies || movies.length === 0) {
                 const stored = localStorage.getItem('streamer_movies');
                 if (stored) {
@@ -170,7 +181,7 @@ class StreamerApp {
     }
       
     renderEmptyState() {
-        const emptyHTML = `<div class="text-center py-12"><i class="fas fa-film text-5xl text-gray-700 mb-4"></i><p class="text-gray-500 mb-2">No content available</p>${this.isAdmin ? '<p class="text-xs text-gray-600">Add content using Admin Panel</p>' : '<p class="text-xs text-gray-600">Check back later</p>'}</div>`;
+        const emptyHTML = `<div class="text-center py-12"><i class="fas fa-film text-5xl text-gray-700 mb-4"></i><p class="text-gray-500 mb-2">No content available</p>${this.isAdmin ? '<p class="text-xs text-gray-600">Add content using Admin Panel above</p>' : '<p class="text-xs text-gray-600">Check back later</p>'}</div>`;
         document.getElementById('hero-slides').innerHTML = emptyHTML;
         document.getElementById('trending-container').innerHTML = emptyHTML;
         document.getElementById('foryou-container').innerHTML = emptyHTML;
@@ -367,7 +378,6 @@ class StreamerApp {
         player.loadMovie(movie);
         this.showScreen('player-screen');
         
-        // Update views - Firebase + Local
         if (this.firebaseReady && window.FirebaseAPI) {
             window.FirebaseAPI.updateViews(movieId).catch(() => {});
         }
@@ -424,7 +434,6 @@ class StreamerApp {
         try {
             let savedId;
             
-            // Try Firebase first
             if (this.firebaseReady && window.FirebaseAPI) {
                 try {
                     const result = await window.FirebaseAPI.saveMovie(movieData);
@@ -440,7 +449,6 @@ class StreamerApp {
                 this.showToast('Saved locally', 'info');
             }
             
-            // Save to localStorage too (backup + offline)
             movieData.id = savedId;
             this.movies.unshift(movieData);
             localStorage.setItem('streamer_movies', JSON.stringify(this.movies));
@@ -475,7 +483,6 @@ class StreamerApp {
             for (const movie of demoMovies) {
                 movie.id = 'demo-' + Date.now() + Math.random();
                 
-                // Try Firebase
                 if (this.firebaseReady && window.FirebaseAPI) {
                     try {
                         await window.FirebaseAPI.saveMovie(movie);
@@ -483,8 +490,6 @@ class StreamerApp {
                         console.log('Firebase demo save failed');
                     }
                 }
-                
-                // Always save to local
                 this.movies.push(movie);
             }
             
@@ -554,7 +559,6 @@ class StreamerApp {
     guestLogin() {
         localStorage.setItem('streamer_visited', 'true');
         this.showScreen('main-screen');
-        // loadMovies will be called by waitForFirebase when ready
     }
       
     updateStats() {
