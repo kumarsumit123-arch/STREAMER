@@ -5,129 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0f0f0f">
     <title>STREAMER - Premium OTT</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyC203H8isoltOx66YZ_wddqpWB4nBIMQZU",
-            authDomain: "streamer-a5ea9.firebaseapp.com",
-            projectId: "streamer-a5ea9",
-            storageBucket: "streamer-a5ea9.firebasestorage.app",
-            messagingSenderId: "821781298641",
-            appId: "1:821781298641:web:1fcec50709460dcdd8f4f0",
-            measurementId: "G-21LF69JH1Q"
-        };
-        
-        try {
-            window.firebaseApp = initializeApp(firebaseConfig);
-            window.db = getFirestore(window.firebaseApp);
-            window.auth = getAuth(window.firebaseApp);
-            console.log('Firebase OK');
-        } catch (e) {
-            console.error('Firebase Error:', e);
-        }
-    </script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Background Particles -->
-    <div id="particles-bg"></div>
-
-    <!-- Toast Container -->
+    <div class="animated-bg" id="animated-bg"></div>
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- ========== WELCOME SCREEN ========== -->
-    <div id="welcome-screen" class="screen active">
-        <div class="welcome-wrapper">
-            <div class="welcome-bg-effects">
-                <div class="bg-orb orb-1"></div>
-                <div class="bg-orb orb-2"></div>
-                <div class="bg-orb orb-3"></div>
+    <!-- WELCOME SCREEN -->
+    <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="mesh-gradient bg-red-600" style="top:10%;left:10%"></div>
+            <div class="mesh-gradient bg-purple-600" style="top:60%;right:10%;animation-delay:-5s"></div>
+        </div>
+        <div class="relative z-10 text-center max-w-md w-full">
+            <div class="welcome-logo w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
+                <i class="fas fa-play text-3xl text-white ml-1"></i>
             </div>
-            
-            <div class="welcome-content">
-                <div class="logo-box animate-glow">
-                    <i class="fas fa-play"></i>
-                </div>
-                
-                <h1 class="app-title gradient-text animate-shimmer">STREAMER</h1>
-                <p class="app-subtitle">Premium OTT Experience</p>
-                
-                <div class="welcome-buttons">
-                    <button id="btn-start" class="btn-primary ripple-btn">
-                        <i class="fas fa-play-circle"></i>
-                        <span>Start Watching</span>
-                    </button>
-                    
-                    <button id="btn-admin-login" class="btn-secondary">
-                        <i class="fas fa-lock"></i>
-                        <span>Admin Access</span>
-                    </button>
-                </div>
-            </div>
+            <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
+            <p class="text-gray-400 text-lg font-light mb-8">Premium OTT Experience</p>
+            <button onclick="app.guestLogin()" class="welcome-btn w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 mb-4">
+                <i class="fas fa-play-circle"></i> Start Watching
+            </button>
+            <button onclick="app.showAdminLogin()" class="welcome-btn w-full bg-gray-800/50 text-gray-400 py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 border border-gray-700/50">
+                <i class="fas fa-lock"></i> Admin Access
+            </button>
         </div>
     </div>
 
-    <!-- ========== MAIN SCREEN ========== -->
-    <div id="main-screen" class="screen">
-        
-        <!-- Header -->
-        <header class="main-header">
-            <div class="header-inner">
-                <h1 class="header-logo gradient-text">STREAMER</h1>
-                <div class="header-actions">
-                    <button id="btn-search" class="icon-btn">
+    <!-- MAIN SCREEN -->
+    <div id="main-screen" class="screen pb-24">
+        <div class="sticky top-0 z-40 glass">
+            <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
+                <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
+                <div class="flex items-center gap-3">
+                    <button onclick="app.showScreen('search-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button id="btn-profile" class="icon-btn avatar-btn">
-                        <i class="fas fa-user"></i>
+                    <button onclick="app.showScreen('profile-screen')" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-user text-sm"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Admin Panel -->
-            <div id="admin-panel" class="admin-panel hidden">
+            <!-- ADMIN PANEL - Hidden until admin login -->
+            <div id="admin-panel" class="admin-panel">
                 <div class="admin-badge">Admin Mode</div>
-                
-                <div class="panel-header">
-                    <h3><i class="fas fa-cog"></i> Content Manager</h3>
-                    <button id="btn-close-admin" class="icon-btn-sm">
-                        <i class="fas fa-times"></i>
-                    </button>
+                <div class="flex justify-between items-center mb-6 mt-2">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-cog text-red-500"></i> Content Manager
+                    </h3>
+                    <button onclick="app.hideAdminPanel()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
                 </div>
-                
-                <!-- Upload -->
-                <div class="form-group">
+                <div class="mb-6">
                     <label class="form-label">Poster Image</label>
-                    <div class="upload-zone" id="upload-zone">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Click to upload image</p>
-                        <small>JPG, PNG, WebP</small>
+                    <div class="upload-area" onclick="document.getElementById('image-upload').click()">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400 mb-2">Click to upload image</p>
+                        <p class="text-xs text-gray-600">JPG, PNG, WebP</p>
                     </div>
-                    <input type="file" id="file-upload" accept="image/*" hidden>
-                    <img id="preview-img" class="preview-img hidden" alt="Preview">
-                    <input type="url" id="input-poster-url" class="form-input mt-2" placeholder="Or paste image URL">
+                    <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="app.handleImageUpload(event)">
+                    <img id="upload-preview" class="mt-4 rounded-xl max-h-48 hidden mx-auto shadow-lg">
+                    <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL" oninput="app.handleUrlInput(this.value)">
                 </div>
-                
-                <!-- Title & Category -->
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
                         <label class="form-label">Title *</label>
-                        <input type="text" id="input-title" class="form-input" placeholder="Enter title">
+                        <input type="text" id="admin-title" class="form-input" placeholder="Enter title">
                     </div>
-                    <div class="form-group">
+                    <div>
                         <label class="form-label">Category *</label>
-                        <select id="select-category" class="form-input">
+                        <select id="admin-category" class="form-input">
                             <option value="Anime">Anime</option>
-                            <option value="Donghua">Donghua (Chinese)</option>
+                            <option value="Donghua">Donghua</option>
                             <option value="K-Drama">K-Drama</option>
                             <option value="Movies">Movies</option>
                             <option value="Web Series">Web Series</option>
@@ -135,283 +86,207 @@
                         </select>
                     </div>
                 </div>
-                
-                <!-- Meta -->
-                <div class="form-row three-col">
-                    <div class="form-group">
-                        <label class="form-label">Year</label>
-                        <input type="number" id="input-year" class="form-input" value="2024">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Duration</label>
-                        <input type="text" id="input-duration" class="form-input" placeholder="24 min">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rating</label>
-                        <input type="number" id="input-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5">
-                    </div>
+                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                    <div><label class="form-label">Year</label><input type="number" id="admin-year" class="form-input" value="2024"></div>
+                    <div><label class="form-label">Duration</label><input type="text" id="admin-duration" class="form-input" placeholder="24 min"></div>
+                    <div><label class="form-label">Rating</label><input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5"></div>
                 </div>
-                
-                <!-- Description -->
-                <div class="form-group">
+                <div class="mb-4">
                     <label class="form-label">Description</label>
-                    <textarea id="input-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
+                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
                 </div>
-                
-                <!-- Video -->
-                <div class="form-group">
-                    <label class="form-label">Video URL *</label>
-                    <input type="url" id="input-video" class="form-input" placeholder="Dailymotion or MP4 URL">
-                    <div class="video-type-btns">
-                        <button id="type-dm" class="type-btn active">Dailymotion</button>
-                        <button id="type-mp4" class="type-btn">MP4/CDN</button>
-                    </div>
+                <div class="mb-4">
+                    <label class="form-label">Video Type</label>
+                    <select id="video-type" class="form-input mb-2" onchange="app.toggleVideoInput()">
+                        <option value="dailymotion">Dailymotion Embed</option>
+                        <option value="hls">HLS Stream (.m3u8)</option>
+                        <option value="mp4">Direct MP4</option>
+                    </select>
+                    <input type="url" id="admin-video" class="form-input" placeholder="https://www.dailymotion.com/video/XXXXXX">
+                    <p class="text-xs text-gray-500 mt-2" id="video-hint">Dailymotion video URL paste karein</p>
                 </div>
-                
-                <!-- Subtitle -->
-                <div class="form-group">
-                    <label class="form-label">Subtitle URL (.vtt) - Optional</label>
-                    <input type="url" id="input-subtitle" class="form-input" placeholder="https://example.com/subtitles.vtt">
-                </div>
-                
-                <!-- Actions -->
-                <div class="panel-actions">
-                    <button id="btn-save" class="btn-primary flex-1">
-                        <i class="fas fa-save"></i> Save
+                <div class="flex gap-3">
+                    <button onclick="app.saveContent()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-bold">
+                        <i class="fas fa-save mr-2"></i> Save
                     </button>
-                    <button id="btn-demo" class="btn-success">
+                    <button onclick="app.addDemoContent()" class="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-xl font-bold">
                         <i class="fas fa-magic"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Categories -->
-            <div class="category-bar" id="category-bar">
-                <button class="cat-pill active" data-cat="All">All</button>
-                <button class="cat-pill" data-cat="Anime">Anime</button>
-                <button class="cat-pill" data-cat="Donghua">Donghua</button>
-                <button class="cat-pill" data-cat="K-Drama">K-Drama</button>
-                <button class="cat-pill" data-cat="Movies">Movies</button>
-                <button class="cat-pill" data-cat="Web Series">Web Series</button>
-                <button class="cat-pill" data-cat="Sports">Sports</button>
+            <!-- CATEGORIES -->
+            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
+                <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>All</span></button>
+                <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Anime</span></button>
+                <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Donghua</span></button>
+                <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>K-Drama</span></button>
+                <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Movies</span></button>
+                <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Web Series</span></button>
+                <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Sports</span></button>
             </div>
-        </header>
+        </div>
 
-        <!-- Hero Slider -->
-        <section class="hero-section">
+        <!-- HERO SLIDER -->
+        <div class="mb-8 px-4">
             <div class="hero-slider" id="hero-slider">
-                <div class="hero-slides" id="hero-slides">
-                    <!-- JS injected -->
-                </div>
-                <div class="hero-dots" id="hero-dots"></div>
-                <button class="slider-arrow slider-prev" id="slider-prev">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="slider-arrow slider-next" id="slider-next">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <div class="hero-gradient"></div>
+                <div id="hero-slides"></div>
+                <div class="slider-indicators" id="slider-indicators"></div>
             </div>
-        </section>
+        </div>
 
-        <!-- Content Sections -->
-        <main class="content-area">
-            
-            <!-- Continue Watching -->
-            <section id="section-continue" class="content-section hidden">
-                <div class="section-header">
-                    <h3><i class="fas fa-play-circle text-blue-500"></i> Continue Watching</h3>
-                    <button id="clear-continue" class="text-btn">Clear All</button>
+        <div class="px-4 max-w-7xl mx-auto space-y-10">
+            <section id="continue-watching-section" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-play-circle text-blue-500"></i> Continue Watching</h3>
+                    <button onclick="app.clearContinueWatching()" class="text-xs text-gray-500 hover:text-red-500">Clear All</button>
                 </div>
-                <div class="horizontal-scroll" id="continue-scroll"></div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
             </section>
 
-            <!-- Trending -->
-            <section class="content-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
+            <section>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
+                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
                 </div>
-                <div class="horizontal-scroll" id="trending-scroll"></div>
             </section>
 
-            <!-- For You -->
-            <section class="content-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-sparkles text-purple-500"></i> For You</h3>
+            <section>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-sparkles text-purple-500"></i> For You</h3>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
+                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
                 </div>
-                <div class="horizontal-scroll" id="foryou-scroll"></div>
             </section>
 
-            <!-- New Releases -->
-            <section class="content-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-clock text-green-500"></i> New Releases</h3>
+            <section>
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-clock text-green-500"></i> New Releases</h3>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container">
+                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
                 </div>
-                <div class="horizontal-scroll" id="new-scroll"></div>
             </section>
-        </main>
+        </div>
     </div>
 
-    <!-- ========== SEARCH SCREEN ========== -->
-    <div id="search-screen" class="screen">
-        <header class="page-header">
-            <button id="search-back" class="icon-btn">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Search</h2>
-        </header>
-        
-        <div class="search-box">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" id="search-input" placeholder="Search anime, movies, dramas..." autocomplete="off">
+    <!-- SEARCH SCREEN -->
+    <div id="search-screen" class="screen pb-24 min-h-screen">
+        <div class="sticky top-0 z-40 glass px-4 py-4">
+            <div class="flex items-center gap-4 max-w-7xl mx-auto">
+                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                <h1 class="text-xl font-bold">Search</h1>
+            </div>
+            <div class="relative mt-4 max-w-2xl mx-auto">
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                <input type="text" id="search-input" onkeyup="app.searchMovies()" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none" placeholder="Search anime, movies, dramas...">
+            </div>
+            <div class="flex gap-2 mt-3 overflow-x-auto hide-scrollbar max-w-2xl mx-auto">
+                <button onclick="app.setSearchFilter('all')" class="search-filter active px-4 py-1.5 rounded-full text-xs font-semibold bg-red-600 text-white">All</button>
+                <button onclick="app.setSearchFilter('Anime')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Anime</button>
+                <button onclick="app.setSearchFilter('Donghua')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Donghua</button>
+                <button onclick="app.setSearchFilter('K-Drama')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">K-Drama</button>
+                <button onclick="app.setSearchFilter('Movies')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Movies</button>
+            </div>
         </div>
-        
-        <div class="search-results" id="search-results">
-            <div class="empty-search">
-                <i class="fas fa-search"></i>
-                <p>Type to search content...</p>
+        <div class="px-4 py-6 max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="search-container">
+                <div class="col-span-full text-center py-12 text-gray-500">
+                    <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
+                    <p>Type to search content...</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ========== PROFILE SCREEN ========== -->
-    <div id="profile-screen" class="screen">
-        <header class="page-header">
-            <button id="profile-back" class="icon-btn">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <h2>Profile</h2>
-        </header>
-        
-        <div class="profile-content">
-            <div class="profile-avatar animate-glow-pulse">
-                <i class="fas fa-user"></i>
+    <!-- PROFILE SCREEN -->
+    <div id="profile-screen" class="screen pb-24 min-h-screen">
+        <div class="sticky top-0 z-40 glass px-4 py-4">
+            <div class="flex items-center gap-4 max-w-7xl mx-auto">
+                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                <h1 class="text-xl font-bold">Profile</h1>
             </div>
-            <h3 class="profile-name">Guest User</h3>
-            <p class="profile-plan">Free Plan</p>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-num" id="stat-continue">0</span>
-                    <span class="stat-label">Continue</span>
+        </div>
+        <div class="px-4 py-6 max-w-2xl mx-auto">
+            <div class="flex flex-col items-center py-12">
+                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl">
+                    <i class="fas fa-user"></i>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-num" id="stat-total">0</span>
-                    <span class="stat-label">Total</span>
+                <h2 class="text-2xl font-bold mb-1">Guest User</h2>
+                <p class="text-gray-400 mb-8">Free Plan</p>
+                <div class="grid grid-cols-3 gap-4 w-full mb-8">
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-blue-500" id="continue-count">0</p><p class="text-xs text-gray-400 mt-1">Continue</p></div>
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-green-500" id="total-count">0</p><p class="text-xs text-gray-400 mt-1">Total</p></div>
+                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-purple-500" id="watch-time">0h</p><p class="text-xs text-gray-400 mt-1">Watched</p></div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-num" id="stat-watch">0h</span>
-                    <span class="stat-label">Watched</span>
+                <div class="w-full space-y-3">
+                    <button onclick="app.showAdminLogin()" class="w-full bg-white/5 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 border border-white/5"><i class="fas fa-crown text-yellow-500"></i> Admin Panel</button>
+                    <button onclick="app.clearAllData()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Clear Watch History</button>
                 </div>
-            </div>
-            
-            <div class="profile-actions">
-                <button id="btn-admin-profile" class="btn-outline">
-                    <i class="fas fa-crown text-yellow-500"></i>
-                    <span>Admin Panel</span>
-                </button>
-                <button id="btn-clear-data" class="btn-danger">
-                    <i class="fas fa-trash"></i>
-                    <span>Clear History</span>
-                </button>
+                <div class="mt-8 text-center"><p class="text-xs text-gray-600">STREAMER v3.0</p></div>
             </div>
         </div>
     </div>
 
-    <!-- ========== PLAYER SCREEN ========== -->
-    <div id="player-screen" class="screen">
-        <div class="player-wrapper" id="player-wrapper">
+    <!-- VIDEO PLAYER -->
+    <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
+        <div class="video-player-wrapper" id="video-container">
+            <video id="video-element" class="w-full h-full bg-black" playsinline></video>
+            <div id="dailymotion-container" class="dailymotion-container hidden"></div>
+            <track id="subtitle-track" kind="subtitles" srclang="en" label="English">
+            <div class="buffering-spinner" id="buffering-spinner"></div>
+            <div class="center-play-btn" id="center-play-btn" onclick="player.togglePlay()"><i class="fas fa-play text-2xl ml-1"></i></div>
+            <div id="subtitle-display" class="subtitle-display"></div>
             
-            <!-- Video Containers -->
-            <div id="dm-player" class="video-layer hidden"></div>
-            <video id="native-player" class="video-layer hidden" playsinline></video>
-            
-            <!-- Loading -->
-            <div class="player-loader" id="player-loader">
-                <div class="loader-ring"></div>
+            <div class="ai-subtitle-panel" id="ai-subtitle-panel">
+                <div class="ai-status"><div class="ai-status-dot" id="ai-status-dot"></div><span class="text-sm font-semibold" id="ai-status-text">AI Subtitles Active</span></div>
+                <div class="text-xs text-gray-400 mb-2">Real-time transcription</div>
+                <div id="ai-subtitle-text" class="text-sm text-white min-h-[60px] p-2 bg-white/5 rounded-lg"></div>
+                <button onclick="player.toggleAISubtitles()" class="mt-3 w-full py-2 bg-red-600/20 text-red-400 rounded-lg text-xs font-semibold">Stop AI Subtitles</button>
             </div>
             
-            <!-- Center Play -->
-            <button class="center-play" id="center-play">
-                <i class="fas fa-play"></i>
-            </button>
-            
-            <!-- Subtitles -->
-            <div class="subtitle-layer" id="subtitle-layer"></div>
-            
-            <!-- AI Button -->
-            <button class="ai-btn" id="ai-btn" title="AI Subtitles">
-                <i class="fas fa-robot"></i>
-            </button>
-            
-            <!-- Top Bar -->
-            <div class="player-topbar">
-                <button id="player-back" class="icon-btn">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <div class="player-info">
-                    <h4 id="player-title">Loading...</h4>
-                    <p id="player-meta"></p>
+            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
+                <div class="flex items-center gap-3">
+                    <button onclick="player.closePlayer()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                    <div><h3 class="font-bold text-sm" id="player-title">Loading...</h3><p class="text-xs text-gray-400" id="player-meta"></p></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="player.toggleAISubtitles()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center" title="AI Subtitles"><i class="fas fa-robot text-green-400"></i></button>
+                    <button onclick="app.shareContent()" class="share-btn"><i class="fas fa-share-alt"></i></button>
                 </div>
             </div>
             
-            <!-- Controls -->
             <div class="player-controls">
-                <div class="progress-track" id="progress-track">
-                    <div class="progress-bar" id="progress-bar"></div>
-                    <div class="progress-thumb"></div>
+                <div class="progress-container" id="progress-bar" onclick="player.seekVideo(event)">
+                    <div class="progress-fill" id="progress-fill"><div class="progress-handle"></div></div>
                 </div>
-                
-                <div class="controls-row">
-                    <div class="controls-left">
-                        <button id="ctrl-play" class="ctrl-btn">
-                            <i class="fas fa-pause"></i>
-                        </button>
-                        <button id="ctrl-back" class="ctrl-btn">
-                            <i class="fas fa-undo-alt"></i>
-                            <span class="skip-badge">10</span>
-                        </button>
-                        <button id="ctrl-fwd" class="ctrl-btn">
-                            <i class="fas fa-redo-alt"></i>
-                            <span class="skip-badge">10</span>
-                        </button>
-                        <span class="time-display" id="time-display">0:00 / 0:00</span>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button class="control-btn" onclick="player.togglePlay()" id="play-pause-btn"><i class="fas fa-pause"></i></button>
+                        <button class="control-btn" onclick="player.skipBackward()"><i class="fas fa-backward"></i></button>
+                        <button class="control-btn" onclick="player.skipForward()"><i class="fas fa-forward"></i></button>
+                        <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
                     </div>
-                    
-                    <div class="controls-right">
-                        <button id="ctrl-sub" class="ctrl-btn">
-                            <i class="fas fa-closed-captioning"></i>
-                        </button>
-                        <button id="ctrl-fullscreen" class="ctrl-btn">
-                            <i class="fas fa-expand"></i>
-                        </button>
+                    <div class="flex items-center gap-3">
+                        <button class="control-btn" onclick="player.toggleQualityMenu()" id="quality-btn"><i class="fas fa-cog"></i></button>
+                        <button class="control-btn" onclick="player.toggleSubtitle()"><i class="fas fa-closed-captioning"></i></button>
+                        <button class="control-btn" onclick="player.toggleFullscreen()"><i class="fas fa-expand"></i></button>
                     </div>
                 </div>
+            </div>
+            <div class="quality-menu" id="quality-menu">
+                <div class="text-sm font-bold mb-3 text-gray-400 px-2">Quality</div>
+                <div id="quality-options"></div>
             </div>
         </div>
     </div>
 
-    <!-- ========== BOTTOM NAV ========== -->
-    <nav id="bottom-nav" class="bottom-nav hidden">
-        <button class="nav-item active" data-screen="main-screen">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </button>
-        <button class="nav-item" data-screen="search-screen">
-            <i class="fas fa-search"></i>
-            <span>Search</span>
-        </button>
-        <button class="nav-item" data-screen="profile-screen">
-            <i class="fas fa-user"></i>
-            <span>Profile</span>
-        </button>
-    </nav>
+    <!-- BOTTOM NAV -->
+    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-3 flex justify-around items-center z-40 hidden">
+        <button onclick="app.showScreen('main-screen')" class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400" data-screen="main-screen"><i class="fas fa-home text-xl"></i><span class="text-xs font-medium">Home</span></button>
+        <button onclick="app.showScreen('search-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400" data-screen="search-screen"><i class="fas fa-search text-xl"></i><span class="text-xs font-medium">Search</span></button>
+        <button onclick="app.showScreen('profile-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400" data-screen="profile-screen"><i class="fas fa-user text-xl"></i><span class="text-xs font-medium">Profile</span></button>
+    </div>
 
-    <!-- Scripts -->
-    <script src="https://api.dmcdn.net/all.js"></script>
-    <script type="module" src="app.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="player.js"></script>
-
+    <script src="app.js"></script>
 </body>
-    </html>
-                    
+</html>
