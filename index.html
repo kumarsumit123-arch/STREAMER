@@ -7,28 +7,26 @@
     <title>STREAMER - Premium OTT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="animated-bg" id="animated-bg"></div>
     <div id="toast-container" class="toast-container"></div>
 
     <!-- WELCOME SCREEN -->
     <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6">
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="mesh-gradient bg-red-600" style="top:10%;left:10%"></div>
-            <div class="mesh-gradient bg-purple-600" style="top:60%;right:10%;animation-delay:-5s"></div>
-        </div>
         <div class="relative z-10 text-center max-w-md w-full">
-            <div class="welcome-logo w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
                 <i class="fas fa-play text-3xl text-white ml-1"></i>
             </div>
             <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
             <p class="text-gray-400 text-lg font-light mb-8">Premium OTT Experience</p>
-            <button onclick="app.guestLogin()" class="welcome-btn w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 mb-4">
+            <button onclick="app.guestLogin()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 mb-4">
                 <i class="fas fa-play-circle"></i> Start Watching
             </button>
-            <button onclick="app.showAdminLogin()" class="welcome-btn w-full bg-gray-800/50 text-gray-400 py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 border border-gray-700/50">
+            <button onclick="app.showAdminLogin()" class="w-full bg-gray-800/50 text-gray-400 py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 border border-gray-700/50">
                 <i class="fas fa-lock"></i> Admin Access
             </button>
         </div>
@@ -49,8 +47,8 @@
                 </div>
             </div>
             
-            <!-- ADMIN PANEL - Hidden until admin login -->
-            <div id="admin-panel" class="admin-panel">
+            <!-- ADMIN PANEL - HIDDEN BY DEFAULT -->
+            <div id="admin-panel" class="admin-panel hidden">
                 <div class="admin-badge">Admin Mode</div>
                 <div class="flex justify-between items-center mb-6 mt-2">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -116,14 +114,16 @@
             </div>
             
             <!-- CATEGORIES -->
-            <div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar max-w-7xl mx-auto">
-                <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>All</span></button>
-                <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Anime</span></button>
-                <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Donghua</span></button>
-                <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>K-Drama</span></button>
-                <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Movies</span></button>
-                <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Web Series</span></button>
-                <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap"><span>Sports</span></button>
+            <div class="category-scroll px-4 py-3 max-w-7xl mx-auto">
+                <div class="flex gap-2" style="width:max-content">
+                    <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>All</span></button>
+                    <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Anime</span></button>
+                    <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Donghua</span></button>
+                    <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>K-Drama</span></button>
+                    <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Movies</span></button>
+                    <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Web Series</span></button>
+                    <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Sports</span></button>
+                </div>
             </div>
         </div>
 
@@ -146,24 +146,33 @@
 
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container">
-                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container"></div>
             </section>
 
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-sparkles text-purple-500"></i> For You</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container">
-                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container"></div>
             </section>
 
             <section>
                 <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-clock text-green-500"></i> New Releases</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container">
-                    <div class="flex gap-4"><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div><div class="skeleton w-36 h-52 flex-shrink-0"></div></div>
-                </div>
+                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container"></div>
             </section>
+        </div>
+        
+        <!-- DISCLAIMER -->
+        <div class="px-4 py-8 mt-8 border-t border-gray-800">
+            <div class="max-w-7xl mx-auto text-center">
+                <p class="text-xs text-gray-600 mb-2">STREAMER v3.0 • Free OTT Platform</p>
+                <p class="text-xs text-gray-700 max-w-2xl mx-auto leading-relaxed">
+                    Disclaimer: All content available on this platform is sourced from publicly available third-party websites. 
+                    We do not host, upload, or store any copyrighted material on our servers. 
+                    This application is for educational and demonstration purposes only. 
+                    If you are a content owner and believe your rights have been violated, 
+                    please contact us for immediate removal. We respect DMCA and copyright laws.
+                </p>
+                <p class="text-xs text-gray-800 mt-2">© 2024 STREAMER. All rights reserved.</p>
+            </div>
         </div>
     </div>
 
@@ -220,7 +229,6 @@
                     <button onclick="app.showAdminLogin()" class="w-full bg-white/5 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 border border-white/5"><i class="fas fa-crown text-yellow-500"></i> Admin Panel</button>
                     <button onclick="app.clearAllData()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Clear Watch History</button>
                 </div>
-                <div class="mt-8 text-center"><p class="text-xs text-gray-600">STREAMER v3.0</p></div>
             </div>
         </div>
     </div>
@@ -235,22 +243,12 @@
             <div class="center-play-btn" id="center-play-btn" onclick="player.togglePlay()"><i class="fas fa-play text-2xl ml-1"></i></div>
             <div id="subtitle-display" class="subtitle-display"></div>
             
-            <div class="ai-subtitle-panel" id="ai-subtitle-panel">
-                <div class="ai-status"><div class="ai-status-dot" id="ai-status-dot"></div><span class="text-sm font-semibold" id="ai-status-text">AI Subtitles Active</span></div>
-                <div class="text-xs text-gray-400 mb-2">Real-time transcription</div>
-                <div id="ai-subtitle-text" class="text-sm text-white min-h-[60px] p-2 bg-white/5 rounded-lg"></div>
-                <button onclick="player.toggleAISubtitles()" class="mt-3 w-full py-2 bg-red-600/20 text-red-400 rounded-lg text-xs font-semibold">Stop AI Subtitles</button>
-            </div>
-            
             <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
                 <div class="flex items-center gap-3">
                     <button onclick="player.closePlayer()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
                     <div><h3 class="font-bold text-sm" id="player-title">Loading...</h3><p class="text-xs text-gray-400" id="player-meta"></p></div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="player.toggleAISubtitles()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center" title="AI Subtitles"><i class="fas fa-robot text-green-400"></i></button>
-                    <button onclick="app.shareContent()" class="share-btn"><i class="fas fa-share-alt"></i></button>
-                </div>
+                <button onclick="app.shareContent()" class="share-btn"><i class="fas fa-share-alt"></i></button>
             </div>
             
             <div class="player-controls">
@@ -285,7 +283,6 @@
         <button onclick="app.showScreen('profile-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400" data-screen="profile-screen"><i class="fas fa-user text-xl"></i><span class="text-xs font-medium">Profile</span></button>
     </div>
 
-    <script src="firebase-config.js"></script>
     <script src="player.js"></script>
     <script src="app.js"></script>
 </body>
