@@ -2,8 +2,6 @@ class VideoPlayer {
     constructor() {
         this.hls = null;
         this.currentMovie = null;
-        this.aiSubtitlesActive = false;
-        this.recognition = null;
         this.isDailymotion = false;
     }
     
@@ -17,7 +15,6 @@ class VideoPlayer {
         const videoEl = document.getElementById('video-element');
         const dmContainer = document.getElementById('dailymotion-container');
         
-        // Cleanup previous
         this.cleanup();
         
         if (this.isDailymotion) {
@@ -30,7 +27,6 @@ class VideoPlayer {
             this.loadNativeVideo(movie);
         }
         
-        // Subtitle track
         const track = document.getElementById('subtitle-track');
         const subtitleDisplay = document.getElementById('subtitle-display');
         if (movie.subtitleUrl) {
@@ -41,7 +37,6 @@ class VideoPlayer {
             subtitleDisplay.classList.remove('show');
         }
         
-        // Resume progress
         const progress = app.continueWatching.find(item => item.movieId === movie.id);
         if (progress && progress.currentTime > 10 && !this.isDailymotion) {
             videoEl.currentTime = progress.currentTime;
@@ -52,13 +47,7 @@ class VideoPlayer {
     loadDailymotion(videoId) {
         const container = document.getElementById('dailymotion-container');
         const videoIdClean = videoId.replace('https://www.dailymotion.com/video/', '').replace('https://dai.ly/', '');
-        container.innerHTML = `
-            <iframe 
-                src="https://www.dailymotion.com/embed/video/${videoIdClean}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0" 
-                allow="autoplay; fullscreen" 
-                allowfullscreen>
-            </iframe>
-        `;
+        container.innerHTML = `<iframe src="https://www.dailymotion.com/embed/video/${videoIdClean}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
         document.getElementById('buffering-spinner').style.display = 'none';
     }
     
@@ -168,7 +157,7 @@ class VideoPlayer {
     }
     
     togglePlay() {
-        if (this.isDailymotion) return; // Dailymotion has its own controls
+        if (this.isDailymotion) return;
         const video = document.getElementById('video-element');
         video.paused ? video.play() : video.pause();
     }
@@ -237,7 +226,6 @@ class VideoPlayer {
             this.hls = null;
         }
         dmContainer.innerHTML = '';
-        this.stopAISubtitles();
     }
     
     formatTime(seconds) {
@@ -248,82 +236,7 @@ class VideoPlayer {
         if (h > 0) return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
-    
-    // ===== AI SUBTITLES (Web Speech API) =====
-    toggleAISubtitles() {
-        if (this.aiSubtitlesActive) {
-            this.stopAISubtitles();
-        } else {
-            this.startAISubtitles();
-        }
-    }
-    
-    startAISubtitles() {
-        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-            app.showToast('AI Subtitles not supported in this browser', 'error');
-            return;
-        }
-        
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        this.recognition = new SpeechRecognition();
-        this.recognition.continuous = true;
-        this.recognition.interimResults = true;
-        this.recognition.lang = 'en-US';
-        
-        const panel = document.getElementById('ai-subtitle-panel');
-        const statusDot = document.getElementById('ai-status-dot');
-        const statusText = document.getElementById('ai-status-text');
-        const subtitleText = document.getElementById('ai-subtitle-text');
-        
-        this.recognition.onresult = (event) => {
-            let finalTranscript = '';
-            let interimTranscript = '';
-            
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
-                } else {
-                    interimTranscript += transcript;
-                }
-            }
-            
-            if (finalTranscript) {
-                subtitleText.textContent = finalTranscript;
-            } else {
-                subtitleText.textContent = interimTranscript;
-            }
-        };
-        
-        this.recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            statusDot.classList.add('inactive');
-            statusText.textContent = 'AI Error - Retrying...';
-        };
-        
-        this.recognition.onend = () => {
-            if (this.aiSubtitlesActive) {
-                this.recognition.start();
-            }
-        };
-        
-        this.recognition.start();
-        this.aiSubtitlesActive = true;
-        panel.classList.add('show');
-        statusDot.classList.remove('inactive');
-        statusText.textContent = 'AI Subtitles Active';
-        app.showToast('AI Subtitles started', 'success');
-    }
-    
-    stopAISubtitles() {
-        if (this.recognition) {
-            this.recognition.stop();
-            this.recognition = null;
-        }
-        this.aiSubtitlesActive = false;
-        document.getElementById('ai-subtitle-panel').classList.remove('show');
-        app.showToast('AI Subtitles stopped', 'info');
-    }
 }
 
 const player = new VideoPlayer();
+                    
