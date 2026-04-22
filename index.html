@@ -215,3 +215,182 @@
 </body>
         </html>
     
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Anime Stream</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="admin-logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>Admin Panel</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="active" onclick="showSection('dashboard')">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#" onclick="showSection('anime')">
+                    <i class="fas fa-video"></i> Manage Anime
+                </a>
+                <a href="#" onclick="showSection('add')">
+                    <i class="fas fa-plus-circle"></i> Add New
+                </a>
+                <a href="#" onclick="showSection('subtitles')">
+                    <i class="fas fa-closed-captioning"></i> Subtitles
+                </a>
+                <a href="index.html">
+                    <i class="fas fa-arrow-left"></i> Back to Site
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard -->
+            <section id="dashboard" class="admin-section active">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-video"></i>
+                        <div>
+                            <h3 id="totalAnime">0</h3>
+                            <p>Total Anime</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <h3 id="totalViews">0</h3>
+                            <p>Total Views</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-closed-captioning"></i>
+                        <div>
+                            <h3 id="totalSubtitles">0</h3>
+                            <p>Subtitles</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Manage Anime -->
+            <section id="anime" class="admin-section">
+                <h1>Manage Anime</h1>
+                <div class="anime-list" id="adminAnimeList">
+                    <!-- Dynamically loaded -->
+                </div>
+            </section>
+
+            <!-- Add New Anime -->
+            <section id="add" class="admin-section">
+                <h1>Add New Anime</h1>
+                <form class="anime-form" id="addAnimeForm" onsubmit="handleAddAnime(event)">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="animeTitle" required placeholder="Enter anime title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Channel/Uploader</label>
+                        <input type="text" id="animeChannel" required placeholder="@channelname">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Video URL (M3U8/MP4)</label>
+                        <input type="url" id="animeVideoUrl" required placeholder="https://example.com/video.m3u8">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Thumbnail Image</label>
+                        <div class="upload-area" id="thumbnailUpload">
+                            <input type="file" id="thumbnailFile" accept="image/*" onchange="handleImageUpload(this, 'thumbnail')">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload or drag & drop</p>
+                            <img id="thumbnailPreview" style="display:none; max-width:200px; margin-top:10px;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <input type="text" id="animeDuration" placeholder="2:31">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Subtitles</label>
+                        <div class="subtitle-options">
+                            <label class="radio-label">
+                                <input type="radio" name="subtitleType" value="file" checked onchange="toggleSubtitleInput()">
+                                Upload VTT/SRT File
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="subtitleType" value="manual" onchange="toggleSubtitleInput()">
+                                Manual Text Input
+                            </label>
+                        </div>
+                        
+                        <div id="subtitleFileInput">
+                            <input type="file" id="subtitleFile" accept=".vtt,.srt" onchange="handleSubtitleUpload(this)">
+                        </div>
+                        
+                        <div id="subtitleManualInput" style="display:none;">
+                            <textarea id="subtitleText" rows="10" placeholder="Enter script here...&#10;&#10;Example:&#10;00:00:01 --> 00:00:05&#10;Hello world&#10;&#10;00:00:06 --> 00:00:10&#10;How are you?"></textarea>
+                            <button type="button" class="btn-secondary" onclick="autoSyncSubtitles()">Auto-Sync Timestamps</button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-plus"></i> Add Anime
+                    </button>
+                </form>
+            </section>
+
+            <!-- Subtitle Management -->
+            <section id="subtitles" class="admin-section">
+                <h1>Subtitle Management</h1>
+                <div class="subtitle-list" id="subtitleList">
+                    <!-- Dynamically loaded -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h2>Edit Anime</h2>
+            <form id="editForm" onsubmit="handleEditAnime(event)">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Video URL</label>
+                    <input type="url" id="editVideoUrl" required>
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+                <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        // Security check
+        const isAdmin = sessionStorage.getItem('adminLoggedIn');
+        if (!isAdmin) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
