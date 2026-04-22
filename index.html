@@ -2,288 +2,216 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0f0f0f">
-    <title>STREAMER - Premium OTT</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <!-- Firebase SDK -->
-    <script type="module" src="firebase-config.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Stream - Premium Video Player</title>
+    <link rel="stylesheet" href="css/player.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- WELCOME SCREEN -->
-    <div id="welcome-screen" class="screen active flex flex-col justify-center items-center min-h-screen px-6">
-        <div class="relative z-10 text-center max-w-md w-full">
-            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
-                <i class="fas fa-play text-3xl text-white ml-1"></i>
-            </div>
-            <h1 class="text-6xl md:text-7xl font-black mb-4 tracking-tighter gradient-text">STREAMER</h1>
-            <p class="text-gray-400 text-lg font-light mb-8">Premium OTT Experience</p>
-            <button onclick="app.guestLogin()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 mb-4">
-                <i class="fas fa-play-circle"></i> Start Watching
-            </button>
-            <button onclick="app.showAdminLogin()" class="w-full bg-gray-800/50 text-gray-400 py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 border border-gray-700/50">
-                <i class="fas fa-lock"></i> Admin Access
-            </button>
-        </div>
-    </div>
-
-    <!-- MAIN SCREEN -->
-    <div id="main-screen" class="screen pb-24">
-        <div class="sticky top-0 z-40 glass">
-            <div class="flex justify-between items-center px-4 py-4 max-w-7xl mx-auto">
-                <h1 class="text-2xl font-black tracking-tight gradient-text">STREAMER</h1>
-                <div class="flex items-center gap-3">
-                    <button onclick="app.showScreen('search-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <button onclick="app.showScreen('profile-screen')" class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-purple-600 flex items-center justify-center">
-                        <i class="fas fa-user text-sm"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- ADMIN PANEL - HIDDEN BY DEFAULT -->
-            <div id="admin-panel" class="admin-panel hidden">
-                <div class="admin-badge">Admin Mode</div>
-                <div class="flex justify-between items-center mb-6 mt-2">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <i class="fas fa-cog text-red-500"></i> Content Manager
-                    </h3>
-                    <button onclick="app.hideAdminPanel()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="mb-6">
-                    <label class="form-label">Poster Image</label>
-                    <div class="upload-area" onclick="document.getElementById('image-upload').click()">
-                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-600 mb-4"></i>
-                        <p class="text-gray-400 mb-2">Click to upload image</p>
-                        <p class="text-xs text-gray-600">JPG, PNG, WebP</p>
-                    </div>
-                    <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="app.handleImageUpload(event)">
-                    <img id="upload-preview" class="mt-4 rounded-xl max-h-48 hidden mx-auto shadow-lg">
-                    <input type="url" id="poster-url" class="form-input mt-4" placeholder="Or paste image URL" oninput="app.handleUrlInput(this.value)">
-                </div>
-                <div class="grid md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label class="form-label">Title *</label>
-                        <input type="text" id="admin-title" class="form-input" placeholder="Enter title">
-                    </div>
-                    <div>
-                        <label class="form-label">Category *</label>
-                        <select id="admin-category" class="form-input">
-                            <option value="Anime">Anime</option>
-                            <option value="Donghua">Donghua</option>
-                            <option value="K-Drama">K-Drama</option>
-                            <option value="Movies">Movies</option>
-                            <option value="Web Series">Web Series</option>
-                            <option value="Sports">Sports</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-3 gap-4 mb-4">
-                    <div><label class="form-label">Year</label><input type="number" id="admin-year" class="form-input" value="2024"></div>
-                    <div><label class="form-label">Duration</label><input type="text" id="admin-duration" class="form-input" placeholder="24 min"></div>
-                    <div><label class="form-label">Rating</label><input type="number" id="admin-rating" class="form-input" min="0" max="10" step="0.1" placeholder="8.5"></div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Description</label>
-                    <textarea id="admin-description" class="form-input" rows="3" placeholder="Story synopsis..."></textarea>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Video Type</label>
-                    <select id="video-type" class="form-input mb-2" onchange="app.toggleVideoInput()">
-                        <option value="dailymotion">Dailymotion Embed</option>
-                        <option value="hls">HLS Stream (.m3u8)</option>
-                        <option value="mp4">Direct MP4</option>
-                    </select>
-                    <input type="url" id="admin-video" class="form-input" placeholder="https://www.dailymotion.com/video/XXXXXX">
-                    <p class="text-xs text-gray-500 mt-2" id="video-hint">Dailymotion video URL paste karein</p>
-                </div>
-                <div class="flex gap-3">
-                    <button onclick="app.saveContent()" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-bold">
-                        <i class="fas fa-save mr-2"></i> Save
-                    </button>
-                    <button onclick="app.addDemoContent()" class="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-xl font-bold">
-                        <i class="fas fa-magic"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- CATEGORIES -->
-            <div class="category-scroll px-4 py-3 max-w-7xl mx-auto">
-                <div class="flex gap-2" style="width:max-content">
-                    <button onclick="app.filterCategory('All')" class="category-pill active bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>All</span></button>
-                    <button onclick="app.filterCategory('Anime')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Anime</span></button>
-                    <button onclick="app.filterCategory('Donghua')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Donghua</span></button>
-                    <button onclick="app.filterCategory('K-Drama')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>K-Drama</span></button>
-                    <button onclick="app.filterCategory('Movies')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Movies</span></button>
-                    <button onclick="app.filterCategory('Web Series')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Web Series</span></button>
-                    <button onclick="app.filterCategory('Sports')" class="category-pill bg-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-semibold"><span>Sports</span></button>
-                </div>
-            </div>
-        </div>
-
-        <!-- HERO SLIDER -->
-        <div class="mb-8 px-4">
-            <div class="hero-slider" id="hero-slider">
-                <div id="hero-slides"></div>
-                <div class="slider-indicators" id="slider-indicators"></div>
-            </div>
-        </div>
-
-        <div class="px-4 max-w-7xl mx-auto space-y-10">
-            <section id="continue-watching-section" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-play-circle text-blue-500"></i> Continue Watching</h3>
-                    <button onclick="app.clearContinueWatching()" class="text-xs text-gray-500 hover:text-red-500">Clear All</button>
-                </div>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="continue-container"></div>
-            </section>
-
-            <section>
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Trending Now</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="trending-container"></div>
-            </section>
-
-            <section>
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-sparkles text-purple-500"></i> For You</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="foryou-container"></div>
-            </section>
-
-            <section>
-                <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-clock text-green-500"></i> New Releases</h3>
-                <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2" id="new-container"></div>
-            </section>
-        </div>
+    <!-- Main Container -->
+    <div class="app-container">
         
-        <!-- DISCLAIMER -->
-        <div class="px-4 py-8 mt-8 border-t border-gray-800">
-            <div class="max-w-7xl mx-auto text-center">
-                <p class="text-xs text-gray-600 mb-2">STREAMER v3.0 • Free OTT Platform</p>
-                <p class="text-xs text-gray-700 max-w-2xl mx-auto leading-relaxed">
-                    Disclaimer: All content available on this platform is sourced from publicly available third-party websites. 
-                    We do not host, upload, or store any copyrighted material on our servers. 
-                    This application is for educational and demonstration purposes only. 
-                    If you are a content owner and believe your rights have been violated, 
-                    please contact us for immediate removal. We respect DMCA and copyright laws.
-                </p>
-                <p class="text-xs text-gray-800 mt-2">© 2024 STREAMER. All rights reserved.</p>
+        <!-- Header -->
+        <header class="main-header">
+            <div class="logo">
+                <i class="fas fa-play-circle"></i>
+                <span>AnimeStream</span>
             </div>
-        </div>
-    </div>
+            <nav class="main-nav">
+                <a href="#" class="active">Home</a>
+                <a href="#">Trending</a>
+                <a href="#">Movies</a>
+                <a href="#">Series</a>
+            </nav>
+            <div class="header-actions">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+                <button class="cast-btn" onclick="toggleCast()"><i class="fas fa-cast"></i></button>
+                <button class="admin-toggle" onclick="showAdminLogin()"><i class="fas fa-cog"></i></button>
+            </div>
+        </header>
 
-    <!-- SEARCH SCREEN -->
-    <div id="search-screen" class="screen pb-24 min-h-screen">
-        <div class="sticky top-0 z-40 glass px-4 py-4">
-            <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-                <h1 class="text-xl font-bold">Search</h1>
-            </div>
-            <div class="relative mt-4 max-w-2xl mx-auto">
-                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="search-input" onkeyup="app.searchMovies()" class="w-full bg-white/5 border border-gray-800 rounded-xl py-4 pl-12 pr-4 text-white placeholder-gray-600 focus:border-red-600 focus:outline-none" placeholder="Search anime, movies, dramas...">
-            </div>
-            <div class="flex gap-2 mt-3 overflow-x-auto hide-scrollbar max-w-2xl mx-auto">
-                <button onclick="app.setSearchFilter('all')" class="search-filter active px-4 py-1.5 rounded-full text-xs font-semibold bg-red-600 text-white">All</button>
-                <button onclick="app.setSearchFilter('Anime')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Anime</button>
-                <button onclick="app.setSearchFilter('Donghua')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Donghua</button>
-                <button onclick="app.setSearchFilter('K-Drama')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">K-Drama</button>
-                <button onclick="app.setSearchFilter('Movies')" class="search-filter px-4 py-1.5 rounded-full text-xs font-semibold bg-gray-800 text-gray-400">Movies</button>
-            </div>
-        </div>
-        <div class="px-4 py-6 max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="search-container">
-                <div class="col-span-full text-center py-12 text-gray-500">
-                    <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
-                    <p>Type to search content...</p>
+        <!-- Video Player Section -->
+        <div class="video-section">
+            <div class="video-container" id="videoContainer">
+                <video id="mainVideo" preload="metadata"></video>
+                
+                <!-- Loading Spinner -->
+                <div class="loading-spinner" id="loadingSpinner">
+                    <div class="spinner"></div>
+                    <p>Loading stream...</p>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- PROFILE SCREEN -->
-    <div id="profile-screen" class="screen pb-24 min-h-screen">
-        <div class="sticky top-0 z-40 glass px-4 py-4">
-            <div class="flex items-center gap-4 max-w-7xl mx-auto">
-                <button onclick="app.showScreen('main-screen')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-                <h1 class="text-xl font-bold">Profile</h1>
-            </div>
-        </div>
-        <div class="px-4 py-6 max-w-2xl mx-auto">
-            <div class="flex flex-col items-center py-12">
-                <div class="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 via-purple-500 to-pink-500 flex items-center justify-center text-4xl font-bold mb-4 shadow-xl">
-                    <i class="fas fa-user"></i>
+                <!-- Big Play Button (initial state) -->
+                <div class="big-play-btn" id="bigPlayBtn" onclick="togglePlay()">
+                    <i class="fas fa-play"></i>
                 </div>
-                <h2 class="text-2xl font-bold mb-1">Guest User</h2>
-                <p class="text-gray-400 mb-8">Free Plan</p>
-                <div class="grid grid-cols-3 gap-4 w-full mb-8">
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-blue-500" id="continue-count">0</p><p class="text-xs text-gray-400 mt-1">Continue</p></div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-green-500" id="total-count">0</p><p class="text-xs text-gray-400 mt-1">Total</p></div>
-                    <div class="bg-white/5 rounded-xl p-4 text-center border border-white/5"><p class="text-2xl font-bold text-purple-500" id="watch-time">0h</p><p class="text-xs text-gray-400 mt-1">Watched</p></div>
-                </div>
-                <div class="w-full space-y-3">
-                    <button onclick="app.showAdminLogin()" class="w-full bg-white/5 text-gray-300 py-4 rounded-xl font-semibold flex items-center justify-center gap-3 border border-white/5"><i class="fas fa-crown text-yellow-500"></i> Admin Panel</button>
-                    <button onclick="app.clearAllData()" class="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-semibold flex items-center justify-center gap-2"><i class="fas fa-trash"></i> Clear Watch History</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- VIDEO PLAYER -->
-    <div id="player-screen" class="screen fixed inset-0 z-50 bg-black">
-        <div class="video-player-wrapper" id="video-container">
-            <video id="video-element" class="w-full h-full bg-black" playsinline></video>
-            <div id="dailymotion-container" class="dailymotion-container hidden"></div>
-            <track id="subtitle-track" kind="subtitles" srclang="en" label="English">
-            <div class="buffering-spinner" id="buffering-spinner"></div>
-            <div class="center-play-btn" id="center-play-btn" onclick="player.togglePlay()"><i class="fas fa-play text-2xl ml-1"></i></div>
-            <div id="subtitle-display" class="subtitle-display"></div>
-            
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/80 to-transparent">
-                <div class="flex items-center gap-3">
-                    <button onclick="player.closePlayer()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
-                    <div><h3 class="font-bold text-sm" id="player-title">Loading...</h3><p class="text-xs text-gray-400" id="player-meta"></p></div>
-                </div>
-                <button onclick="app.shareContent()" class="share-btn"><i class="fas fa-share-alt"></i></button>
-            </div>
-            
-            <div class="player-controls">
-                <div class="progress-container" id="progress-bar" onclick="player.seekVideo(event)">
-                    <div class="progress-fill" id="progress-fill"><div class="progress-handle"></div></div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="player.togglePlay()" id="play-pause-btn"><i class="fas fa-pause"></i></button>
-                        <button class="control-btn" onclick="player.skipBackward()"><i class="fas fa-backward"></i></button>
-                        <button class="control-btn" onclick="player.skipForward()"><i class="fas fa-forward"></i></button>
-                        <span class="text-sm text-gray-300 font-mono" id="time-display">0:00 / 0:00</span>
+                <!-- Top Controls -->
+                <div class="player-top-controls">
+                    <button class="back-btn" onclick="goBack()"><i class="fas fa-chevron-down"></i></button>
+                    <div class="video-info">
+                        <h3 id="videoTitle">Trump and Zelenskyy play cards in the Oval Office</h3>
+                        <p id="videoChannel">@22Minutes</p>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button class="control-btn" onclick="player.toggleQualityMenu()" id="quality-btn"><i class="fas fa-cog"></i></button>
-                        <button class="control-btn" onclick="player.toggleSubtitle()"><i class="fas fa-closed-captioning"></i></button>
-                        <button class="control-btn" onclick="player.toggleFullscreen()"><i class="fas fa-expand"></i></button>
+                    <div class="top-right-controls">
+                        <button class="control-btn" onclick="togglePause()" id="topPauseBtn"><i class="fas fa-pause"></i></button>
+                        <button class="control-btn" onclick="toggleCast()"><i class="fas fa-cast"></i></button>
+                        <button class="control-btn" onclick="toggleSubtitles()" id="ccBtn"><i class="fas fa-closed-captioning"></i></button>
+                        <button class="control-btn" onclick="toggleSettings()" id="settingsBtn"><i class="fas fa-cog"></i></button>
+                        <button class="control-btn" onclick="closePlayer()"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
+
+                <!-- Center Controls -->
+                <div class="player-center-controls">
+                    <button class="center-btn skip-back" onclick="skipBackward()">
+                        <i class="fas fa-undo"></i>
+                        <span>10</span>
+                    </button>
+                    <button class="center-btn play-pause" onclick="togglePlay()" id="centerPlayBtn">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="center-btn skip-forward" onclick="skipForward()">
+                        <i class="fas fa-redo"></i>
+                        <span>10</span>
+                    </button>
+                    <button class="center-btn next-btn" onclick="nextVideo()">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                </div>
+
+                <!-- Subtitle Display -->
+                <div class="subtitle-display" id="subtitleDisplay"></div>
+
+                <!-- Bottom Controls -->
+                <div class="player-bottom-controls">
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-filled" id="progressFilled"></div>
+                            <div class="progress-handle" id="progressHandle"></div>
+                        </div>
+                        <div class="time-tooltip" id="timeTooltip">00:00</div>
+                    </div>
+                    
+                    <div class="controls-row">
+                        <div class="left-controls">
+                            <button class="control-btn" onclick="togglePlay()" id="bottomPlayBtn"><i class="fas fa-play"></i></button>
+                            <button class="control-btn" onclick="skipBackward()"><i class="fas fa-undo"></i></button>
+                            <button class="control-btn" onclick="skipForward()"><i class="fas fa-redo"></i></button>
+                            
+                            <div class="volume-container">
+                                <button class="control-btn" onclick="toggleMute()" id="muteBtn"><i class="fas fa-volume-up"></i></button>
+                                <div class="volume-slider">
+                                    <input type="range" min="0" max="100" value="100" id="volumeSlider" oninput="setVolume(this.value)">
+                                </div>
+                            </div>
+                            
+                            <div class="time-display">
+                                <span id="currentTime">0:01</span>
+                                <span>/</span>
+                                <span id="duration">2:31</span>
+                            </div>
+                        </div>
+                        
+                        <div class="right-controls">
+                            <button class="control-btn" onclick="toggleSubtitles()"><i class="fas fa-closed-captioning"></i></button>
+                            <button class="control-btn" onclick="toggleSettings()" id="bottomSettingsBtn"><i class="fas fa-cog"></i></button>
+                            <button class="control-btn" onclick="toggleFullscreen()" id="fullscreenBtn"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Menu -->
+                <div class="settings-menu" id="settingsMenu">
+                    <div class="settings-item" onclick="showQualityMenu()">
+                        <span>Quality</span>
+                        <span id="currentQuality">Auto <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item" onclick="showSpeedMenu()">
+                        <span>Playback Speed</span>
+                        <span id="currentSpeed">1x <i class="fas fa-chevron-right"></i></span>
+                    </div>
+                    <div class="settings-item" onclick="toggleSubtitles()">
+                        <span>Subtitles</span>
+                        <span id="subtitlesStatus">Off</span>
+                    </div>
+                </div>
+
+                <!-- Quality Menu -->
+                <div class="quality-menu" id="qualityMenu">
+                    <div class="menu-header" onclick="backToSettings()">
+                        <i class="fas fa-arrow-left"></i> Quality
+                    </div>
+                    <div class="quality-options" id="qualityOptions">
+                        <div class="quality-option active" onclick="setQuality('auto')">Auto</div>
+                    </div>
+                </div>
+
+                <!-- Speed Menu -->
+                <div class="speed-menu" id="speedMenu">
+                    <div class="menu-header" onclick="backToSettings()">
+                        <i class="fas fa-arrow-left"></i> Playback Speed
+                    </div>
+                    <div class="speed-options">
+                        <div class="speed-option" onclick="setSpeed(0.25)">0.25x</div>
+                        <div class="speed-option" onclick="setSpeed(0.5)">0.5x</div>
+                        <div class="speed-option" onclick="setSpeed(0.75)">0.75x</div>
+                        <div class="speed-option active" onclick="setSpeed(1)">1x (Normal)</div>
+                        <div class="speed-option" onclick="setSpeed(1.25)">1.25x</div>
+                        <div class="speed-option" onclick="setSpeed(1.5)">1.5x</div>
+                        <div class="speed-option" onclick="setSpeed(1.75)">1.75x</div>
+                        <div class="speed-option" onclick="setSpeed(2)">2x</div>
+                    </div>
+                </div>
             </div>
-            <div class="quality-menu" id="quality-menu">
-                <div class="text-sm font-bold mb-3 text-gray-400 px-2">Quality</div>
-                <div id="quality-options"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn" onclick="likeVideo()"><i class="fas fa-thumbs-up"></i></button>
+            <button class="action-btn" onclick="dislikeVideo()"><i class="fas fa-thumbs-down"></i></button>
+            <button class="action-btn" onclick="showComments()"><i class="fas fa-comment"></i></button>
+            <button class="action-btn" onclick="saveVideo()"><i class="fas fa-bookmark"></i></button>
+            <button class="action-btn" onclick="shareVideo()"><i class="fas fa-share"></i></button>
+            <button class="action-btn" onclick="showMore()"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+
+        <!-- Share Modal -->
+        <div class="share-modal" id="shareModal">
+            <div class="share-content">
+                <h3>Share</h3>
+                <div class="share-options">
+                    <button onclick="shareTo('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                    <button onclick="shareTo('facebook')"><i class="fab fa-facebook"></i> Facebook</button>
+                    <button onclick="shareTo('twitter')"><i class="fab fa-twitter"></i> Twitter</button>
+                    <button onclick="shareTo('copy')"><i class="fas fa-link"></i> Copy Link</button>
+                </div>
+                <button class="close-modal" onclick="closeShare()">Close</button>
             </div>
+        </div>
+
+        <!-- Video Grid -->
+        <div class="video-grid" id="videoGrid">
+            <!-- Dynamically loaded from data.js -->
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
-    <div id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-3 flex justify-around items-center z-40 hidden">
-        <button onclick="app.showScreen('main-screen')" class="bottom-nav-item active flex flex-col items-center gap-1 text-gray-400" data-screen="main-screen"><i class="fas fa-home text-xl"></i><span class="text-xs font-medium">Home</span></button>
-        <button onclick="app.showScreen('search-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400" data-screen="search-screen"><i class="fas fa-search text-xl"></i><span class="text-xs font-medium">Search</span></button>
-        <button onclick="app.showScreen('profile-screen')" class="bottom-nav-item flex flex-col items-center gap-1 text-gray-400" data-screen="profile-screen"><i class="fas fa-user text-xl"></i><span class="text-xs font-medium">Profile</span></button>
+    <!-- Admin Login Modal -->
+    <div class="admin-login-modal" id="adminLoginModal">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Enter admin password">
+            <button onclick="verifyAdmin()">Login</button>
+            <button class="cancel-btn" onclick="closeAdminLogin()">Cancel</button>
+            <p class="error-msg" id="loginError"></p>
+        </div>
     </div>
 
-    <script src="player.js"></script>
-    <script src="app.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/player.js"></script>
 </body>
-</html>
+        </html>
+    
