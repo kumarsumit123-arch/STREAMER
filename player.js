@@ -1,545 +1,329 @@
-// ==================== AI SUBTITLE ENGINE (FIXED) ====================
-class AISubtitleEngine {
+class VideoPlayer {
     constructor() {
-        this.isActive = false;
-        this.currentLanguage = 'en';
-        this.simulationInterval = null;
-        this.hideTimeout = null;
+        this.hls = null;
+        this.currentMovie = null;
+        this.aiSubtitlesActive = false;
         this.recognition = null;
-        this.isListening = false;
-        
-        // 25 Languages supported
-        this.supportedLanguages = {
-            'en': { name: 'English', code: 'en-US', sample: "I will become the strongest!" },
-            'ja': { name: 'Japanese', code: 'ja-JP', sample: "俺は最強になる！" },
-            'zh': { name: 'Chinese', code: 'zh-CN', sample: "我会成为最强者！" },
-            'ko': { name: 'Korean', code: 'ko-KR', sample: "나는 최강이 될 거야!" },
-            'es': { name: 'Spanish', code: 'es-ES', sample: "¡Me convertiré en el más fuerte!" },
-            'fr': { name: 'French', code: 'fr-FR', sample: "Je deviendrai le plus fort !" },
-            'de': { name: 'German', code: 'de-DE', sample: "Ich werde der Stärkste werden!" },
-            'it': { name: 'Italian', code: 'it-IT', sample: "Diventerò il più forte!" },
-            'pt': { name: 'Portuguese', code: 'pt-BR', sample: "Vou me tornar o mais forte!" },
-            'ru': { name: 'Russian', code: 'ru-RU', sample: "Я стану сильнейшим!" },
-            'ar': { name: 'Arabic', code: 'ar-SA', sample: "سأصبح الأقوى!" },
-            'hi': { name: 'Hindi', code: 'hi-IN', sample: "मैं सबसे मजबूत बनूंगा!" },
-            'tr': { name: 'Turkish', code: 'tr-TR', sample: "En güçlü ben olacağım!" },
-            'pl': { name: 'Polish', code: 'pl-PL', sample: "Stanę się najsilniejszy!" },
-            'nl': { name: 'Dutch', code: 'nl-NL', sample: "Ik word de sterkste!" },
-            'vi': { name: 'Vietnamese', code: 'vi-VN', sample: "Tôi sẽ trở nên mạnh nhất!" },
-            'th': { name: 'Thai', code: 'th-TH', sample: "ฉันจะกลายเป็นผู้แข็งแกร่งที่สุด!" },
-            'id': { name: 'Indonesian', code: 'id-ID', sample: "Saya akan menjadi yang terkuat!" },
-            'ms': { name: 'Malay', code: 'ms-MY', sample: "Saya akan menjadi yang terkuat!" },
-            'tl': { name: 'Filipino', code: 'tl-PH', sample: "Magiging pinakamalakas ako!" },
-            'uk': { name: 'Ukrainian', code: 'uk-UA', sample: "Я стану найсильнішим!" },
-            'ro': { name: 'Romanian', code: 'ro-RO', sample: "Voi deveni cel mai puternic!" },
-            'cs': { name: 'Czech', code: 'cs-CZ', sample: "Stanu se nejsilnějším!" },
-            'el': { name: 'Greek', code: 'el-GR', sample: "Θα γίνω ο πιο δυνατός!" },
-            'he': { name: 'Hebrew', code: 'he-IL', sample: "אני אהפוך לחזק ביותר!" }
-        };
+        this.isDailymotion = false;
     }
-
-    // FIXED: Use window.app.showToast instead of this.showToast
-    showToast(message, type = 'info') {
-        if (window.app && window.app.showToast) {
-            window.app.showToast(message, type);
+    
+    loadMovie(movie) {
+        this.currentMovie = movie;
+        this.isDailymotion = movie.videoType === 'dailymotion';
+        
+        document.getElementById('player-title').textContent = movie.title;
+        document.getElementById('player-meta').textContent = `${movie.category} • ${movie.year || ''} • ${movie.duration || ''}`;
+        
+        const videoEl = document.getElementById('video-element');
+        const dmContainer = document.getElementById('dailymotion-container');
+        
+        // Cleanup previous
+        this.cleanup();
+        
+        if (this.isDailymotion) {
+            videoEl.classList.add('hidden');
+            dmContainer.classList.remove('hidden');
+            this.loadDailymotion(movie.videoUrl);
         } else {
-            console.log(`[${type}] ${message}`);
+            dmContainer.classList.add('hidden');
+            videoEl.classList.remove('hidden');
+            this.loadNativeVideo(movie);
+        }
+        
+        // Subtitle track
+        const track = document.getElementById('subtitle-track');
+        const subtitleDisplay = document.getElementById('subtitle-display');
+        if (movie.subtitleUrl) {
+            track.src = movie.subtitleUrl;
+            track.mode = 'hidden';
+            subtitleDisplay.classList.add('show');
+        } else {
+            subtitleDisplay.classList.remove('show');
+        }
+        
+        // Resume progress
+        const progress = app.continueWatching.find(item => item.movieId === movie.id);
+        if (progress && progress.currentTime > 10 && !this.isDailymotion) {
+            videoEl.currentTime = progress.currentTime;
+            app.showToast(`Resumed from ${this.formatTime(progress.currentTime)}`, 'info');
         }
     }
-
-    // ==================== REAL SPEECH RECOGNITION ====================
-    initSpeechRecognition() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    loadDailymotion(videoId) {
+        const container = document.getElementById('dailymotion-container');
+        const videoIdClean = videoId.replace('https://www.dailymotion.com/video/', '').replace('https://dai.ly/', '');
+        container.innerHTML = `
+            <iframe 
+                src="https://www.dailymotion.com/embed/video/${videoIdClean}?autoplay=1&queue-autoplay-next=0&ui-start-screen-info=0" 
+                allow="autoplay; fullscreen" 
+                allowfullscreen>
+            </iframe>
+        `;
+        document.getElementById('buffering-spinner').style.display = 'none';
+    }
+    
+    loadNativeVideo(movie) {
+        const video = document.getElementById('video-element');
+        document.getElementById('progress-fill').style.width = '0%';
+        document.getElementById('time-display').textContent = '0:00 / 0:00';
         
-        if (!SpeechRecognition) {
-            console.log('Web Speech API not supported');
-            return false;
+        if (this.hls) {
+            this.hls.destroy();
+            this.hls = null;
         }
-
+        
+        if (movie.videoType === 'hls' && Hls.isSupported()) {
+            this.hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 600, enableWorker: true, debug: false });
+            this.hls.loadSource(movie.videoUrl);
+            this.hls.attachMedia(video);
+            this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play();
+                this.setupQualityLevels();
+                document.getElementById('buffering-spinner').style.display = 'none';
+            });
+            this.hls.on(Hls.Events.BUFFERING, () => document.getElementById('buffering-spinner').style.display = 'block');
+            this.hls.on(Hls.Events.BUFFERED, () => document.getElementById('buffering-spinner').style.display = 'none');
+            this.hls.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    app.showToast('Stream error - recovering...', 'error');
+                    this.hls.recoverMediaError();
+                }
+            });
+        } else if (movie.videoType === 'mp4' || video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = movie.videoUrl;
+            video.addEventListener('loadedmetadata', () => video.play());
+        } else {
+            app.showToast('Video format not supported', 'error');
+            return;
+        }
+        
+        this.setupVideoTracking(video, movie.id);
+    }
+    
+    setupQualityLevels() {
+        const container = document.getElementById('quality-options');
+        container.innerHTML = '';
+        const autoDiv = document.createElement('div');
+        autoDiv.className = 'quality-option active';
+        autoDiv.innerHTML = '<span>Auto</span><i class="fas fa-check text-xs"></i>';
+        autoDiv.onclick = () => this.changeQuality(-1, autoDiv);
+        container.appendChild(autoDiv);
+    }
+    
+    changeQuality(levelIndex, element) {
+        if (this.hls) this.hls.currentLevel = levelIndex;
+        document.querySelectorAll('.quality-option').forEach(opt => {
+            opt.classList.remove('active');
+            const check = opt.querySelector('i');
+            if (check) check.remove();
+        });
+        element.classList.add('active');
+        const span = element.querySelector('span').textContent;
+        element.innerHTML = `<span>${span}</span><i class="fas fa-check text-xs"></i>`;
+        document.getElementById('quality-menu').classList.remove('show');
+        app.showToast(`Quality: ${span}`, 'info');
+    }
+    
+    setupVideoTracking(video, movieId) {
+        const progressFill = document.getElementById('progress-fill');
+        const timeDisplay = document.getElementById('time-display');
+        const playBtn = document.getElementById('play-pause-btn');
+        const centerBtn = document.getElementById('center-play-btn');
+        const container = document.getElementById('video-container');
+        
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressFill.style.width = percent + '%';
+                timeDisplay.textContent = `${this.formatTime(video.currentTime)} / ${this.formatTime(video.duration)}`;
+                if (Math.floor(video.currentTime) % 5 === 0) {
+                    app.saveContinueWatching(movieId, video.currentTime, video.duration, percent);
+                }
+                app.watchTime++;
+                if (app.watchTime % 60 === 0) {
+                    localStorage.setItem('streamer_watchtime', app.watchTime);
+                }
+            }
+        });
+        
+        video.addEventListener('play', () => {
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            centerBtn.innerHTML = '<i class="fas fa-pause text-2xl"></i>';
+            container.classList.remove('paused');
+        });
+        
+        video.addEventListener('pause', () => {
+            playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+            centerBtn.innerHTML = '<i class="fas fa-play text-2xl ml-1"></i>';
+            container.classList.add('paused');
+        });
+        
+        video.addEventListener('ended', () => {
+            app.showToast('Video ended', 'info');
+            app.continueWatching = app.continueWatching.filter(item => item.movieId !== movieId);
+            localStorage.setItem('streamer_continue', JSON.stringify(app.continueWatching));
+        });
+        
+        video.addEventListener('click', () => this.togglePlay());
+    }
+    
+    togglePlay() {
+        if (this.isDailymotion) return; // Dailymotion has its own controls
+        const video = document.getElementById('video-element');
+        video.paused ? video.play() : video.pause();
+    }
+    
+    seekVideo(event) {
+        if (this.isDailymotion) return;
+        const video = document.getElementById('video-element');
+        const rect = event.currentTarget.getBoundingClientRect();
+        const percent = (event.clientX - rect.left) / rect.width;
+        if (video.duration) video.currentTime = percent * video.duration;
+    }
+    
+    skipForward() {
+        if (this.isDailymotion) return;
+        const video = document.getElementById('video-element');
+        video.currentTime = Math.min(video.currentTime + 10, video.duration);
+    }
+    
+    skipBackward() {
+        if (this.isDailymotion) return;
+        const video = document.getElementById('video-element');
+        video.currentTime = Math.max(video.currentTime - 10, 0);
+    }
+    
+    toggleQualityMenu() {
+        document.getElementById('quality-menu').classList.toggle('show');
+    }
+    
+    toggleSubtitle() {
+        const track = document.getElementById('subtitle-track');
+        const display = document.getElementById('subtitle-display');
+        if (track.mode === 'showing') {
+            track.mode = 'hidden';
+            display.classList.remove('show');
+            app.showToast('Subtitles off', 'info');
+        } else {
+            track.mode = 'showing';
+            display.classList.add('show');
+            app.showToast('Subtitles on', 'success');
+        }
+    }
+    
+    toggleFullscreen() {
+        const container = document.getElementById('video-container');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(() => app.showToast('Fullscreen error', 'error'));
+        } else {
+            document.exitFullscreen();
+        }
+    }
+    
+    closePlayer() {
+        this.cleanup();
+        app.showScreen('main-screen');
+    }
+    
+    cleanup() {
+        const video = document.getElementById('video-element');
+        const dmContainer = document.getElementById('dailymotion-container');
+        
+        if (!this.isDailymotion) {
+            video.pause();
+        }
+        if (this.hls) {
+            this.hls.destroy();
+            this.hls = null;
+        }
+        dmContainer.innerHTML = '';
+        this.stopAISubtitles();
+    }
+    
+    formatTime(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        if (h > 0) return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+    
+    // ===== AI SUBTITLES (Web Speech API) =====
+    toggleAISubtitles() {
+        if (this.aiSubtitlesActive) {
+            this.stopAISubtitles();
+        } else {
+            this.startAISubtitles();
+        }
+    }
+    
+    startAISubtitles() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            app.showToast('AI Subtitles not supported in this browser', 'error');
+            return;
+        }
+        
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
         this.recognition.continuous = true;
         this.recognition.interimResults = true;
-        this.recognition.lang = this.supportedLanguages[this.currentLanguage]?.code || 'en-US';
-
+        this.recognition.lang = 'en-US';
+        
+        const panel = document.getElementById('ai-subtitle-panel');
+        const statusDot = document.getElementById('ai-status-dot');
+        const statusText = document.getElementById('ai-status-text');
+        const subtitleText = document.getElementById('ai-subtitle-text');
+        
         this.recognition.onresult = (event) => {
             let finalTranscript = '';
+            let interimTranscript = '';
             
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    finalTranscript += transcript;
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
                 }
             }
-
-            if (finalTranscript) {
-                this.displaySubtitle(finalTranscript, true);
-            }
-        };
-
-        this.recognition.onerror = (event) => {
-            if (event.error === 'no-speech') return;
-            console.log('Speech error:', event.error);
-            this.restartRecognition();
-        };
-
-        this.recognition.onend = () => {
-            if (this.isListening) this.restartRecognition();
-        };
-
-        return true;
-    }
-
-    restartRecognition() {
-        setTimeout(() => {
-            if (this.isListening && this.recognition) {
-                try {
-                    this.recognition.start();
-                } catch (e) {}
-            }
-        }, 1000);
-    }
-
-    // ==================== DISPLAY SUBTITLE ====================
-    displaySubtitle(text, isFinal) {
-        const display = document.getElementById('subtitle-display');
-        if (!display) return;
-
-        const langInfo = this.supportedLanguages[this.currentLanguage];
-        
-        display.innerHTML = `
-            <span class="ai-indicator">
-                <i class="fas fa-robot"></i> AI • ${langInfo?.name || 'Auto'}
-            </span>
-            <span class="subtitle-text ${this.getScriptClass(text)}">${text}</span>
-        `;
-        
-        display.classList.add('show');
-
-        if (isFinal) {
-            clearTimeout(this.hideTimeout);
-            this.hideTimeout = setTimeout(() => {
-                if (!this.isListening) display.classList.remove('show');
-            }, 5000);
-        }
-    }
-
-    getScriptClass(text) {
-        if (/[\u4e00-\u9fff]/.test(text)) return 'chinese-script';
-        if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) return 'japanese-script';
-        if (/[\uac00-\ud7af]/.test(text)) return 'korean-script';
-        if (/[\u0600-\u06ff]/.test(text)) return 'arabic-script';
-        if (/[\u0400-\u04ff]/.test(text)) return 'cyrillic-script';
-        return '';
-    }
-
-    // ==================== START AI SUBTITLES ====================
-    start(language = 'en') {
-        this.currentLanguage = language;
-        this.isActive = true;
-        this.isListening = true;
-
-        const display = document.getElementById('subtitle-display');
-        if (display) {
-            display.innerHTML = `
-                <span class="ai-indicator">
-                    <i class="fas fa-circle-notch fa-spin"></i> AI Initializing...
-                </span>
-            `;
-            display.classList.add('show');
-        }
-
-        // Try real speech recognition
-        const hasRealRecognition = this.initSpeechRecognition();
-        
-        if (hasRealRecognition && this.recognition) {
-            try {
-                this.recognition.start();
-                this.showToast(`AI Listening: ${this.supportedLanguages[language]?.name}`, 'success');
-            } catch (e) {
-                this.fallbackToSimulation();
-            }
-        } else {
-            this.fallbackToSimulation();
-        }
-    }
-
-    stop() {
-        this.isActive = false;
-        this.isListening = false;
-        
-        if (this.recognition) {
-            try { this.recognition.stop(); } catch (e) {}
-        }
-        
-        if (this.simulationInterval) {
-            clearInterval(this.simulationInterval);
-            this.simulationInterval = null;
-        }
-        
-        const display = document.getElementById('subtitle-display');
-        if (display) display.classList.remove('show');
-        
-        clearTimeout(this.hideTimeout);
-    }
-
-    // ==================== FALLBACK SIMULATION ====================
-    fallbackToSimulation() {
-        console.log('Using AI simulation mode');
-        this.showToast('AI Mode: Demo (Real needs Chrome + Mic)', 'info');
-        
-        const langInfo = this.supportedLanguages[this.currentLanguage];
-        const samples = [
-            langInfo?.sample || "I will become the strongest!",
-            "This power... it's incredible!",
-            "I won't give up!",
-            "Everyone, lend me your strength!",
-            "This is my final attack!"
-        ];
-
-        let index = 0;
-        this.simulationInterval = setInterval(() => {
-            if (!this.isActive) {
-                clearInterval(this.simulationInterval);
-                return;
-            }
-            this.displaySubtitle(samples[index % samples.length], true);
-            index++;
-        }, 4000);
-    }
-
-    // ==================== LANGUAGE SELECTOR ====================
-    showLanguageSelector() {
-        const existing = document.querySelector('.language-selector-overlay');
-        if (existing) existing.remove();
-
-        const container = document.createElement('div');
-        container.className = 'language-selector-overlay';
-        container.innerHTML = `
-            <div class="language-modal glass-card animate-fade-up">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold gradient-text">AI Subtitle Language</h3>
-                    <button onclick="this.closest('.language-selector-overlay').remove()" 
-                            class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto hide-scrollbar">
-                    ${Object.entries(this.supportedLanguages).map(([code, lang]) => `
-                        <button onclick="window.aiSubtitles.changeLanguage('${code}'); this.closest('.language-selector-overlay').remove()" 
-                                class="p-3 rounded-xl bg-white/5 hover:bg-gradient-to-r hover:from-red-500/20 hover:to-purple-500/20 border border-white/5 hover:border-red-500/30 transition text-left group ${this.currentLanguage === code ? 'border-red-500 bg-red-500/10' : ''}">
-                            <div class="font-semibold text-sm group-hover:text-white transition">${lang.name}</div>
-                            <div class="text-xs text-gray-500 group-hover:text-gray-300 transition">${lang.code}</div>
-                        </button>
-                    `).join('')}
-                </div>
-                <div class="mt-4 p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20">
-                    <p class="text-xs text-yellow-400">
-                        <i class="fas fa-microphone mr-1"></i>
-                        Real-time: Chrome/Edge only | Others: Demo mode
-                    </p>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(container);
-        
-        container.addEventListener('click', (e) => {
-            if (e.target === container) container.remove();
-        });
-    }
-
-    changeLanguage(langCode) {
-        this.stop();
-        this.currentLanguage = langCode;
-        
-        setTimeout(() => {
-            this.start(langCode);
-        }, 500);
-        
-        this.showToast(`AI Language: ${this.supportedLanguages[langCode]?.name}`, 'success');
-    }
-}
-
-// ==================== ENHANCED PLAYER (FIXED) ====================
-class EnhancedPlayer {
-    constructor() {
-        this.gestureState = {
-            startX: 0,
-            startY: 0,
-            startTime: 0,
-            isDragging: false,
-            lastTapTime: 0
-        };
-        this.seekAmount = 0;
-        this.gestureTimeout = null;
-    }
-
-    setupTouchGestures() {
-        const container = document.getElementById('video-container');
-        if (!container) return;
-
-        // Remove old listeners to prevent duplicates
-        const newContainer = container.cloneNode(true);
-        container.parentNode.replaceChild(newContainer, container);
-        
-        // Re-attach to new container
-        this.attachGestureListeners(newContainer);
-    }
-
-    attachGestureListeners(container) {
-        let touchStartTime = 0;
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let isDragging = false;
-
-        container.addEventListener('touchstart', (e) => {
-            if (e.touches.length !== 1) return;
-            touchStartTime = Date.now();
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            isDragging = false;
-        }, { passive: true });
-
-        container.addEventListener('touchmove', (e) => {
-            if (e.touches.length !== 1) return;
             
-            const deltaX = e.touches[0].clientX - touchStartX;
-            const deltaY = e.touches[0].clientY - touchStartY;
-            const elapsed = Date.now() - touchStartTime;
-
-            if (elapsed > 150 && Math.abs(deltaX) > 10) {
-                isDragging = true;
-                this.handleSeekGesture(deltaX);
+            if (finalTranscript) {
+                subtitleText.textContent = finalTranscript;
+            } else {
+                subtitleText.textContent = interimTranscript;
             }
-        }, { passive: true });
-
-        container.addEventListener('touchend', (e) => {
-            const elapsed = Date.now() - touchStartTime;
-            const deltaX = e.changedTouches[0].clientX - touchStartX;
-            const screenWidth = window.innerWidth;
-
-            // Double tap detection
-            if (elapsed < 300 && Math.abs(deltaX) < 30) {
-                const currentTime = Date.now();
-                if (currentTime - this.gestureState.lastTapTime < 400) {
-                    // Double tap
-                    const tapX = e.changedTouches[0].clientX;
-                    if (tapX < screenWidth / 3) {
-                        window.app?.skipBackward();
-                        this.showGestureFeedback('backward', '-10s');
-                    } else if (tapX > (screenWidth * 2) / 3) {
-                        window.app?.skipForward();
-                        this.showGestureFeedback('forward', '+10s');
-                    } else {
-                        window.app?.togglePlay();
-                    }
-                }
-                this.gestureState.lastTapTime = currentTime;
-            }
-
-            // Apply seek if was dragging
-            if (isDragging && Math.abs(deltaX) > 50) {
-                this.applySeekGesture();
-            }
-
-            this.hideGestureFeedback();
-        });
-    }
-
-    handleSeekGesture(deltaX) {
-        const sensitivity = 0.3;
-        this.seekAmount = Math.round(deltaX * sensitivity);
-        const direction = this.seekAmount > 0 ? 'forward' : 'backward';
-        this.showGestureFeedback(direction, `${this.seekAmount > 0 ? '+' : ''}${this.seekAmount}s`);
-    }
-
-    applySeekGesture() {
-        const video = document.getElementById('video-element');
-        if (video && video.duration && !isNaN(video.duration)) {
-            const newTime = Math.max(0, Math.min(video.duration, video.currentTime + this.seekAmount));
-            video.currentTime = newTime;
-        }
-        this.seekAmount = 0;
-    }
-
-    showGestureFeedback(type, text) {
-        let feedback = document.getElementById('gesture-feedback');
-        if (!feedback) {
-            feedback = document.createElement('div');
-            feedback.id = 'gesture-feedback';
-            feedback.className = 'gesture-feedback';
-            document.getElementById('video-container')?.appendChild(feedback);
-        }
-
-        const icons = {
-            forward: 'fa-redo',
-            backward: 'fa-undo',
-            volume: 'fa-volume-up',
-            brightness: 'fa-sun',
-            play: 'fa-play',
-            pause: 'fa-pause'
         };
-
-        if (feedback) {
-            feedback.innerHTML = `
-                <div class="gesture-icon"><i class="fas ${icons[type] || 'fa-circle'}"></i></div>
-                <div class="gesture-text">${text}</div>
-            `;
-            feedback.classList.add('show');
-        }
-
-        clearTimeout(this.gestureTimeout);
-        this.gestureTimeout = setTimeout(() => this.hideGestureFeedback(), 800);
-    }
-
-    hideGestureFeedback() {
-        const feedback = document.getElementById('gesture-feedback');
-        if (feedback) feedback.classList.remove('show');
-    }
-
-    togglePictureInPicture() {
-        const video = document.getElementById('video-element');
-        if (!video) return;
-
-        if (document.pictureInPictureElement) {
-            document.exitPictureInPicture();
-        } else if (video.requestPictureInPicture) {
-            video.requestPictureInPicture().catch(() => {
-                window.app?.showToast('PIP not supported', 'error');
-            });
-        }
-    }
-}
-
-// ==================== SAFE INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize AI Subtitle Engine globally
-    window.aiSubtitles = new AISubtitleEngine();
-    
-    // Initialize Enhanced Player globally
-    window.enhancedPlayer = new EnhancedPlayer();
-    
-    // Wait for app to be ready then setup gestures
-    const checkApp = setInterval(() => {
-        if (window.app) {
-            clearInterval(checkApp);
-            window.enhancedPlayer.setupTouchGestures();
-        }
-    }, 100);
-
-    // Add styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .gesture-feedback {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 24px 36px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 60;
-            pointer-events: none;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
         
-        .gesture-feedback.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
+        this.recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            statusDot.classList.add('inactive');
+            statusText.textContent = 'AI Error - Retrying...';
+        };
         
-        .gesture-icon {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #ef4444, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .gesture-text {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-        
-        .language-selector-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .language-modal {
-            width: 100%;
-            max-width: 420px;
-            max-height: 85vh;
-            overflow: hidden;
-            padding: 24px;
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .chinese-script { font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif; }
-        .japanese-script { font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', sans-serif; }
-        .korean-script { font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; }
-        .arabic-script { font-family: 'Noto Sans Arabic', 'Arial', sans-serif; direction: rtl; }
-        .cyrillic-script { font-family: 'Noto Sans', 'Arial', sans-serif; }
-        
-        .subtitle-text {
-            display: block;
-            margin-top: 8px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-    `;
-    document.head.appendChild(style);
-});
-
-// ==================== SAFE APP INTEGRATION ====================
-// Only override if app exists
-if (typeof StreamerApp !== 'undefined') {
-    
-    // FIXED: Safe method addition
-    StreamerApp.prototype.toggleAISubtitles = function() {
-        if (!window.aiSubtitles) {
-            console.error('AI Subtitles not initialized');
-            return;
-        }
-        
-        if (window.aiSubtitles.isActive) {
-            window.aiSubtitles.stop();
-            this.showToast('AI Subtitles stopped', 'info');
-        } else {
-            window.aiSubtitles.showLanguageSelector();
-        }
-    };
-
-    // FIXED: Safe playMovie override
-    const originalPlayMovie = StreamerApp.prototype.playMovie;
-    
-    StreamerApp.prototype.playMovie = async function(movieId) {
-        // Call original
-        await originalPlayMovie.call(this, movieId);
-        
-        // Setup enhanced features
-        setTimeout(() => {
-            if (window.enhancedPlayer) {
-                window.enhancedPlayer.setupTouchGestures();
+        this.recognition.onend = () => {
+            if (this.aiSubtitlesActive) {
+                this.recognition.start();
             }
-        }, 500);
-    };
+        };
+        
+        this.recognition.start();
+        this.aiSubtitlesActive = true;
+        panel.classList.add('show');
+        statusDot.classList.remove('inactive');
+        statusText.textContent = 'AI Subtitles Active';
+        app.showToast('AI Subtitles started', 'success');
+    }
+    
+    stopAISubtitles() {
+        if (this.recognition) {
+            this.recognition.stop();
+            this.recognition = null;
+        }
+        this.aiSubtitlesActive = false;
+        document.getElementById('ai-subtitle-panel').classList.remove('show');
+        app.showToast('AI Subtitles stopped', 'info');
+    }
 }
+
+const player = new VideoPlayer();
